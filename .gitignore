@@ -35,3 +35,6 @@ build/
 ### Env Variables ###
 .env
 *.env
+
+### Claude Code ###
+.claude/settings.local.json
