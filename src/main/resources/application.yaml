@@ -3,25 +3,27 @@ spring:
     name: smart-task-bot
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/smarttaskbot
-    username: postgres
-    password: postgres
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        format_sql: false
+        timezone:
+          default_storage: NORMALIZE_UTC
 
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.xml
 
-  telegram:
-    bot:
-      token: ${TELEGRAM_BOT_TOKEN}
-      username: ${TELEGRAM_BOT_USERNAME}
+telegram:
+  bot:
+    token: ${BOT_TOKEN}
+    username: ${BOT_USERNAME}

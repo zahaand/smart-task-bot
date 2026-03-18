@@ -25,9 +25,9 @@ and testable after Foundational phase completes.
 
 **Purpose**: Establish project skeleton and shared configuration files.
 
-- [ ] T001 Create all package directories: `handler/command/`, `handler/callback/`, `service/`, `repository/`, `model/`, `dto/`, `config/` under `src/main/java/ru/zahaand/smarttaskbot/`
-- [ ] T002 Configure `src/main/resources/application.yaml` with datasource env vars (`${DB_URL}`, `${DB_USERNAME}`, `${DB_PASSWORD}`), `spring.jpa.hibernate.ddl-auto: validate`, `spring.jpa.properties.hibernate.timezone.default_storage: NORMALIZE_UTC`, Liquibase enabled, and bot token/username placeholders
-- [ ] T003 [P] Create `.env.example` in project root with all required variable names: `BOT_TOKEN`, `BOT_USERNAME`, `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
+- [x] T001 Create all package directories: `handler/command/`, `handler/callback/`, `service/`, `repository/`, `model/`, `dto/`, `config/` under `src/main/java/ru/zahaand/smarttaskbot/`
+- [x] T002 Configure `src/main/resources/application.yaml` with datasource env vars (`${DB_URL}`, `${DB_USERNAME}`, `${DB_PASSWORD}`), `spring.jpa.hibernate.ddl-auto: validate`, `spring.jpa.properties.hibernate.timezone.default_storage: NORMALIZE_UTC`, Liquibase enabled, and bot token/username placeholders
+- [x] T003 [P] Create `.env.example` in project root with all required variable names: `BOT_TOKEN`, `BOT_USERNAME`, `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
 
 ---
 
