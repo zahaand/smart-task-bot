@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="002-create-tasks-table" author="a.zakharenkov">
+        <createTable tableName="tasks">
+            <column name="id" type="BIGINT" autoIncrement="true" generationType="ALWAYS">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="telegram_user_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_tasks_users"
+                             references="users(telegram_user_id)"/>
+            </column>
+            <column name="text" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reminder_time" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="reminder_processed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reminder_retry_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <sql>
+            ALTER TABLE tasks ADD CONSTRAINT chk_tasks_status CHECK (status IN ('ACTIVE', 'COMPLETED'));
+        </sql>
+        <rollback>
+            <dropTable tableName="tasks"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

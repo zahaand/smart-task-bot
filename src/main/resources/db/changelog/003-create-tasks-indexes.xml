@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="003-create-tasks-indexes" author="a.zakharenkov">
+        <createIndex tableName="tasks" indexName="idx_tasks_user_status">
+            <column name="telegram_user_id"/>
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="tasks" indexName="idx_tasks_reminder_time">
+            <column name="reminder_processed"/>
+            <column name="reminder_time"/>
+        </createIndex>
+
+        <createIndex tableName="tasks" indexName="idx_tasks_reminder_retry">
+            <column name="reminder_processed"/>
+            <column name="reminder_retry_at"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="tasks" indexName="idx_tasks_reminder_retry"/>
+            <dropIndex tableName="tasks" indexName="idx_tasks_reminder_time"/>
+            <dropIndex tableName="tasks" indexName="idx_tasks_user_status"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
