@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.handler.callback.TimezoneCallbackHandler;
 import ru.zahaand.smarttaskbot.handler.command.HelpCommandHandler;
+import ru.zahaand.smarttaskbot.handler.command.NewTaskCommandHandler;
 import ru.zahaand.smarttaskbot.handler.command.StartCommandHandler;
 import ru.zahaand.smarttaskbot.handler.command.UnknownInputHandler;
 
@@ -21,6 +22,7 @@ public class UpdateDispatcher {
     private final TimezoneCallbackHandler timezoneCallbackHandler;
     private final StartCommandHandler startCommandHandler;
     private final HelpCommandHandler helpCommandHandler;
+    private final NewTaskCommandHandler newTaskCommandHandler;
     private final UnknownInputHandler unknownInputHandler;
 
     public void dispatch(Update update) {
@@ -35,6 +37,8 @@ public class UpdateDispatcher {
             switch (command) {
                 case "/start" -> startCommandHandler.handle(update);
                 case "/help" -> helpCommandHandler.handle(update);
+                case "/newtask" -> registrationGuard.checkAndRoute(update,
+                        () -> newTaskCommandHandler.handle(update));
                 default -> registrationGuard.checkAndRoute(update,
                         () -> unknownInputHandler.handle(update));
             }

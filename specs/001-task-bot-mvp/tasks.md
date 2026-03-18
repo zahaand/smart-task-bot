@@ -88,10 +88,10 @@ infrastructure. No user story can be implemented or manually tested until this p
 verify bot replies with `Task created ✓ #<ID>: Buy groceries`. Send `/newtask` with no
 text, verify usage hint. Two different users each create a task and verify isolation.
 
-- [ ] T024 [P] [US1] Create `CreateTaskRequest` DTO in `src/main/java/ru/zahaand/smarttaskbot/dto/CreateTaskRequest.java` — fields: `Long telegramUserId`, `String text`; Lombok `@Getter @AllArgsConstructor`
-- [ ] T025 [US1] Create `TaskService` in `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java` — inject `TaskRepository`, `UserRepository`; implement `createTask(Long telegramUserId, String text)`: validate text not blank and ≤500 chars (throw `IllegalArgumentException` with user-facing message on violation), look up `User` by `telegramUserId`, create and save `Task` with `status=ACTIVE`, return saved task's `id` and `text`
-- [ ] T026 [US1] Create `NewTaskCommandHandler` in `src/main/java/ru/zahaand/smarttaskbot/handler/command/NewTaskCommandHandler.java` — inject `TaskService`, `NotificationService`; `handle(Update update)`: extract text after `/newtask`, if blank → send usage hint; else call `taskService.createTask()`, on success send "Task created ✓\n#{id}: {text}", on validation error send the exception message
-- [ ] T027 [US1] Register `NewTaskCommandHandler` in `UpdateDispatcher` routing in `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java` — inject `NewTaskCommandHandler`; add `/newtask` case to the command routing through `RegistrationGuard`
+- [x] T024 [P] [US1] Create `CreateTaskRequest` DTO in `src/main/java/ru/zahaand/smarttaskbot/dto/CreateTaskRequest.java` — fields: `Long telegramUserId`, `String text`; Lombok `@Getter @AllArgsConstructor`
+- [x] T025 [US1] Create `TaskService` in `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java` — inject `TaskRepository`, `UserRepository`; implement `createTask(Long telegramUserId, String text)`: validate text not blank and ≤500 chars (throw `IllegalArgumentException` with user-facing message on violation), look up `User` by `telegramUserId`, create and save `Task` with `status=ACTIVE`, return saved task's `id` and `text`
+- [x] T026 [US1] Create `NewTaskCommandHandler` in `src/main/java/ru/zahaand/smarttaskbot/handler/command/NewTaskCommandHandler.java` — inject `TaskService`, `NotificationService`; `handle(Update update)`: extract text after `/newtask`, if blank → send usage hint; else call `taskService.createTask()`, on success send "Task created ✓\n#{id}: {text}", on validation error send the exception message
+- [x] T027 [US1] Register `NewTaskCommandHandler` in `UpdateDispatcher` routing in `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java` — inject `NewTaskCommandHandler`; add `/newtask` case to the command routing through `RegistrationGuard`
 
 **Checkpoint**: User Story 1 is fully functional and independently testable.
 
