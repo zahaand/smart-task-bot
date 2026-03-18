@@ -152,10 +152,10 @@ Send `/tasks`, verify task is absent. Send `/done` with another user's task ID, 
 
 **Purpose**: Final hardening, validation, and documentation completeness.
 
-- [ ] T040 [P] Review `application.yaml` — confirm `ddl-auto: validate`, `timezone.default_storage: NORMALIZE_UTC` are present; add `show-sql: false` for production readiness in `src/main/resources/application.yaml`
-- [ ] T041 [P] Verify Lombok `@PrePersist` sets `createdAt` on both `User` and `Task` in `src/main/java/ru/zahaand/smarttaskbot/model/` — add if missing from T009/T010
-- [ ] T042 [P] Verify no unused imports, no orphaned classes across all packages — run `mvn compile` and confirm zero warnings
-- [ ] T043 Run full lifecycle validation per `specs/001-task-bot-mvp/quickstart.md` — send `/start`, select timezone, `/newtask`, `/tasks`, `/remind`, wait for notification, `/done`, confirm task list is empty
+- [x] T040 [P] Review `application.yaml` — confirm `ddl-auto: validate`, `timezone.default_storage: NORMALIZE_UTC` are present; add `show-sql: false` for production readiness in `src/main/resources/application.yaml`
+- [x] T041 [P] Verify Lombok `@PrePersist` sets `createdAt` on both `User` and `Task` in `src/main/java/ru/zahaand/smarttaskbot/model/` — add if missing from T009/T010
+- [x] T042 [P] Verify no unused imports, no orphaned classes across all packages — run `mvn compile` and confirm zero warnings
+- [x] T043 Run full lifecycle validation per `specs/001-task-bot-mvp/quickstart.md` — send `/start`, select timezone, `/newtask`, `/tasks`, `/remind`, wait for notification, `/done`, confirm task list is empty
 
 ---
 
