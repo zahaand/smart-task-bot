@@ -19,6 +19,11 @@
             <column name="reminder_processed"/>
             <column name="reminder_retry_at"/>
         </createIndex>
+        <rollback>
+            <dropIndex tableName="tasks" indexName="idx_tasks_reminder_retry"/>
+            <dropIndex tableName="tasks" indexName="idx_tasks_reminder_time"/>
+            <dropIndex tableName="tasks" indexName="idx_tasks_user_status"/>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
