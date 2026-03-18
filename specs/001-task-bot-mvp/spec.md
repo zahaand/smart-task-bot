@@ -129,9 +129,11 @@ and verifying it no longer appears in the `/tasks` response.
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST register a user automatically on first interaction,
-  storing their Telegram identity, and MUST NOT create duplicate records on
-  subsequent interactions.
+- **FR-001**: The system MUST register a user when they complete the `/start`
+  registration flow by selecting a timezone. The user record is created at that
+  moment, storing their Telegram identity and selected timezone. The system MUST NOT
+  create duplicate records if the user sends `/start` or taps the timezone button
+  again after already being registered.
 - **FR-002**: The system MUST create a task linked exclusively to the requesting user,
   assign it a unique numeric ID, and set its initial status to ACTIVE.
 - **FR-003**: The system MUST reject task creation when no task text is provided,
@@ -174,10 +176,12 @@ and verifying it no longer appears in the `/tasks` response.
 
 ### Key Entities
 
-- **User**: Represents a person interacting with the bot. Identified by their
-  Telegram identity. Created automatically on first interaction. Each user's data
-  is fully isolated from all other users. Stores a timezone identifier selected
-  during registration (e.g. "Europe/Moscow").
+- **User**: Represents a registered Telegram user. Identified by their Telegram
+  identity. A user record is created upon completion of the `/start` registration
+  flow — specifically when the user selects their timezone via the inline keyboard.
+  Before timezone selection is complete, no user record exists. "Registered" always
+  means "timezone is set"; there is no partial registration state. Each user's data
+  is fully isolated from all other users.
 - **Task**: A single to-do item owned by exactly one user. Has a text description,
   a lifecycle status (ACTIVE or COMPLETED), and an optional scheduled reminder time.
   Identified by a globally unique numeric ID (auto-incremented across all users).
