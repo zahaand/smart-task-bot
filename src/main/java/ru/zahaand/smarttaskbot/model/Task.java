@@ -42,4 +42,11 @@ public class Task {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    void prePersist() {
+        if (status == null) status = TaskStatus.ACTIVE;
+        reminderProcessed = false;
+        createdAt = LocalDateTime.now();
+    }
 }
