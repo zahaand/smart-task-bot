@@ -22,6 +22,7 @@ public class UpdateDispatcher {
     private final NewTaskCommandHandler newTaskCommandHandler;
     private final TaskListCommandHandler taskListCommandHandler;
     private final RemindCommandHandler remindCommandHandler;
+    private final DoneCommandHandler doneCommandHandler;
     private final UnknownInputHandler unknownInputHandler;
 
     public void dispatch(Update update) {
@@ -42,6 +43,8 @@ public class UpdateDispatcher {
                         () -> taskListCommandHandler.handle(update));
                 case "/remind" -> registrationGuard.checkAndRoute(update,
                         () -> remindCommandHandler.handle(update));
+                case "/done" -> registrationGuard.checkAndRoute(update,
+                        () -> doneCommandHandler.handle(update));
                 default -> registrationGuard.checkAndRoute(update,
                         () -> unknownInputHandler.handle(update));
             }

@@ -114,6 +114,22 @@ public class TaskService {
         return getTaskDto(task, userZone);
     }
 
+    /**
+     * Marks a task as COMPLETED.
+     *
+     * @param telegramUserId owner of the task
+     * @param taskId         ID of the task to complete
+     * @return the completed {@link Task} for building the confirmation reply
+     * @throws NoSuchElementException if the task does not exist or belongs to another user
+     */
+    public Task completeTask(Long telegramUserId, Long taskId) {
+        Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
+                .orElseThrow(() -> new NoSuchElementException("Task #%d not found.".formatted(taskId)));
+
+        task.setStatus(TaskStatus.COMPLETED);
+        return taskRepository.save(task);
+    }
+
     private TaskDto getTaskDto(Task task, ZoneId userZone) {
         String reminderTime = getReminderTime(task, userZone);
         return new TaskDto(task.getId(), task.getText(), reminderTime);

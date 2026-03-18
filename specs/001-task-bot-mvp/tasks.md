@@ -140,9 +140,9 @@ error. Use invalid date format, verify format hint.
 Send `/tasks`, verify task is absent. Send `/done` with another user's task ID, verify
 "Task not found" (no data leak).
 
-- [ ] T037 [US4] Add `completeTask(Long telegramUserId, Long taskId)` to `TaskService` in `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java` — look up task via `taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)`; if absent throw with "Task #{id} not found." message; set `status=COMPLETED`, save, return task text for confirmation
-- [ ] T038 [US4] Create `DoneCommandHandler` in `src/main/java/ru/zahaand/smarttaskbot/handler/command/DoneCommandHandler.java` — inject `TaskService`, `NotificationService`; `handle(Update update)`: parse task ID from args, if missing or non-numeric → send usage hint; call `taskService.completeTask()`; on success send "Task completed ✓\n#{id} {text}"; on not-found send "Task #{id} not found."
-- [ ] T039 [US4] Register `DoneCommandHandler` in `UpdateDispatcher` routing in `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java` — inject `DoneCommandHandler`; add `/done` case through `RegistrationGuard`
+- [x] T037 [US4] Add `completeTask(Long telegramUserId, Long taskId)` to `TaskService` in `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java` — look up task via `taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)`; if absent throw with "Task #{id} not found." message; set `status=COMPLETED`, save, return task text for confirmation
+- [x] T038 [US4] Create `DoneCommandHandler` in `src/main/java/ru/zahaand/smarttaskbot/handler/command/DoneCommandHandler.java` — inject `TaskService`, `NotificationService`; `handle(Update update)`: parse task ID from args, if missing or non-numeric → send usage hint; call `taskService.completeTask()`; on success send "Task completed ✓\n#{id} {text}"; on not-found send "Task #{id} not found."
+- [x] T039 [US4] Register `DoneCommandHandler` in `UpdateDispatcher` routing in `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java` — inject `DoneCommandHandler`; add `/done` case through `RegistrationGuard`
 
 **Checkpoint**: All four user stories are independently functional. Full task lifecycle works.
 
