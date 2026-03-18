@@ -40,21 +40,21 @@ infrastructure. No user story can be implemented or manually tested until this p
 
 ### Database Migrations
 
-- [ ] T004 Create Liquibase changeset `001-create-users-table.xml` in `src/main/resources/db/changelog/` — define `users` table: `telegram_user_id BIGINT PK`, `username VARCHAR(255) NULL`, `timezone VARCHAR(50) NOT NULL`, `created_at TIMESTAMP NOT NULL DEFAULT NOW()`
-- [ ] T005 Create Liquibase changeset `002-create-tasks-table.xml` in `src/main/resources/db/changelog/` — define `tasks` table: `id BIGINT GENERATED ALWAYS AS IDENTITY PK`, `telegram_user_id BIGINT NOT NULL FK→users`, `text VARCHAR(500) NOT NULL`, `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE','COMPLETED'))`, `reminder_time TIMESTAMP NULL`, `reminder_processed BOOLEAN NOT NULL DEFAULT false`, `reminder_retry_at TIMESTAMP NULL`, `created_at TIMESTAMP NOT NULL DEFAULT NOW()`
-- [ ] T006 [P] Create Liquibase changeset `003-create-tasks-indexes.xml` in `src/main/resources/db/changelog/` — add three indexes: `(telegram_user_id, status)`, `(reminder_processed, reminder_time)`, `(reminder_processed, reminder_retry_at)` on `tasks`
-- [ ] T007 Register changesets `001`, `002`, `003` in `src/main/resources/db/changelog/db.changelog-master.xml` in execution order
+- [x] T004 Create Liquibase changeset `001-create-users-table.xml` in `src/main/resources/db/changelog/` — define `users` table: `telegram_user_id BIGINT PK`, `username VARCHAR(255) NULL`, `timezone VARCHAR(50) NOT NULL`, `created_at TIMESTAMP NOT NULL DEFAULT NOW()`
+- [x] T005 Create Liquibase changeset `002-create-tasks-table.xml` in `src/main/resources/db/changelog/` — define `tasks` table: `id BIGINT GENERATED ALWAYS AS IDENTITY PK`, `telegram_user_id BIGINT NOT NULL FK→users`, `text VARCHAR(500) NOT NULL`, `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE','COMPLETED'))`, `reminder_time TIMESTAMP NULL`, `reminder_processed BOOLEAN NOT NULL DEFAULT false`, `reminder_retry_at TIMESTAMP NULL`, `created_at TIMESTAMP NOT NULL DEFAULT NOW()`
+- [x] T006 [P] Create Liquibase changeset `003-create-tasks-indexes.xml` in `src/main/resources/db/changelog/` — add three indexes: `(telegram_user_id, status)`, `(reminder_processed, reminder_time)`, `(reminder_processed, reminder_retry_at)` on `tasks`
+- [x] T007 Register changesets `001`, `002`, `003` in `src/main/resources/db/changelog/db.changelog-master.xml` in execution order
 
 ### Model Layer
 
-- [ ] T008 [P] Create `TaskStatus` enum (`ACTIVE`, `COMPLETED`) in `src/main/java/ru/zahaand/smarttaskbot/model/TaskStatus.java`
-- [ ] T009 [P] Create `User` JPA entity in `src/main/java/ru/zahaand/smarttaskbot/model/User.java` — `@Entity @Table(name="users")`, `@Id Long telegramUserId`, `String username`, `String timezone`, `LocalDateTime createdAt`, Lombok `@Getter @Setter @NoArgsConstructor`, `@PrePersist` sets `createdAt = LocalDateTime.now()`
-- [ ] T010 Create `Task` JPA entity in `src/main/java/ru/zahaand/smarttaskbot/model/Task.java` — `@Entity @Table(name="tasks")`, `@Id @GeneratedValue(IDENTITY) Long id`, `@ManyToOne(fetch=LAZY) User user`, `String text`, `@Enumerated(STRING) TaskStatus status`, `Instant reminderTime`, `boolean reminderProcessed`, `Instant reminderRetryAt`, `LocalDateTime createdAt`, Lombok annotations, `@PrePersist` sets `status=ACTIVE`, `reminderProcessed=false`, `createdAt=now`
+- [x] T008 [P] Create `TaskStatus` enum (`ACTIVE`, `COMPLETED`) in `src/main/java/ru/zahaand/smarttaskbot/model/TaskStatus.java`
+- [x] T009 [P] Create `User` JPA entity in `src/main/java/ru/zahaand/smarttaskbot/model/User.java` — `@Entity @Table(name="users")`, `@Id Long telegramUserId`, `String username`, `String timezone`, `LocalDateTime createdAt`, Lombok `@Getter @Setter @NoArgsConstructor`, `@PrePersist` sets `createdAt = LocalDateTime.now()`
+- [x] T010 Create `Task` JPA entity in `src/main/java/ru/zahaand/smarttaskbot/model/Task.java` — `@Entity @Table(name="tasks")`, `@Id @GeneratedValue(IDENTITY) Long id`, `@ManyToOne(fetch=LAZY) User user`, `String text`, `@Enumerated(STRING) TaskStatus status`, `Instant reminderTime`, `boolean reminderProcessed`, `Instant reminderRetryAt`, `LocalDateTime createdAt`, Lombok annotations, `@PrePersist` sets `status=ACTIVE`, `reminderProcessed=false`, `createdAt=now`
 
 ### Repository Layer
 
-- [ ] T011 [P] Create `UserRepository` extending `JpaRepository<User, Long>` in `src/main/java/ru/zahaand/smarttaskbot/repository/UserRepository.java` — no custom queries needed beyond `existsById` and `findById` (inherited)
-- [ ] T012 Create `TaskRepository` extending `JpaRepository<Task, Long>` in `src/main/java/ru/zahaand/smarttaskbot/repository/TaskRepository.java` — add custom queries: `findAllByUserTelegramUserIdAndStatus(Long telegramUserId, TaskStatus status)`, `findByIdAndUserTelegramUserId(Long id, Long telegramUserId)`, `findAllByReminderProcessedFalseAndReminderTimeIsNotNullAndReminderTimeBeforeAndStatusAndReminderRetryAtIsNull(Instant now, TaskStatus status)`, `findAllByReminderProcessedFalseAndReminderRetryAtBeforeAndStatus(Instant now, TaskStatus status)`
+- [x] T011 [P] Create `UserRepository` extending `JpaRepository<User, Long>` in `src/main/java/ru/zahaand/smarttaskbot/repository/UserRepository.java` — no custom queries needed beyond `existsById` and `findById` (inherited)
+- [x] T012 Create `TaskRepository` extending `JpaRepository<Task, Long>` in `src/main/java/ru/zahaand/smarttaskbot/repository/TaskRepository.java` — add custom queries: `findAllByUserTelegramUserIdAndStatus(Long telegramUserId, TaskStatus status)`, `findByIdAndUserTelegramUserId(Long id, Long telegramUserId)`, `findAllByReminderProcessedFalseAndReminderTimeIsNotNullAndReminderTimeBeforeAndStatusAndReminderRetryAtIsNull(Instant now, TaskStatus status)`, `findAllByReminderProcessedFalseAndReminderRetryAtBeforeAndStatus(Instant now, TaskStatus status)`
 
 ### Config Layer
 
