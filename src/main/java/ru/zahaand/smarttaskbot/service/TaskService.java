@@ -15,6 +15,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Service for managing task lifecycle: creation, retrieval, reminders, and completion.
@@ -78,6 +79,39 @@ public class TaskService {
                 .stream()
                 .map(task -> getTaskDto(task, userZone))
                 .toList();
+    }
+
+    /**
+     * Sets a reminder on an existing ACTIVE task.
+     * Parses {@code dateTimeInput} in the user's timezone and stores it as UTC.
+     *
+     * @param telegramUserId owner of the task
+     * @param taskId         ID of the task to remind
+     * @param dateTimeInput  datetime string in {@code dd.MM.yyyy HH:mm} format (user's local time)
+     * @return {@link TaskDto} with the formatted reminder time for the confirmation reply
+     * @throws NoSuchElementException   if the task does not exist or belongs to another user
+     * @throws IllegalArgumentException if the task is already COMPLETED
+     * @throws java.time.format.DateTimeParseException if {@code dateTimeInput} cannot be parsed
+     */
+    public TaskDto setReminder(Long telegramUserId, Long taskId, String dateTimeInput) {
+        Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
+                .orElseThrow(() -> new NoSuchElementException("Task #%d not found.".formatted(taskId)));
+
+        if (task.getStatus() == TaskStatus.COMPLETED) {
+            throw new IllegalArgumentException("Cannot set a reminder on a completed task.");
+        }
+
+        ZoneId userZone = ZoneId.of(userService.getTimezone(telegramUserId));
+        LocalDateTime localDateTime = LocalDateTime.parse(dateTimeInput, REMINDER_FORMATTER);
+        Instant reminderInstant = localDateTime.atZone(userZone).toInstant();
+
+        task.setReminderTime(reminderInstant);
+        task.setReminderProcessed(false);
+        task.setReminderRetryAt(null);
+
+        taskRepository.save(task);
+
+        return getTaskDto(task, userZone);
     }
 
     private TaskDto getTaskDto(Task task, ZoneId userZone) {
