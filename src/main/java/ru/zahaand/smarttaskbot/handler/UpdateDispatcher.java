@@ -8,6 +8,11 @@ import ru.zahaand.smarttaskbot.handler.command.HelpCommandHandler;
 import ru.zahaand.smarttaskbot.handler.command.StartCommandHandler;
 import ru.zahaand.smarttaskbot.handler.command.UnknownInputHandler;
 
+/**
+ * Central component for routing incoming updates.
+ * Analyzes the type of update (message, callback query, etc.) and
+ * forwards it to the appropriate handler or guard.
+ */
 @Component
 @RequiredArgsConstructor
 public class UpdateDispatcher {

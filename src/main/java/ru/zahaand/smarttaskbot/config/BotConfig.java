@@ -9,6 +9,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import ru.zahaand.smarttaskbot.handler.SmartTaskBot;
 
+/**
+ * Configuration class for initializing the Telegram Bot API.
+ * Loads bot credentials from properties and registers the {@link SmartTaskBot} bean.
+ */
 @Configuration
 @Getter
 public class BotConfig {

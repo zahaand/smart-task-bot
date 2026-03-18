@@ -7,6 +7,11 @@ import ru.zahaand.smarttaskbot.repository.UserRepository;
 
 import java.time.LocalDateTime;
 
+/**
+ * Service for managing user data and registration.
+ * Handles user persistence, registration status checks, and
+ * retrieval of user-specific settings like timezones.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {

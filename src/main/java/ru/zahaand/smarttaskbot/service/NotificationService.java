@@ -13,6 +13,11 @@ import ru.zahaand.smarttaskbot.model.Task;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service responsible for sending all outgoing communications to Telegram users.
+ * Provides methods for sending plain text messages, interactive keyboards,
+ * and scheduled task reminders.
+ */
 @Slf4j
 @Service
 public class NotificationService {

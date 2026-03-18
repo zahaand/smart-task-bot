@@ -6,6 +6,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.UserService;
 
+/**
+ * Security component that ensures the user is registered before accessing
+ * protected bot commands. If the user is not found in the database,
+ * redirects them to the timezone selection process.
+ */
 @Component
 @RequiredArgsConstructor
 public class RegistrationGuard {

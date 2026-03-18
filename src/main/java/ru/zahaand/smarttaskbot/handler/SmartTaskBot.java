@@ -5,6 +5,11 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConfig;
 
+/**
+ * Main bot class that handles communication with Telegram via Long Polling.
+ * Inherits from {@link TelegramLongPollingBot} to receive updates and
+ * delegates them to the {@link UpdateDispatcher}.
+ */
 @Component
 public class SmartTaskBot extends TelegramLongPollingBot {
 
