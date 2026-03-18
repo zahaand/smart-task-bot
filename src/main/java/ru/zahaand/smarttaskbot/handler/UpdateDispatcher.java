@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.handler.callback.TimezoneCallbackHandler;
-import ru.zahaand.smarttaskbot.handler.command.HelpCommandHandler;
-import ru.zahaand.smarttaskbot.handler.command.NewTaskCommandHandler;
-import ru.zahaand.smarttaskbot.handler.command.StartCommandHandler;
-import ru.zahaand.smarttaskbot.handler.command.UnknownInputHandler;
+import ru.zahaand.smarttaskbot.handler.command.*;
 
 /**
  * Central component for routing incoming updates.
@@ -23,6 +20,7 @@ public class UpdateDispatcher {
     private final StartCommandHandler startCommandHandler;
     private final HelpCommandHandler helpCommandHandler;
     private final NewTaskCommandHandler newTaskCommandHandler;
+    private final TaskListCommandHandler taskListCommandHandler;
     private final UnknownInputHandler unknownInputHandler;
 
     public void dispatch(Update update) {
@@ -39,6 +37,8 @@ public class UpdateDispatcher {
                 case "/help" -> helpCommandHandler.handle(update);
                 case "/newtask" -> registrationGuard.checkAndRoute(update,
                         () -> newTaskCommandHandler.handle(update));
+                case "/tasks" -> registrationGuard.checkAndRoute(update,
+                        () -> taskListCommandHandler.handle(update));
                 default -> registrationGuard.checkAndRoute(update,
                         () -> unknownInputHandler.handle(update));
             }
