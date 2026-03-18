@@ -3,7 +3,7 @@ package ru.zahaand.smarttaskbot.handler.command;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.model.Task;
+import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
 
@@ -34,9 +34,9 @@ public class NewTaskCommandHandler {
         }
 
         try {
-            Task task = taskService.createTask(telegramUserId, taskText);
+            TaskDto task = taskService.createTask(telegramUserId, taskText);
             notificationService.sendMessage(chatId,
-                    "Task created \u2713\n#" + task.getId() + ": " + task.getText());
+                    "Task created ✓\n#" + task.getId() + ": " + task.getText());
         } catch (IllegalArgumentException e) {
             notificationService.sendMessage(chatId, e.getMessage());
         }

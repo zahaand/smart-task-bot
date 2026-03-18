@@ -38,10 +38,10 @@ public class TaskService {
      *
      * @param telegramUserId owner of the task
      * @param text           task description (1–500 non-whitespace characters)
-     * @return saved {@link Task} with generated id
+     * @return {@link TaskDto} with the assigned id and text (no reminder on creation)
      * @throws IllegalArgumentException if text is blank or exceeds 500 characters
      */
-    public Task createTask(Long telegramUserId, String text) {
+    public TaskDto createTask(Long telegramUserId, String text) {
 
         if (text == null || text.isBlank()) {
             throw new IllegalArgumentException("Please provide task text.\nUsage: /newtask <your task>");
@@ -62,7 +62,8 @@ public class TaskService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        return taskRepository.save(task);
+        Task saved = taskRepository.save(task);
+        return new TaskDto(saved.getId(), saved.getText(), null);
     }
 
     /**
@@ -119,15 +120,16 @@ public class TaskService {
      *
      * @param telegramUserId owner of the task
      * @param taskId         ID of the task to complete
-     * @return the completed {@link Task} for building the confirmation reply
+     * @return {@link TaskDto} with the task id and text for the confirmation reply
      * @throws NoSuchElementException if the task does not exist or belongs to another user
      */
-    public Task completeTask(Long telegramUserId, Long taskId) {
+    public TaskDto completeTask(Long telegramUserId, Long taskId) {
         Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
                 .orElseThrow(() -> new NoSuchElementException("Task #%d not found.".formatted(taskId)));
 
         task.setStatus(TaskStatus.COMPLETED);
-        return taskRepository.save(task);
+        Task saved = taskRepository.save(task);
+        return new TaskDto(saved.getId(), saved.getText(), null);
     }
 
     private TaskDto getTaskDto(Task task, ZoneId userZone) {

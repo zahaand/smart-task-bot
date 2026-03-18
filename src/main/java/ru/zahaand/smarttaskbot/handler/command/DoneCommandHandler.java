@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.model.Task;
+import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
 
@@ -44,7 +44,7 @@ public class DoneCommandHandler {
         }
 
         try {
-            Task task = taskService.completeTask(telegramUserId, taskId);
+            TaskDto task = taskService.completeTask(telegramUserId, taskId);
 
             notificationService.sendMessage(chatId,
                     "Task completed ✓\n#" + task.getId() + " " + task.getText());

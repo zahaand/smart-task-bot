@@ -23,7 +23,7 @@ public class RegistrationGuard {
         Long chatId = update.getMessage().getChatId();
 
         if (!userService.isRegistered(telegramUserId)) {
-            notificationService.sendTimezoneKeyboard(chatId);
+            notificationService.sendTimezoneKeyboard(chatId, "Please select your timezone first:");
             return;
         }
 

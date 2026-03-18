@@ -4,24 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.UserService;
-
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class TimezoneCallbackHandler {
-
-    private static final String TZ_PREFIX = "tz:";
-
-    private static final Set<String> VALID_TIMEZONES = Set.of(
-            "Europe/Kaliningrad",
-            "Europe/Moscow",
-            "Asia/Yekaterinburg",
-            "Asia/Novosibirsk",
-            "Asia/Vladivostok"
-    );
 
     private final UserService userService;
     private final NotificationService notificationService;
@@ -34,14 +23,14 @@ public class TimezoneCallbackHandler {
         String username = callbackQuery.getFrom().getUserName();
         String data = callbackQuery.getData();
 
-        if (data == null || !data.startsWith(TZ_PREFIX)) {
+        if (data == null || !data.startsWith(BotConstants.TZ_CALLBACK_PREFIX)) {
             notificationService.sendMessage(chatId, "Something went wrong. Please send /start to try again.");
             return;
         }
 
-        String timezone = data.substring(TZ_PREFIX.length());
+        String timezone = data.substring(BotConstants.TZ_CALLBACK_PREFIX.length());
 
-        if (!VALID_TIMEZONES.contains(timezone)) {
+        if (!BotConstants.VALID_TIMEZONES.contains(timezone)) {
             notificationService.sendMessage(chatId, "Something went wrong. Please send /start to try again.");
             return;
         }

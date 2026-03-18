@@ -21,8 +21,8 @@ public class StartCommandHandler {
             notificationService.sendMessage(chatId,
                     "Welcome back! You are already registered.\nUse /help to see available commands.");
         } else {
-            notificationService.sendMessage(chatId, "Welcome to Smart Task Bot!");
-            notificationService.sendTimezoneKeyboard(chatId);
+            notificationService.sendTimezoneKeyboard(chatId,
+                    "Welcome to Smart Task Bot!\nPlease select your timezone:");
         }
     }
 }

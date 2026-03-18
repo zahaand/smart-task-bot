@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.model.Task;
 
 import java.util.ArrayList;
@@ -21,12 +22,6 @@ import java.util.List;
 @Slf4j
 @Service
 public class NotificationService {
-
-    private static final List<List<String>> TIMEZONE_ROWS = List.of(
-            List.of("Europe/Kaliningrad", "Europe/Moscow"),
-            List.of("Asia/Yekaterinburg", "Asia/Novosibirsk"),
-            List.of("Asia/Vladivostok")
-    );
 
     private final AbsSender sender;
 
@@ -44,8 +39,8 @@ public class NotificationService {
         }
     }
 
-    public void sendTimezoneKeyboard(Long chatId) {
-        SendMessage message = new SendMessage(chatId.toString(), "Please select your timezone:");
+    public void sendTimezoneKeyboard(Long chatId, String text) {
+        SendMessage message = new SendMessage(chatId.toString(), text);
 
         message.setReplyMarkup(buildTimezoneKeyboard());
 
@@ -64,12 +59,12 @@ public class NotificationService {
     private InlineKeyboardMarkup buildTimezoneKeyboard() {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
-        for (List<String> rowTimezones : TIMEZONE_ROWS) {
+        for (List<String> rowTimezones : BotConstants.TIMEZONE_ROWS) {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
             for (String tz : rowTimezones) {
                 InlineKeyboardButton keyboardButton = new InlineKeyboardButton(tz);
-                keyboardButton.setCallbackData("tz:" + tz);
+                keyboardButton.setCallbackData(BotConstants.TZ_CALLBACK_PREFIX + tz);
                 row.add(keyboardButton);
             }
 
