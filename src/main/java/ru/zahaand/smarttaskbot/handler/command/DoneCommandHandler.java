@@ -64,15 +64,11 @@ public class DoneCommandHandler {
     }
 
     private Long getTaskId(String argsText, Long chatId) {
-        long taskId;
-
         try {
-            taskId = Long.parseLong(argsText.split("\\s+")[0]);
+            return Long.parseLong(argsText.split("\\s+")[0]);
         } catch (NumberFormatException e) {
             notificationService.sendMessage(chatId, USAGE_HINT);
             return null;
         }
-
-        return taskId;
     }
 }

@@ -80,15 +80,11 @@ public class RemindCommandHandler {
     }
 
     private Long getTaskId(String part, Long chatId) {
-        long taskId;
-
         try {
-            taskId = Long.parseLong(part);
+            return Long.parseLong(part);
         } catch (NumberFormatException e) {
             notificationService.sendMessage(chatId, USAGE_HINT);
             return null;
         }
-
-        return taskId;
     }
 }

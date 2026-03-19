@@ -1,19 +1,19 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.0.0 → 1.1.0
-Modified principles: None (existing I–VI unchanged)
-Added sections:
-  - VII. Logging Standards
-  - VIII. Code Style
-  - IX. Testing Standards
+Version change: 1.1.0 → 1.1.1
+Modified principles:
+  - VIII. Code Style — null-return prohibition clarified: PROHIBITED only for public
+    methods; private methods MAY return null as internal control flow signals within
+    a single class, provided usage is limited to a single call site and intent is obvious.
+Added sections: None
 Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md ✅ (Constitution Check section present; no structural changes needed)
-  - .specify/templates/spec-template.md ✅ (no constitution-driven mandatory section changes)
-  - .specify/templates/tasks-template.md ✅ (T008 logging/error-handling task already aligns with VII)
+  - .specify/templates/plan-template.md ✅ (no structural changes needed)
+  - .specify/templates/spec-template.md ✅ (no structural changes needed)
+  - .specify/templates/tasks-template.md ✅ (no structural changes needed)
   - .specify/templates/constitution-template.md ✅ (source template; no updates needed)
-Follow-up TODOs: None — all principles fully specified.
+Follow-up TODOs: None.
 -->
 
 # Smart Task Bot Constitution
@@ -135,7 +135,10 @@ Additional rules:
 
 - All fields MUST be declared `final`.
 - Constructor injection MUST be used; `@Autowired` on fields is PROHIBITED.
-- Returning `null` is PROHIBITED — use `Optional` or throw an exception.
+- PROHIBITED: returning `null` from public methods — use `Optional` or throw an exception.
+  Private methods MAY return `null` when used as internal control flow signals within
+  a single class, provided the usage is limited to a single call site and the intent
+  is obvious from context.
 - Curly braces MUST always be used, including single-line `if` and `for` bodies.
 - `var` is PROHIBITED except for complex generic types where the explicit type
   is excessively verbose.
@@ -205,4 +208,4 @@ Tracking section of the relevant `plan.md` with explicit justification.
 
 **Runtime guidance**: See `.specify/memory/` for feature-specific specs, plans, and tasks.
 
-**Version**: 1.1.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-19
+**Version**: 1.1.1 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-19

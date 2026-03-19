@@ -1,6 +1,7 @@
 package ru.zahaand.smarttaskbot.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.Task;
@@ -22,16 +23,17 @@ import java.util.NoSuchElementException;
  * All business validation and domain logic is performed here.
  * Methods are added incrementally per user story.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService {
 
-    private static final DateTimeFormatter REMINDER_FORMATTER =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+
+    private static final DateTimeFormatter REMINDER_FORMATTER =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     /**
      * Creates a new ACTIVE task for the given user.
@@ -44,15 +46,20 @@ public class TaskService {
     public TaskDto createTask(Long telegramUserId, String text) {
 
         if (text == null || text.isBlank()) {
+            log.warn("Blank task text from userId={}", telegramUserId);
             throw new IllegalArgumentException("Please provide task text.\nUsage: /newtask <your task>");
         }
 
         if (text.length() > 500) {
+            log.warn("Task text too long ({} chars) from userId={}", text.length(), telegramUserId);
             throw new IllegalArgumentException("Task text is too long (max 500 characters).");
         }
 
         User user = userRepository.findById(telegramUserId)
-                .orElseThrow(() -> new IllegalStateException("User not found: " + telegramUserId));
+                .orElseThrow(() -> {
+                    log.error("User not found during task creation: userId={}", telegramUserId);
+                    return new IllegalStateException("User not found: " + telegramUserId);
+                });
 
         Task task = Task.builder()
                 .user(user)
@@ -63,6 +70,7 @@ public class TaskService {
                 .build();
 
         Task saved = taskRepository.save(task);
+        log.info("Task created: id={}, userId={}", saved.getId(), telegramUserId);
         return new TaskDto(saved.getId(), saved.getText(), null);
     }
 
@@ -96,9 +104,13 @@ public class TaskService {
      */
     public TaskDto setReminder(Long telegramUserId, Long taskId, String dateTimeInput) {
         Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
-                .orElseThrow(() -> new NoSuchElementException("Task #%d not found.".formatted(taskId)));
+                .orElseThrow(() -> {
+                    log.error("Task #{} not found for userId={}", taskId, telegramUserId);
+                    return new NoSuchElementException("Task #%d not found.".formatted(taskId));
+                });
 
         if (task.getStatus() == TaskStatus.COMPLETED) {
+            log.warn("Reminder on completed task #{} by userId={}", taskId, telegramUserId);
             throw new IllegalArgumentException("Cannot set a reminder on a completed task.");
         }
 
@@ -111,6 +123,7 @@ public class TaskService {
         task.setReminderRetryAt(null);
 
         taskRepository.save(task);
+        log.info("Reminder set: taskId={}, userId={}", taskId, telegramUserId);
 
         return getTaskDto(task, userZone);
     }
@@ -125,20 +138,21 @@ public class TaskService {
      */
     public TaskDto completeTask(Long telegramUserId, Long taskId) {
         Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
-                .orElseThrow(() -> new NoSuchElementException("Task #%d not found.".formatted(taskId)));
+                .orElseThrow(() -> {
+                    log.error("Task #{} not found for userId={}", taskId, telegramUserId);
+                    return new NoSuchElementException("Task #%d not found.".formatted(taskId));
+                });
 
         task.setStatus(TaskStatus.COMPLETED);
         Task saved = taskRepository.save(task);
+
+        log.info("Task completed: id={}, userId={}", saved.getId(), telegramUserId);
         return new TaskDto(saved.getId(), saved.getText(), null);
     }
 
     private TaskDto getTaskDto(Task task, ZoneId userZone) {
-        String reminderTime = getReminderTime(task, userZone);
+        String reminderTime = formatReminder(task.getReminderTime(), userZone);
         return new TaskDto(task.getId(), task.getText(), reminderTime);
-    }
-
-    private String getReminderTime(Task task, ZoneId userZone) {
-        return formatReminder(task.getReminderTime(), userZone);
     }
 
     private String formatReminder(Instant reminderTime, ZoneId userZone) {
