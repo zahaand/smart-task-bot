@@ -369,13 +369,13 @@ DoneCommandHandlerTest"` passes in an environment with no database or network ac
 **Purpose**: Confirm all blocks work together; validate quickstart.md against the
 actual implementation.
 
-- [ ] T021 Run `mvn test` (full suite) and confirm zero failures across all test classes
+- [X] T021 Run `mvn test` (full suite) and confirm zero failures across all test classes
   including the existing `SmartTaskBotApplicationTests`
 
-- [ ] T022 Run `mvn spring-boot:run` and confirm application startup log contains
+- [X] T022 Run `mvn spring-boot:run` and confirm application startup log contains
   zero WARN and zero ERROR entries (validates SC-001 and T001)
 
-- [ ] T023 Walk through `specs/002-quality-and-tests/quickstart.md` verification steps
+- [X] T023 Walk through `specs/002-quality-and-tests/quickstart.md` verification steps
   end-to-end: trigger each command manually via Telegram, confirm log output matches
   expected INFO/WARN/ERROR patterns, confirm user-facing messages are correct
 

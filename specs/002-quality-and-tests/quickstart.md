@@ -19,7 +19,8 @@ This guide covers how to verify each block of changes after implementation.
 
 Open `NewTaskCommandHandler.java`. Confirm there is no `isBlank()` check in `handle()`.
 The `extractTaskText()` helper may still exist; only the guard at the top of `handle()`
-is removed.
+is removed. Blank input now flows to `TaskService.createTask()` which throws
+`IllegalArgumentException`, caught by the existing `catch` block.
 
 ### Q1 — `getReminderTime()` inlined
 
@@ -36,6 +37,12 @@ mvn spring-boot:run
 Check startup logs. Confirm **zero** lines matching:
 - `open-in-view`
 - `PostgreSQLDialect`
+
+Verifiable statically:
+```bash
+grep "open-in-view\|dialect" src/main/resources/application.yaml
+# Expected: only "open-in-view: false" — no dialect line
+```
 
 ### Principle VIII member order
 
@@ -59,7 +66,7 @@ grep -rL "@Slf4j" src/main/java/ru/zahaand/smarttaskbot/service/
 ```
 Expected: empty output (all services annotated).
 
-### INFO on success, ERROR/WARN on failure
+### INFO on success, WARN/ERROR on failure
 
 Start the bot and exercise each command. Observe log output:
 
@@ -69,7 +76,7 @@ Start the bot and exercise each command. Observe log output:
 | `/newtask` (blank) | `WARN ... Blank task text from userId=Y` |
 | `/remind 1 25.03.2026 09:00` | `INFO ... Reminder set: taskId=1, userId=Y` |
 | `/done 1` | `INFO ... Task completed: id=1, userId=Y` |
-| `/done 999` (missing) | `ERROR ... Task #999 not found for user Y` |
+| `/done 999` (missing) | `ERROR ... Task #999 not found for userId=Y` |
 
 ### Centralized error handler
 
@@ -89,7 +96,20 @@ Send any message to the bot. Confirm:
 cat railway.toml
 ```
 
-Expected: `builder`, `buildCommand`, `startCommand` all explicitly set.
+Expected content:
+```toml
+[build]
+builder = "NIXPACKS"
+buildCommand = "mvn clean package -DskipTests"
+
+[deploy]
+startCommand = "java -jar target/smart-task-bot-*.jar"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+```
+
+Note: `-DskipTests` is required — without it Railway would attempt to run tests
+during build, which fails because the CI environment has no database.
 
 ### Railway deployment (optional, requires Railway account)
 
@@ -105,15 +125,29 @@ Expected: `builder`, `buildCommand`, `startCommand` all explicitly set.
 ### Run all unit tests (no database, no network required)
 
 ```bash
-mvn test -Dspring.profiles.active=test
+mvn test
 ```
 
-Or, to skip the `@SpringBootTest` context test:
+Expected: **48 tests pass, 1 skipped** (integration smoke test `SmartTaskBotApplicationTests`
+is `@Disabled` — it requires a live database and Telegram credentials).
+Zero failures. No database connection attempted by unit tests.
+
+To run only the unit test classes explicitly:
 ```bash
 mvn test -Dtest="TaskServiceTest,UserServiceTest,ReminderServiceTest,NewTaskCommandHandlerTest,RemindCommandHandlerTest,DoneCommandHandlerTest"
 ```
 
-Expected: **all tests pass**, no database connection attempted.
+### Integration smoke test (requires live environment)
+
+`SmartTaskBotApplicationTests.contextLoads()` is annotated `@Disabled` and will be
+skipped by default. To run it manually with a populated `.env`:
+
+```bash
+mvn test -Dtest="SmartTaskBotApplicationTests" -Dspring.config.location=.env
+```
+
+Or simply start the application normally — a successful startup is equivalent proof
+that the Spring context loads correctly.
 
 ### Coverage spot-check
 
@@ -127,6 +161,7 @@ test method must have a `@DisplayName`.
 After all blocks are complete, run the full test suite:
 ```bash
 mvn test
+# Expected: Tests run: 49, Failures: 0, Errors: 0, Skipped: 1
 ```
 
 Start the bot and manually verify the primary user flows:
@@ -134,6 +169,6 @@ Start the bot and manually verify the primary user flows:
 2. Select timezone → confirmation message
 3. `/newtask Buy milk` → task created with ID
 4. `/tasks` → task appears in list
-5. `/remind <id> <future-date> <time>` → confirmation with formatted time
+5. `/remind <id> <future-date> <time>` → confirmation with formatted time and timezone
 6. `/done <id>` → task marked complete
 7. `/tasks` → list is empty
