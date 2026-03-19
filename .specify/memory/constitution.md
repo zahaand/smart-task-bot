@@ -1,21 +1,19 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: [TEMPLATE] → 1.0.0
-Modified principles: N/A (initial population from template)
+Version change: 1.0.0 → 1.1.0
+Modified principles: None (existing I–VI unchanged)
 Added sections:
-  - Core Principles (I–VI)
-  - Technology Stack
-  - Development Standards
-  - Governance
-Removed sections: N/A
+  - VII. Logging Standards
+  - VIII. Code Style
+  - IX. Testing Standards
+Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md ✅ (Constitution Check section already present; no structural changes needed)
+  - .specify/templates/plan-template.md ✅ (Constitution Check section present; no structural changes needed)
   - .specify/templates/spec-template.md ✅ (no constitution-driven mandatory section changes)
-  - .specify/templates/tasks-template.md ✅ (task categories align with principles)
-  - .claude/commands/speckit.plan.md ✅ (no outdated agent-only references)
-  - .claude/commands/speckit.constitution.md ✅ (generic guidance, no updates needed)
-Follow-up TODOs: None — all placeholders resolved.
+  - .specify/templates/tasks-template.md ✅ (T008 logging/error-handling task already aligns with VII)
+  - .specify/templates/constitution-template.md ✅ (source template; no updates needed)
+Follow-up TODOs: None — all principles fully specified.
 -->
 
 # Smart Task Bot Constitution
@@ -97,6 +95,66 @@ Code MUST be the minimum complexity required to satisfy the stated MVP requireme
 Rationale: This is a portfolio project. Clarity and professionalism of code are the
 primary success criteria alongside functional correctness.
 
+### VII. Logging Standards (NON-NEGOTIABLE)
+
+All logging MUST use the `@Slf4j` Lombok annotation. Direct logger instantiation is PROHIBITED.
+
+Log levels MUST be applied as follows:
+
+- **DEBUG**: input parameters, intermediate processing steps.
+- **INFO**: successful completion of a business operation.
+- **WARN**: abnormal but handled situation (e.g., retry, invalid user input).
+- **ERROR**: exception or operation failure.
+
+Every `Exception` MUST be logged at ERROR level with identifying context before being thrown:
+
+```java
+log.error("Task {} not found for user {}", taskId, userId);
+throw new NoSuchElementException(...);
+```
+
+- Log messages MUST include relevant identifiers (`telegramUserId`, `taskId`, etc.).
+- Logging sensitive data (e.g., `BOT_TOKEN`, passwords) is PROHIBITED.
+- `SmartTaskBot.onUpdateReceived()` MUST wrap all processing in a centralized `try-catch`,
+  log any unhandled exception at ERROR level, and reply to the user:
+  `"Something went wrong. Please try again."`
+- Propagating exceptions above the handler layer is PROHIBITED.
+
+Rationale: Structured, level-appropriate logging is a professional standard that makes
+failures diagnosable in production and demonstrates operational maturity to reviewers.
+
+### VIII. Code Style (NON-NEGOTIABLE)
+
+Class members MUST be declared in the following order:
+
+1. Injected dependencies (via constructor) — one blank line below the class declaration.
+2. Helper objects (`DateTimeFormatter`, etc.) — one blank line below dependencies.
+3. Constants (`static final`) — one blank line below helper objects.
+
+Additional rules:
+
+- All fields MUST be declared `final`.
+- Constructor injection MUST be used; `@Autowired` on fields is PROHIBITED.
+- Returning `null` is PROHIBITED — use `Optional` or throw an exception.
+- Curly braces MUST always be used, including single-line `if` and `for` bodies.
+- `var` is PROHIBITED except for complex generic types where the explicit type
+  is excessively verbose.
+- Private method names MUST start with a verb: `extractTaskId()`, `formatReminder()`.
+
+Rationale: Consistent, explicit code style reduces cognitive load during review and
+signals discipline — a critical quality marker in portfolio code.
+
+### IX. Testing Standards (NON-NEGOTIABLE)
+
+- Unit tests MUST use `@ExtendWith(MockitoExtension.class)`.
+- `@SpringBootTest` in unit tests is PROHIBITED.
+- Tests MUST be structured with `@Nested` classes, one per method under test.
+- Every test method MUST carry `@DisplayName` in English describing the scenario.
+- Boundary and equivalence-class cases MUST use `@ParameterizedTest` + `@MethodSource`.
+
+Rationale: A test suite that follows these conventions is self-documenting, fast, and
+demonstrates mastery of unit-testing discipline — essential for a portfolio project.
+
 ## Technology Stack
 
 The following stack is fixed for the lifetime of this project.
@@ -147,4 +205,4 @@ Tracking section of the relevant `plan.md` with explicit justification.
 
 **Runtime guidance**: See `.specify/memory/` for feature-specific specs, plans, and tasks.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-18
+**Version**: 1.1.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-19
