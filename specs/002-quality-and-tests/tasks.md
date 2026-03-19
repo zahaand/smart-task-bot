@@ -192,7 +192,7 @@ configuration is needed beyond supplying environment variables.
 
 ### Implementation for Block 3
 
-- [ ] T014 [US4] Create `railway.toml` at the repository root with the following content:
+- [X] T014 [US4] Create `railway.toml` at the repository root with the following content:
 
   ```toml
   [build]

@@ -1,0 +1,8 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "mvn clean package"
+
+[deploy]
+startCommand = "java -jar target/smart-task-bot-*.jar"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
