@@ -179,6 +179,7 @@ Railway dashboard changes beyond env vars.
 - Q: Does `ReminderService` need new retry logic, or should tests cover existing retry behavior? → A: Retry logic is already implemented in MVP (001-task-bot-mvp) using `reminder_retry_at` field for one retry attempt, then `reminder_processed = true` + ERROR log. Tests MUST cover this existing behavior as-is — no changes to retry logic in this phase.
 - Q: What was the intended test class behind the cut-off "R" in the feature description? → A: Two handler classes — `RemindCommandHandler.handle()` (success, invalid format, wrong task ID) and `DoneCommandHandler.handle()` (success, task not found, no ID provided).
 - Q: Which layers does Principle VIII refactoring (member ordering, final fields, constructor injection) apply to? → A: `handler/` and `service/` only. `repository/` interfaces, `model/`, `dto/`, and `config/` are out of scope for this phase.
+- Q: Should FR-010 distinguish log levels for user-input vs. system exceptions? → A: Yes. Constitution Principle VII takes precedence over the original literal wording of FR-010. User-input validation exceptions MUST be logged at WARN; system failures and unexpected exceptions MUST be logged at ERROR. FR-010 updated accordingly.
 
 ## Requirements *(mandatory)*
 
@@ -205,8 +206,11 @@ Railway dashboard changes beyond env vars.
 
 - **FR-008**: Every class in `service/` MUST be annotated for structured logging via Lombok.
 - **FR-009**: Every successful business operation completion MUST produce an INFO log entry.
-- **FR-010**: Every exception MUST be logged at ERROR level with `telegramUserId` and any
-  relevant entity identifier before being thrown or re-thrown.
+- **FR-010**: Exceptions MUST be logged with `telegramUserId` and any relevant entity
+  identifier before being thrown or re-thrown. Log level rules:
+  user-input validation exceptions (blank text, invalid format, completed-task guard)
+  MUST be logged at WARN level; system failures and unexpected exceptions (user not found,
+  task not found, unhandled errors) MUST be logged at ERROR level.
 - **FR-011**: The Telegram update entry point MUST wrap all processing in a single top-level
   error handler, log any unhandled exception at ERROR level, and send the user:
   "Something went wrong. Please try again."
@@ -265,8 +269,9 @@ Railway dashboard changes beyond env vars.
 
 - The "R" at the end of the feature description was the start of `RemindCommandHandler`;
   `DoneCommandHandler` was also intended. Both are captured in FR-021 and FR-022.
-- `railway.toml` will target a Maven build (`mvn clean package`) and a standard JVM
-  start command (`java -jar target/*.jar`).
+- `railway.toml` will target a Maven build (`mvn clean package -DskipTests`) and use a
+  wildcard start command (`java -jar target/smart-task-bot-*.jar`) to avoid hardcoding
+  the artifact version.
 - "All service classes" refers to classes in the `service/` package of the existing
   MVP codebase.
 - Per-reminder failure isolation means a failed send for reminder N does not prevent

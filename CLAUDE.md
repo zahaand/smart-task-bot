@@ -1,8 +1,10 @@
 # smart-task-bot Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-18
+Auto-generated from all feature plans. Last updated: 2026-03-19
 
 ## Active Technologies
+- Java 21 + Spring Boot 3.5.11, TelegramBots Spring Boot Starter 6.9.7.1, (002-quality-and-tests)
+- PostgreSQL (no schema changes in this feature) (002-quality-and-tests)
 
 - Java 21, Spring Boot 3.5.11
 - TelegramBots Spring Boot Starter 6.9.7.1 (long-polling, `TelegramLongPollingBot`)
@@ -75,6 +77,7 @@ DB_PASSWORD=        # PostgreSQL password
 - Lombok used for `@Getter`, `@Setter`, `@NoArgsConstructor`, `@Builder` — not for hiding logic
 
 ## Recent Changes
+- 002-quality-and-tests: Added Java 21 + Spring Boot 3.5.11, TelegramBots Spring Boot Starter 6.9.7.1,
 
 - 001-task-bot-mvp: Initial MVP — users, tasks, reminders, inline timezone keyboard
 
