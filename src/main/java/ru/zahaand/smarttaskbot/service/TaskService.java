@@ -26,12 +26,12 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class TaskService {
 
-    private static final DateTimeFormatter REMINDER_FORMATTER =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+
+    private static final DateTimeFormatter REMINDER_FORMATTER =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     /**
      * Creates a new ACTIVE task for the given user.
@@ -133,12 +133,8 @@ public class TaskService {
     }
 
     private TaskDto getTaskDto(Task task, ZoneId userZone) {
-        String reminderTime = getReminderTime(task, userZone);
+        String reminderTime = formatReminder(task.getReminderTime(), userZone);
         return new TaskDto(task.getId(), task.getText(), reminderTime);
-    }
-
-    private String getReminderTime(Task task, ZoneId userZone) {
-        return formatReminder(task.getReminderTime(), userZone);
     }
 
     private String formatReminder(Instant reminderTime, ZoneId userZone) {

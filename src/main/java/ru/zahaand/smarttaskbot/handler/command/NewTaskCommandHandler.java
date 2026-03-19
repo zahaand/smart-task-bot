@@ -27,12 +27,6 @@ public class NewTaskCommandHandler {
         // Extract text after "/newtask" (with possible @botname suffix)
         String taskText = extractTaskText(messageText);
 
-        if (taskText.isBlank()) {
-            notificationService.sendMessage(chatId,
-                    "Please provide task text.\nUsage: /newtask <your task>");
-            return;
-        }
-
         try {
             TaskDto task = taskService.createTask(telegramUserId, taskText);
             notificationService.sendMessage(chatId,

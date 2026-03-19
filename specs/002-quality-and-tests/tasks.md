@@ -33,7 +33,7 @@ All paths relative to repository root:
 
 **Purpose**: Confirm the feature branch builds cleanly before any changes.
 
-- [ ] T000 Verify the project builds on branch `002-quality-and-tests` by running
+- [X] T000 Verify the project builds on branch `002-quality-and-tests` by running
   `mvn clean package -DskipTests` and confirming zero compilation errors
 
 **Checkpoint**: Clean build confirmed — implementation can begin.
@@ -61,31 +61,29 @@ zero startup WARNs when running `mvn spring-boot:run`.
 
 ### Implementation for Block 1
 
-- [ ] T001 [P] [US1] Fix startup WARNs in `src/main/resources/application.yaml`:
+- [X] T001 [P] [US1] Fix startup WARNs in `src/main/resources/application.yaml`:
   add `open-in-view: false` under `spring.jpa`; remove the
   `hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect` line entirely
   (Hibernate auto-detects PostgreSQL dialect — explicit setting triggers deprecation WARN)
 
-- [ ] T002 [P] [US1] Remove duplicate blank-input guard from
+- [X] T002 [P] [US1] Remove duplicate blank-input guard from
   `src/main/java/ru/zahaand/smarttaskbot/handler/command/NewTaskCommandHandler.java`:
   delete the `if (taskText.isBlank())` block and its early-return body (lines 30–34);
   blank input is already validated in `TaskService.createTask()` which throws
   `IllegalArgumentException`, caught by the existing `catch` block in the handler
 
-- [ ] T003 [P] [US1] Fix null return in
+- [X] T003 [P] [US1] No change needed in
   `src/main/java/ru/zahaand/smarttaskbot/handler/command/RemindCommandHandler.java`:
-  change `getTaskId()` return type from `Long` to `Optional<Long>`; on successful parse
-  return `Optional.of(taskId)`; on `NumberFormatException` send usage hint and return
-  `Optional.empty()`; update call site: `Optional<Long> taskId = getTaskId(parts[0], chatId);
-  if (taskId.isEmpty()) { return; }` then use `taskId.get()`; add `import java.util.Optional`
+  `getTaskId()` returning `null` on parse failure is permitted under Constitution v1.1.1
+  (Principle VIII) — private method, single call site, intent obvious from `if (taskId == null)`
+  guard immediately below. No code change required; task closed as N/A.
 
-- [ ] T004 [P] [US1] Fix null return in
+- [X] T004 [P] [US1] No change needed in
   `src/main/java/ru/zahaand/smarttaskbot/handler/command/DoneCommandHandler.java`:
-  same pattern as T003 — change `getTaskId()` to return `Optional<Long>`; update call
-  site to `if (taskId.isEmpty()) { return; }` and use `taskId.get()`;
-  add `import java.util.Optional`
+  same rationale as T003 — `getTaskId()` null return is permitted under Constitution v1.1.1
+  (Principle VIII). Task closed as N/A.
 
-- [ ] T005 [P] [US1] Fix member declaration order in
+- [X] T005 [P] [US1] Fix member declaration order in
   `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java`:
   move `REMINDER_FORMATTER` (currently declared first) to AFTER the three injected
   dependencies (`taskRepository`, `userRepository`, `userService`); correct order is:
@@ -93,13 +91,13 @@ zero startup WARNs when running `mvn spring-boot:run`.
   no constants; note: `@RequiredArgsConstructor` ignores `static` fields so the
   generated constructor is unaffected by this reorder
 
-- [ ] T006 [P] [US1] Fix member declaration order in
+- [X] T006 [P] [US1] Fix member declaration order in
   `src/main/java/ru/zahaand/smarttaskbot/handler/command/HelpCommandHandler.java`:
   move `notificationService` (currently declared second) to BEFORE `HELP_TEXT`;
   correct order: `private final NotificationService notificationService;` → blank line →
   `private static final String HELP_TEXT = ...;`
 
-- [ ] T007 [US1] Inline `getReminderTime()` in
+- [X] T007 [US1] Inline `getReminderTime()` in
   `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java`
   (run after T005 — same file):
   replace the `getTaskDto()` body with a direct call to `formatReminder()`:
