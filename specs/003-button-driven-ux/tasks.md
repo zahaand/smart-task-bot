@@ -19,23 +19,23 @@ All state-driven routing, the `UserState` persistence layer, and `UpdateDispatch
 
 **⚠️ CRITICAL**: No user story implementation can begin until this phase is complete.
 
-- [ ] T001 Create `ConversationState` enum with values IDLE, CREATING_TASK, SELECTING_REMINDER_DATE, ENTERING_REMINDER_TIME, CONFIRMING_DELETE in `model/ConversationState.java`
+- [x] T001 Create `ConversationState` enum with values IDLE, CREATING_TASK, SELECTING_REMINDER_DATE, ENTERING_REMINDER_TIME, CONFIRMING_DELETE in `model/ConversationState.java`
 
-- [ ] T002 Create `UserState` JPA entity (PK = `telegramUserId`, fields: `state` VARCHAR(50), `context` TEXT/JSONB, `updatedAt` Instant) in `model/UserState.java` — note: JPA entities are exempt from `final` fields per plan
+- [x] T002 Create `UserState` JPA entity (PK = `telegramUserId`, fields: `state` VARCHAR(50), `context` TEXT/JSONB, `updatedAt` Instant) in `model/UserState.java` — note: JPA entities are exempt from `final` fields per plan
 
-- [ ] T003 Create `UserStateRepository` extending `JpaRepository<UserState, Long>` in `repository/UserStateRepository.java`
+- [x] T003 Create `UserStateRepository` extending `JpaRepository<UserState, Long>` in `repository/UserStateRepository.java`
 
-- [ ] T004 Create `ConversationContext` DTO with fields `taskId`, `viewingYear`, `viewingMonth`, `date` (Jackson `@JsonInclude(NON_NULL)`) in `dto/ConversationContext.java`
+- [x] T004 Create `ConversationContext` DTO with fields `taskId`, `viewingYear`, `viewingMonth`, `date` (Jackson `@JsonInclude(NON_NULL)`) in `dto/ConversationContext.java`
 
-- [ ] T005 Create Liquibase migration `src/main/resources/db/changelog/004-create-user-states-table.xml` — table `user_states` with columns `telegram_user_id` (BIGINT PK FK→users), `state` (VARCHAR(50) NOT NULL DEFAULT 'IDLE'), `context` (JSONB nullable), `updated_at` (TIMESTAMP NOT NULL DEFAULT NOW()); include rollback block `DROP TABLE user_states`; register in `src/main/resources/db/changelog/db.changelog-master.xml`
+- [x] T005 Create Liquibase migration `src/main/resources/db/changelog/004-create-user-states-table.xml` — table `user_states` with columns `telegram_user_id` (BIGINT PK FK→users), `state` (VARCHAR(50) NOT NULL DEFAULT 'IDLE'), `context` (JSONB nullable), `updated_at` (TIMESTAMP NOT NULL DEFAULT NOW()); include rollback block `DROP TABLE user_states`; register in `src/main/resources/db/changelog/db.changelog-master.xml`
 
-- [ ] T006 [P] Add all callback-prefix constants (`CB_TZ`, `CB_TASK_REMIND`, `CB_TASK_DONE`, `CB_TASK_DELETE`, `CB_CAL_DATE`, `CB_CAL_NAV`, `CB_CONFIRM_DELETE`, `CB_CONFIRM_CANCEL`, `CB_TASKS_TAB`, `CB_NO_OP`) and persistent-menu button label constants (`BTN_NEW_TASK = "📝 Новая задача"`, `BTN_MY_TASKS = "📋 Мои задачи"`, `BTN_REMINDER = "⏰ Напоминание"`) to `config/BotConstants.java`
+- [x] T006 [P] Add all callback-prefix constants (`CB_TZ`, `CB_TASK_REMIND`, `CB_TASK_DONE`, `CB_TASK_DELETE`, `CB_CAL_DATE`, `CB_CAL_NAV`, `CB_CONFIRM_DELETE`, `CB_CONFIRM_CANCEL`, `CB_TASKS_TAB`, `CB_NO_OP`) and persistent-menu button label constants (`BTN_NEW_TASK = "📝 Новая задача"`, `BTN_MY_TASKS = "📋 Мои задачи"`, `BTN_REMINDER = "⏰ Напоминание"`) to `config/BotConstants.java`
 
-- [ ] T007 Implement `UserStateService` in `service/UserStateService.java` with methods: `getState(Long)`, `setState(Long, ConversationState)`, `setStateWithContext(Long, ConversationState, ConversationContext)`, `getContext(Long)`, `updateContext(Long, ConversationContext)`, `resetIfStale(Long)` (resets to IDLE if `updatedAt` > 24h ago), `cancelWithNotification(Long userId, Long chatId, ConversationState)` (resets state + sends cancel message); inject `ObjectMapper` for JSON ser/des; catch `JsonProcessingException` in `getContext()` → reset to IDLE + log ERROR
+- [x] T007 Implement `UserStateService` in `service/UserStateService.java` with methods: `getState(Long)`, `setState(Long, ConversationState)`, `setStateWithContext(Long, ConversationState, ConversationContext)`, `getContext(Long)`, `updateContext(Long, ConversationContext)`, `resetIfStale(Long)` (resets to IDLE if `updatedAt` > 24h ago), `cancelWithNotification(Long userId, Long chatId, ConversationState)` (resets state + sends cancel message); inject `ObjectMapper` for JSON ser/des; catch `JsonProcessingException` in `getContext()` → reset to IDLE + log ERROR
 
-- [ ] T008 Add to `service/NotificationService.java`: `answerCallbackQuery(String callbackQueryId)`, `sendPersistentMenu(Long chatId, String text)` (builds `ReplyKeyboardMarkup` with `isPersistent=true`, `resizeKeyboard=true`, 3 buttons from `BotConstants`), and private `safeEdit(EditMessageText editRequest, SendMessage fallback)` helper (wraps `execute(editRequest)` in try-catch `TelegramApiException`; on failure executes `sendMessage` fallback and logs WARN)
+- [x] T008 Add to `service/NotificationService.java`: `answerCallbackQuery(String callbackQueryId)`, `sendPersistentMenu(Long chatId, String text)` (builds `ReplyKeyboardMarkup` with `isPersistent=true`, `resizeKeyboard=true`, 3 buttons from `BotConstants`), and private `safeEdit(EditMessageText editRequest, SendMessage fallback)` helper (wraps `execute(editRequest)` in try-catch `TelegramApiException`; on failure executes `sendMessage` fallback and logs WARN)
 
-- [ ] T009 Refactor `handler/UpdateDispatcher.java`: extract `routeCallback(Update)` and `routeMessage(Update)` private methods; implement full routing logic per plan (10-step `routeMessage` including `resetIfStale` call, `/cancel` detection at step 3, `isPersistentMenuButton` check at step 4, state-driven routing at steps 5–7, button routing at step 8, command switch at step 9); implement `routeCallback` with `startsWith`-based dispatch for all 9 prefixes + `NO_OP` silent answer; add `isPersistentMenuButton(String)` helper
+- [x] T009 Refactor `handler/UpdateDispatcher.java`: extract `routeCallback(Update)` and `routeMessage(Update)` private methods; implement full routing logic per plan (10-step `routeMessage` including `resetIfStale` call, `/cancel` detection at step 3, `isPersistentMenuButton` check at step 4, state-driven routing at steps 5–7, button routing at step 8, command switch at step 9); implement `routeCallback` with `startsWith`-based dispatch for all 9 prefixes + `NO_OP` silent answer; add `isPersistentMenuButton(String)` helper
 
 **Checkpoint**: State machine, DB schema, and dispatcher routing are in place. User story phases can now begin.
 

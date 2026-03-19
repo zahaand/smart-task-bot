@@ -7,5 +7,6 @@
     <include file="db/changelog/001-create-users-table.xml"/>
     <include file="db/changelog/002-create-tasks-table.xml"/>
     <include file="db/changelog/003-create-tasks-indexes.xml"/>
+    <include file="db/changelog/004-create-user-states-table.xml"/>
 
 </databaseChangeLog>

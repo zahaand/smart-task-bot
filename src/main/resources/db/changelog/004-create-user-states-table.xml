@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                       https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="004-create-user-states-table" author="a.zakharenkov">
+        <createTable tableName="user_states">
+            <column name="telegram_user_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"
+                             foreignKeyName="fk_user_states_users"
+                             references="users(telegram_user_id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="state" type="VARCHAR(50)" defaultValue="IDLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="context" type="TEXT"/>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="user_states"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

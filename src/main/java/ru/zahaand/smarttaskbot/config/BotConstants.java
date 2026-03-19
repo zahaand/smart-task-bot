@@ -10,7 +10,33 @@ import java.util.Set;
  */
 public final class BotConstants {
 
-    public static final String TZ_CALLBACK_PREFIX = "tz:";
+    // ── Callback prefixes ────────────────────────────────────────────────────
+
+    /**
+     * Timezone selection (legacy — used by TimezoneCallbackHandler).
+     */
+    public static final String CB_TZ = "tz:";
+
+    /**
+     * @deprecated Use {@link #CB_TZ}. Kept for backward-compat with existing code.
+     */
+    public static final String TZ_CALLBACK_PREFIX = CB_TZ;
+
+    public static final String CB_TASK_REMIND = "TASK_REMIND:";
+    public static final String CB_TASK_DONE = "TASK_DONE:";
+    public static final String CB_TASK_DELETE = "TASK_DELETE:";
+    public static final String CB_CAL_DATE = "CAL_DATE:";
+    public static final String CB_CAL_NAV = "CAL_NAV:";
+    public static final String CB_CONFIRM_DELETE = "CONFIRM_DELETE:";
+    public static final String CB_CONFIRM_CANCEL = "CONFIRM_CANCEL";
+    public static final String CB_TASKS_TAB = "TASKS_TAB:";
+    public static final String CB_NO_OP = "NO_OP";
+
+    // ── Persistent menu button labels ────────────────────────────────────────
+
+    public static final String BTN_NEW_TASK = "📝 Новая задача";
+    public static final String BTN_MY_TASKS = "📋 Мои задачи";
+    public static final String BTN_REMINDER = "⏰ Напоминание";
 
     /**
      * Predefined timezone options displayed as inline keyboard rows (FR-018).

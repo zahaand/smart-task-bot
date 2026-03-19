@@ -3,9 +3,14 @@ package ru.zahaand.smarttaskbot.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.zahaand.smarttaskbot.config.BotConstants;
@@ -54,6 +59,71 @@ public class NotificationService {
     public void sendReminder(Task task) {
         Long chatId = task.getUser().getTelegramUserId();
         sendMessage(chatId, "⏰ Reminder: " + task.getText());
+    }
+
+    /**
+     * Answers a callback query to clear the Telegram loading spinner.
+     * Every callback handler MUST call this per the callback-data-contract.
+     */
+    public void answerCallbackQuery(String callbackQueryId) {
+        AnswerCallbackQuery answer = new AnswerCallbackQuery();
+        answer.setCallbackQueryId(callbackQueryId);
+
+        try {
+            sender.execute(answer);
+        } catch (TelegramApiException e) {
+            log.warn("Failed to answer callbackQueryId={}: {}", callbackQueryId, e.getMessage());
+        }
+    }
+
+    /**
+     * Sends a message and attaches the persistent 3-button reply keyboard.
+     * The keyboard stays visible across messages until explicitly removed.
+     */
+    public void sendPersistentMenu(Long chatId, String text) {
+        SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(buildPersistentMenuKeyboard());
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send persistent menu to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Attempts to edit an existing message in-place.
+     * Falls back to sending a new message if the Telegram edit API rejects the request
+     * (e.g. message is older than 48 hours).
+     */
+    public void safeEdit(EditMessageText editRequest, SendMessage fallback) {
+        try {
+            sender.execute(editRequest);
+        } catch (TelegramApiException e) {
+            log.warn("EditMessageText failed (chatId={}, messageId={}), falling back to sendMessage: {}",
+                    editRequest.getChatId(), editRequest.getMessageId(), e.getMessage());
+
+            try {
+                sender.execute(fallback);
+            } catch (TelegramApiException fallbackEx) {
+                log.error("Fallback sendMessage also failed for chatId={}: {}",
+                        fallback.getChatId(), fallbackEx.getMessage(), fallbackEx);
+            }
+        }
+    }
+
+    private ReplyKeyboardMarkup buildPersistentMenuKeyboard() {
+        KeyboardRow row = new KeyboardRow();
+        row.add(new KeyboardButton(BotConstants.BTN_NEW_TASK));
+        row.add(new KeyboardButton(BotConstants.BTN_MY_TASKS));
+        row.add(new KeyboardButton(BotConstants.BTN_REMINDER));
+
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        markup.setKeyboard(List.of(row));
+        markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
+
+        return markup;
     }
 
     private InlineKeyboardMarkup buildTimezoneKeyboard() {
