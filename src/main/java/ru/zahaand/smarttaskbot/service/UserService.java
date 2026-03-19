@@ -1,6 +1,7 @@
 package ru.zahaand.smarttaskbot.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.repository.UserRepository;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
  * Handles user persistence, registration status checks, and
  * retrieval of user-specific settings like timezones.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -34,6 +36,7 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+        log.info("User registered: userId={}", telegramUserId);
     }
 
     public boolean isRegistered(Long telegramUserId) {
@@ -43,6 +46,9 @@ public class UserService {
     public String getTimezone(Long telegramUserId) {
         return userRepository.findById(telegramUserId)
                 .map(User::getTimezone)
-                .orElseThrow(() -> new IllegalStateException("User not found: " + telegramUserId));
+                .orElseThrow(() -> {
+                    log.error("Timezone lookup failed — user not found: userId={}", telegramUserId);
+                    return new IllegalStateException("User not found: " + telegramUserId);
+                });
     }
 }

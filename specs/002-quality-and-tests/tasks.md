@@ -123,7 +123,7 @@ on unhandled exceptions. Confirm startup log has zero WARN/ERROR entries.
 
 ### Implementation for Block 2
 
-- [ ] T008 [P] [US2] Add `@Slf4j` and centralized try-catch to
+- [X] T008 [P] [US2] Add `@Slf4j` and centralized try-catch to
   `src/main/java/ru/zahaand/smarttaskbot/handler/SmartTaskBot.java`:
   add `@Slf4j` class annotation; wrap `dispatcher.dispatch(update)` in try-catch;
   in the catch block: `log.error("Unhandled exception processing update: {}", e.getMessage(), e)`;
@@ -136,12 +136,12 @@ on unhandled exceptions. Confirm startup log has zero WARN/ERROR entries.
   `org.telegram.telegrambots.meta.api.methods.send.SendMessage`,
   `org.telegram.telegrambots.meta.exceptions.TelegramApiException`
 
-- [ ] T009 [US2] Add `@Slf4j` to
+- [X] T009 [US2] Add `@Slf4j` to
   `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java`
   (run after T005 and T007 — same file):
   add `@Slf4j` class annotation; add `import lombok.extern.slf4j.Slf4j`
 
-- [ ] T010 [P] [US2] Add logging to `createTask()` in
+- [X] T010 [P] [US2] Add logging to `createTask()` in
   `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java`
   (run after T009; parallel with T011):
   before blank-text throw: `log.warn("Blank task text from userId={}", telegramUserId)`;
@@ -152,7 +152,7 @@ on unhandled exceptions. Confirm startup log has zero WARN/ERROR entries.
   after `taskRepository.save()`: `log.info("Task created: id={}, userId={}",
   saved.getId(), telegramUserId)`
 
-- [ ] T011 [P] [US2] Add logging to `setReminder()` and `completeTask()` in
+- [X] T011 [P] [US2] Add logging to `setReminder()` and `completeTask()` in
   `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java`
   (run after T009; parallel with T010):
   in `setReminder()` — before task-not-found throw:
@@ -164,11 +164,11 @@ on unhandled exceptions. Confirm startup log has zero WARN/ERROR entries.
   `log.error("Task #{} not found for userId={}", taskId, telegramUserId)`;
   after save: `log.info("Task completed: id={}, userId={}", saved.getId(), telegramUserId)`
 
-- [ ] T012 [P] [US2] Add `@Slf4j` to
+- [X] T012 [P] [US2] Add `@Slf4j` to
   `src/main/java/ru/zahaand/smarttaskbot/service/UserService.java`:
   add `@Slf4j` class annotation; add `import lombok.extern.slf4j.Slf4j`
 
-- [ ] T013 [US2] Add logging to `register()` and `getTimezone()` in
+- [X] T013 [US2] Add logging to `register()` and `getTimezone()` in
   `src/main/java/ru/zahaand/smarttaskbot/service/UserService.java`
   (run after T012):
   in `register()` — after `userRepository.save(user)`:
