@@ -234,7 +234,7 @@ DoneCommandHandlerTest"` passes in an environment with no database or network ac
 
 ### Tests for Block 4
 
-- [ ] T015 [P] [US3] Create
+- [X] T015 [P] [US3] Create
   `src/test/java/ru/zahaand/smarttaskbot/service/TaskServiceTest.java`
   (run after T005, T007, T009–T011):
   Mocks: `TaskRepository`, `UserRepository`, `UserService`.
@@ -261,7 +261,7 @@ DoneCommandHandlerTest"` passes in an environment with no database or network ac
   }
   ```
 
-- [ ] T016 [P] [US3] Create
+- [X] T016 [P] [US3] Create
   `src/test/java/ru/zahaand/smarttaskbot/service/UserServiceTest.java`
   (run after T012–T013):
   Mocks: `UserRepository`.
@@ -280,7 +280,7 @@ DoneCommandHandlerTest"` passes in an environment with no database or network ac
   }
   ```
 
-- [ ] T017 [P] [US3] Create
+- [X] T017 [P] [US3] Create
   `src/test/java/ru/zahaand/smarttaskbot/service/ReminderServiceTest.java`
   (no source dep — `ReminderService` is unchanged in this branch):
   Mocks: `TaskRepository`, `NotificationService`.
@@ -311,7 +311,7 @@ DoneCommandHandlerTest"` passes in an environment with no database or network ac
   }
   ```
 
-- [ ] T018 [P] [US3] Create
+- [X] T018 [P] [US3] Create
   `src/test/java/ru/zahaand/smarttaskbot/handler/command/NewTaskCommandHandlerTest.java`
   (run after T002):
   Mocks: `TaskService`, `NotificationService`.
@@ -328,7 +328,7 @@ DoneCommandHandlerTest"` passes in an environment with no database or network ac
   }
   ```
 
-- [ ] T019 [P] [US3] Create
+- [X] T019 [P] [US3] Create
   `src/test/java/ru/zahaand/smarttaskbot/handler/command/RemindCommandHandlerTest.java`
   (run after T003):
   Mocks: `TaskService`, `NotificationService`, `UserService`.
@@ -345,7 +345,7 @@ DoneCommandHandlerTest"` passes in an environment with no database or network ac
   }
   ```
 
-- [ ] T020 [P] [US3] Create
+- [X] T020 [P] [US3] Create
   `src/test/java/ru/zahaand/smarttaskbot/handler/command/DoneCommandHandlerTest.java`
   (run after T004):
   Mocks: `TaskService`, `NotificationService`.
