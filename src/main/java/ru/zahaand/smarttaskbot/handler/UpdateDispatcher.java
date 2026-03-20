@@ -5,10 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.handler.callback.TaskActionCallbackHandler;
+import ru.zahaand.smarttaskbot.handler.callback.TaskListTabCallbackHandler;
 import ru.zahaand.smarttaskbot.handler.callback.TimezoneCallbackHandler;
 import ru.zahaand.smarttaskbot.handler.command.*;
 import ru.zahaand.smarttaskbot.handler.text.NewTaskButtonHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskCreationTextHandler;
+import ru.zahaand.smarttaskbot.handler.text.TaskListButtonHandler;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
@@ -40,10 +43,13 @@ public class UpdateDispatcher {
 
     // Callback handlers
     private final TimezoneCallbackHandler timezoneCallbackHandler;
+    private final TaskActionCallbackHandler taskActionCallbackHandler;
+    private final TaskListTabCallbackHandler taskListTabCallbackHandler;
 
     // Text/button handlers
     private final NewTaskButtonHandler newTaskButtonHandler;
     private final TaskCreationTextHandler taskCreationTextHandler;
+    private final TaskListButtonHandler taskListButtonHandler;
 
     // Command handlers
     private final StartCommandHandler startCommandHandler;
@@ -88,17 +94,16 @@ public class UpdateDispatcher {
             return;
         }
 
-        // TASK_* prefixes — routed to TaskActionCallbackHandler (wired in later phases)
         if (data.startsWith(BotConstants.CB_TASK_REMIND)
                 || data.startsWith(BotConstants.CB_TASK_DONE)
                 || data.startsWith(BotConstants.CB_TASK_DELETE)) {
-            log.warn("TaskActionCallbackHandler not yet wired — callback ignored: {}", data);
-            notificationService.answerCallbackQuery(callbackQueryId);
+            taskActionCallbackHandler.handle(update);
             return;
         }
 
         if (data.startsWith(BotConstants.CB_CAL_DATE)
                 || data.startsWith(BotConstants.CB_CAL_NAV)) {
+            // CalendarCallbackHandler wired in Phase 5
             log.warn("CalendarCallbackHandler not yet wired — callback ignored: {}", data);
             notificationService.answerCallbackQuery(callbackQueryId);
             return;
@@ -106,14 +111,14 @@ public class UpdateDispatcher {
 
         if (data.startsWith(BotConstants.CB_CONFIRM_DELETE)
                 || data.equals(BotConstants.CB_CONFIRM_CANCEL)) {
+            // DeleteConfirmCallbackHandler wired in Phase 6
             log.warn("DeleteConfirmCallbackHandler not yet wired — callback ignored: {}", data);
             notificationService.answerCallbackQuery(callbackQueryId);
             return;
         }
 
         if (data.startsWith(BotConstants.CB_TASKS_TAB)) {
-            log.warn("TaskListTabCallbackHandler not yet wired — callback ignored: {}", data);
-            notificationService.answerCallbackQuery(callbackQueryId);
+            taskListTabCallbackHandler.handle(update);
             return;
         }
 
@@ -204,10 +209,12 @@ public class UpdateDispatcher {
             return;
         }
 
-        // TaskListButtonHandler wired in Phase 4
-        log.debug("Persistent menu button pressed: '{}' — handler not yet wired", text);
-        Long chatId = update.getMessage().getChatId();
-        notificationService.sendMessage(chatId, "This feature is coming soon!");
+        if (BotConstants.BTN_MY_TASKS.equals(text) || BotConstants.BTN_REMINDER.equals(text)) {
+            taskListButtonHandler.handle(update);
+            return;
+        }
+
+        log.warn("Unhandled persistent menu button: '{}'", text);
     }
 
     boolean isPersistentMenuButton(String text) {

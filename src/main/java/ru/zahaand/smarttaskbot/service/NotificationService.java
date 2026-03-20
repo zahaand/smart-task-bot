@@ -14,7 +14,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.Task;
+import ru.zahaand.smarttaskbot.model.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +30,14 @@ import java.util.List;
 @Service
 public class NotificationService {
 
-    private final AbsSender sender;
+    private static final int MAX_TASK_LIST_SIZE = 20;
 
-    public NotificationService(@Lazy AbsSender sender) {
+    private final AbsSender sender;
+    private final TaskListKeyboardBuilder taskListKeyboardBuilder;
+
+    public NotificationService(@Lazy AbsSender sender, TaskListKeyboardBuilder taskListKeyboardBuilder) {
         this.sender = sender;
+        this.taskListKeyboardBuilder = taskListKeyboardBuilder;
     }
 
     public void sendMessage(Long chatId, String text) {
@@ -92,6 +98,50 @@ public class NotificationService {
     }
 
     /**
+     * Sends a new task-list message with inline action buttons and a tab row.
+     * Truncates to {@link #MAX_TASK_LIST_SIZE} tasks and appends a note when the list overflows.
+     */
+    public void sendTaskList(Long chatId, List<TaskDto> tasks, TaskStatus tab) {
+        final boolean truncated = tasks.size() > MAX_TASK_LIST_SIZE;
+        final List<TaskDto> visible = truncated ? tasks.subList(0, MAX_TASK_LIST_SIZE) : tasks;
+
+        final String text = buildTaskListText(visible, tab, truncated);
+        final InlineKeyboardMarkup keyboard = taskListKeyboardBuilder.buildKeyboard(visible, tab);
+
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(keyboard);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send task list to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Edits an existing task-list message in-place.
+     * Falls back to a new message via {@link #safeEdit} if the Telegram edit API rejects the request.
+     */
+    public void editTaskList(Long chatId, Integer messageId, List<TaskDto> tasks, TaskStatus tab) {
+        final boolean truncated = tasks.size() > MAX_TASK_LIST_SIZE;
+        final List<TaskDto> visible = truncated ? tasks.subList(0, MAX_TASK_LIST_SIZE) : tasks;
+
+        final String text = buildTaskListText(visible, tab, truncated);
+        final InlineKeyboardMarkup keyboard = taskListKeyboardBuilder.buildKeyboard(visible, tab);
+
+        final EditMessageText edit = new EditMessageText();
+        edit.setChatId(chatId.toString());
+        edit.setMessageId(messageId);
+        edit.setText(text);
+        edit.setReplyMarkup(keyboard);
+
+        final SendMessage fallback = new SendMessage(chatId.toString(), text);
+        fallback.setReplyMarkup(keyboard);
+
+        safeEdit(edit, fallback);
+    }
+
+    /**
      * Attempts to edit an existing message in-place.
      * Falls back to sending a new message if the Telegram edit API rejects the request
      * (e.g. message is older than 48 hours).
@@ -110,6 +160,32 @@ public class NotificationService {
                         fallback.getChatId(), fallbackEx.getMessage(), fallbackEx);
             }
         }
+    }
+
+    private String buildTaskListText(List<TaskDto> tasks, TaskStatus tab, boolean truncated) {
+        if (tasks.isEmpty()) {
+            return tab == TaskStatus.ACTIVE
+                    ? "📋 No active tasks yet. Tap \"📝 New Task\" to create one."
+                    : "✅ No completed tasks yet.";
+        }
+
+        final String header = tab == TaskStatus.ACTIVE ? "📋 Active tasks" : "✅ Completed tasks";
+        final StringBuilder sb = new StringBuilder(header)
+                .append(" (").append(tasks.size()).append("):\n\n");
+
+        for (TaskDto task : tasks) {
+            sb.append("#").append(task.getId()).append(": ").append(task.getText());
+            if (task.getReminderTime() != null) {
+                sb.append(" [⏰ ").append(task.getReminderTime()).append("]");
+            }
+            sb.append("\n");
+        }
+
+        if (truncated) {
+            sb.append("\nShowing first ").append(MAX_TASK_LIST_SIZE).append(" tasks…");
+        }
+
+        return sb.toString().trim();
     }
 
     private ReplyKeyboardMarkup buildPersistentMenuKeyboard() {

@@ -75,6 +75,21 @@ public class TaskService {
     }
 
     /**
+     * Returns all COMPLETED tasks for the given user as DTOs.
+     *
+     * @param telegramUserId owner of the tasks
+     * @return list of {@link TaskDto}, empty if no completed tasks
+     */
+    public List<TaskDto> getCompletedTasks(Long telegramUserId) {
+        ZoneId userZone = ZoneId.of(userService.getTimezone(telegramUserId));
+
+        return taskRepository.findByUserTelegramUserIdAndStatus(telegramUserId, TaskStatus.COMPLETED)
+                .stream()
+                .map(task -> getTaskDto(task, userZone))
+                .toList();
+    }
+
+    /**
      * Returns all ACTIVE tasks for the given user as DTOs with reminder times
      * pre-formatted in the user's local timezone.
      *

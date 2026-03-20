@@ -74,19 +74,19 @@ All state-driven routing, the `UserState` persistence layer, and `UpdateDispatch
 **Goal**: "📋 Мои задачи" shows active tasks with 3 inline buttons each; tab toggle switches between active/completed in-place.
 **Independent Test**: Tap "📋 Мои задачи" → see active tasks with `[⏰ Напомнить][✅ Выполнить][🗑 Удалить]`; tap "Выполненные" → list edits in-place to show completed tasks with `[🗑 Удалить]`; tap "✅ Выполнить" on a task → task marked done, list refreshes.
 
-- [ ] T015 [US3] Add `getCompletedTasks(Long telegramUserId)` method to `service/TaskService.java` using existing `findByUserTelegramUserIdAndStatus` query with `TaskStatus.COMPLETED`
+- [x] T015 [US3] Add `getCompletedTasks(Long telegramUserId)` method to `service/TaskService.java` using existing `findByUserTelegramUserIdAndStatus` query with `TaskStatus.COMPLETED`
 
-- [ ] T016 [P] [US3] Add `findByUserTelegramUserIdAndStatus(Long telegramUserId, TaskStatus status)` query method to `repository/TaskRepository.java` (Spring Data naming — may already exist; confirm and add if missing)
+- [x] T016 [P] [US3] Add `findByUserTelegramUserIdAndStatus(Long telegramUserId, TaskStatus status)` query method to `repository/TaskRepository.java` (Spring Data naming — may already exist; confirm and add if missing)
 
-- [ ] T017 [US3] Create `service/TaskListKeyboardBuilder.java`: method `buildKeyboard(List<TaskDto> tasks, TaskStatus activeTab)` → `InlineKeyboardMarkup`; active tasks get 3-button row `[TASK_REMIND:<id>][TASK_DONE:<id>][TASK_DELETE:<id>]`; completed tasks get 1-button row `[TASK_DELETE:<id>]`; append tab row `[Активные ✓][Выполненные]` or `[Активные][Выполненные ✓]` using `BotConstants.CB_TASKS_TAB` prefixes; truncate at 20 tasks with note "Показаны первые 20 задач…"
+- [x] T017 [US3] Create `service/TaskListKeyboardBuilder.java`: method `buildKeyboard(List<TaskDto> tasks, TaskStatus activeTab)` → `InlineKeyboardMarkup`; active tasks get 3-button row `[TASK_REMIND:<id>][TASK_DONE:<id>][TASK_DELETE:<id>]`; completed tasks get 1-button row `[TASK_DELETE:<id>]`; append tab row `[Активные ✓][Выполненные]` or `[Активные][Выполненные ✓]` using `BotConstants.CB_TASKS_TAB` prefixes; truncate at 20 tasks with note "Показаны первые 20 задач…"
 
-- [ ] T018 [US3] Add to `service/NotificationService.java`: `sendTaskList(Long chatId, List<TaskDto> tasks, TaskStatus tab)` → sends text + keyboard built by `TaskListKeyboardBuilder`; `editTaskList(Long chatId, Integer messageId, List<TaskDto> tasks, TaskStatus tab)` → builds `EditMessageText` + calls `safeEdit(...)`
+- [x] T018 [US3] Add to `service/NotificationService.java`: `sendTaskList(Long chatId, List<TaskDto> tasks, TaskStatus tab)` → sends text + keyboard built by `TaskListKeyboardBuilder`; `editTaskList(Long chatId, Integer messageId, List<TaskDto> tasks, TaskStatus tab)` → builds `EditMessageText` + calls `safeEdit(...)`
 
-- [ ] T019 [US3] Create `handler/text/TaskListButtonHandler.java`: called for `BTN_MY_TASKS` and `BTN_REMINDER` taps; loads active tasks via `taskService.getActiveTasks(userId)` → calls `notificationService.sendTaskList(chatId, tasks, ACTIVE)`
+- [x] T019 [US3] Create `handler/text/TaskListButtonHandler.java`: called for `BTN_MY_TASKS` and `BTN_REMINDER` taps; loads active tasks via `taskService.getActiveTasks(userId)` → calls `notificationService.sendTaskList(chatId, tasks, ACTIVE)`
 
-- [ ] T020 [US3] Create `handler/callback/TaskListTabCallbackHandler.java`: handles `TASKS_TAB:ACTIVE` and `TASKS_TAB:COMPLETED`; calls `answerCallbackQuery`; loads appropriate task list; calls `notificationService.editTaskList(chatId, messageId, tasks, tab)`
+- [x] T020 [US3] Create `handler/callback/TaskListTabCallbackHandler.java`: handles `TASKS_TAB:ACTIVE` and `TASKS_TAB:COMPLETED`; calls `answerCallbackQuery`; loads appropriate task list; calls `notificationService.editTaskList(chatId, messageId, tasks, tab)`
 
-- [ ] T021 [US3] Create `handler/callback/TaskActionCallbackHandler.java` (partial — TASK_DONE only): handles `TASK_DONE:<taskId>`; calls `taskService.completeTask(userId, taskId)`; calls `answerCallbackQuery`; refreshes task list in-place via `notificationService.editTaskList(..., ACTIVE)` — TASK_DELETE and TASK_REMIND will be added in later phases
+- [x] T021 [US3] Create `handler/callback/TaskActionCallbackHandler.java` (partial — TASK_DONE only): handles `TASK_DONE:<taskId>`; calls `taskService.completeTask(userId, taskId)`; calls `answerCallbackQuery`; refreshes task list in-place via `notificationService.editTaskList(..., ACTIVE)` — TASK_DELETE and TASK_REMIND will be added in later phases
 
 **Checkpoint**: US3 complete — task list with tab toggle and "Done" action work independently. "Delete" and "Remind" buttons are visible but not yet wired (handled in Phase 5–6).
 
