@@ -1,19 +1,25 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.0 → 1.1.1
-Modified principles:
-  - VIII. Code Style — null-return prohibition clarified: PROHIBITED only for public
-    methods; private methods MAY return null as internal control flow signals within
-    a single class, provided usage is limited to a single call site and intent is obvious.
-Added sections: None
+Version change: 1.1.1 → 1.2.0
+Modified principles: None
+Added sections:
+  - X. Application Language (NON-NEGOTIABLE) — all user-facing bot text MUST be in English;
+    Russian or any other language in Telegram API output is PROHIBITED.
 Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md ✅ (no structural changes needed)
+  - .specify/templates/plan-template.md ✅ (Constitution Check section is dynamically derived; no edit needed)
   - .specify/templates/spec-template.md ✅ (no structural changes needed)
   - .specify/templates/tasks-template.md ✅ (no structural changes needed)
-  - .specify/templates/constitution-template.md ✅ (source template; no updates needed)
-Follow-up TODOs: None.
+  - .specify/templates/constitution-template.md ✅ (generic slot-based template; Principle X is
+    project-specific and does not warrant a new generic slot in the template)
+Follow-up TODOs:
+  - Code written before 2026-03-20 (Phase 2/3 of 003-button-driven-ux) contains Russian
+    user-facing strings. These MUST be translated to English before the branch is merged.
+    Affected files: TimezoneCallbackHandler, StartCommandHandler, NewTaskButtonHandler,
+    TaskCreationTextHandler, UnknownInputHandler, UserStateService (cancelMessage strings),
+    UpdateDispatcher (sendMessage "Пожалуйста, используй кнопки выше." and
+    "Эта функция скоро появится!"), BotConstants (BTN_* label values).
 -->
 
 # Smart Task Bot Constitution
@@ -158,6 +164,25 @@ signals discipline — a critical quality marker in portfolio code.
 Rationale: A test suite that follows these conventions is self-documenting, fast, and
 demonstrates mastery of unit-testing discipline — essential for a portfolio project.
 
+### X. Application Language (NON-NEGOTIABLE)
+
+All user-facing text sent via the Telegram API MUST be in English:
+
+- Bot messages and replies
+- Button labels and persistent menu items
+- Error messages and validation hints
+- Reminder notifications
+- Confirmation prompts
+
+PROHIBITED: Russian or any other language in bot responses, button labels,
+or any text delivered to the user through the Telegram API.
+
+This constraint applies to all new code. Existing Russian strings introduced before
+this amendment MUST be translated before the containing branch is merged to `main`.
+
+Rationale: The bot is a portfolio project demonstrated to international clients.
+An English-only interface signals professionalism and international readiness.
+
 ## Technology Stack
 
 The following stack is fixed for the lifetime of this project.
@@ -208,4 +233,4 @@ Tracking section of the relevant `plan.md` with explicit justification.
 
 **Runtime guidance**: See `.specify/memory/` for feature-specific specs, plans, and tasks.
 
-**Version**: 1.1.1 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-19
+**Version**: 1.2.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-20

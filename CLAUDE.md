@@ -31,7 +31,7 @@ src/main/java/ru/zahaand/smarttaskbot/
 src/main/resources/db/changelog/   # Liquibase migration files
 ```
 
-## Architecture Rules (from Constitution v1.0.0)
+## Architecture Rules (from Constitution v1.2.0)
 
 - **Handler layer**: receives Telegram updates, delegates immediately — ZERO business logic
 - **Service layer**: all validation, domain logic, timezone conversion — the ONLY place for logic
