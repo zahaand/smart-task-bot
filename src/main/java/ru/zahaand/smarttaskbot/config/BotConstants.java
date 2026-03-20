@@ -1,6 +1,7 @@
 package ru.zahaand.smarttaskbot.config;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -45,6 +46,18 @@ public final class BotConstants {
             List.of("Europe/Kaliningrad", "Europe/Moscow"),
             List.of("Asia/Yekaterinburg", "Asia/Novosibirsk"),
             List.of("Asia/Vladivostok")
+    );
+
+    /**
+     * Human-readable English display names for each IANA timezone in {@link #TIMEZONE_ROWS}.
+     * Used on registration keyboard buttons alongside live current time.
+     */
+    public static final Map<String, String> TIMEZONE_DISPLAY_NAMES = Map.of(
+            "Europe/Kaliningrad", "Kaliningrad",
+            "Europe/Moscow",      "Moscow, SPb",
+            "Asia/Yekaterinburg", "Yekaterinburg",
+            "Asia/Novosibirsk",   "Novosibirsk",
+            "Asia/Vladivostok",   "Vladivostok"
     );
 
     /**

@@ -18,6 +18,9 @@ import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.Task;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -257,6 +260,8 @@ public class NotificationService {
         return markup;
     }
 
+    private static final DateTimeFormatter TZ_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+
     private InlineKeyboardMarkup buildTimezoneKeyboard() {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
@@ -264,7 +269,10 @@ public class NotificationService {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
             for (String tz : rowTimezones) {
-                InlineKeyboardButton keyboardButton = new InlineKeyboardButton(tz);
+                final String displayName = BotConstants.TIMEZONE_DISPLAY_NAMES.getOrDefault(tz, tz);
+                final String currentTime = ZonedDateTime.now(ZoneId.of(tz)).format(TZ_TIME_FORMATTER);
+                final String label = displayName + " (now " + currentTime + ")";
+                final InlineKeyboardButton keyboardButton = new InlineKeyboardButton(label);
                 keyboardButton.setCallbackData(BotConstants.TZ_CALLBACK_PREFIX + tz);
                 row.add(keyboardButton);
             }

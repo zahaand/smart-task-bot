@@ -139,7 +139,7 @@ All state-driven routing, the `UserState` persistence layer, and `UpdateDispatch
 **Purpose**: Ensure all in-place message edits degrade gracefully when the Telegram edit API fails.
 This step validates that `safeEdit` (added in T008) is correctly wired in all callers.
 
-- [ ] T034 Verify `editTaskList` and `editCalendar` in `service/NotificationService.java` both route through `safeEdit(EditMessageText, SendMessage)` — the fallback `SendMessage` must carry the same text and keyboard; confirm WARN log is issued on fallback path; this is a code-review / hardening task, not new functionality
+- [x] T034 Verify `editTaskList` and `editCalendar` in `service/NotificationService.java` both route through `safeEdit(EditMessageText, SendMessage)` — the fallback `SendMessage` must carry the same text and keyboard; confirm WARN log is issued on fallback path; this is a code-review / hardening task, not new functionality
 
 ---
 
@@ -148,7 +148,7 @@ This step validates that `safeEdit` (added in T008) is correctly wired in all ca
 **Goal**: During registration each timezone button shows current local time: "🕐 Москва, СПб (сейчас 18:45)".
 **Independent Test**: Start fresh registration flow → each timezone button shows correct current HH:mm for that zone.
 
-- [ ] T035 [US6] Modify `service/NotificationService.java` method `sendTimezoneKeyboard(Long chatId, String text)` (or its keyboard builder): for each timezone in `BotConstants.TIMEZONE_ROWS`, compute `ZonedDateTime.now(ZoneId.of(tz)).format(DateTimeFormatter.ofPattern("HH:mm"))` and append to button label, e.g. `"Москва, СПб (сейчас " + time + ")"`
+- [x] T035 [US6] Modify `service/NotificationService.java` method `sendTimezoneKeyboard(Long chatId, String text)` (or its keyboard builder): for each timezone in `BotConstants.TIMEZONE_ROWS`, compute `ZonedDateTime.now(ZoneId.of(tz)).format(DateTimeFormatter.ofPattern("HH:mm"))` and append to button label, e.g. `"Москва, СПб (сейчас " + time + ")"`
 
 **Checkpoint**: US6 complete — timezone registration keyboard shows live local time.
 
