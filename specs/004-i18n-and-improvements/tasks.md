@@ -23,9 +23,9 @@ CASCADE) entirely.
 **US2 Independent Test**: Delete a user record directly in the database; verify all tasks and
 user_states rows for that user are gone with no application involvement.
 
-- [ ] T001 Create Migration 005 in `src/main/resources/db/changelog/005-add-language-to-users.xml`: dropNotNullConstraint on `users.timezone`; addColumn `language VARCHAR(2)` NULL; UPDATE backfill to `'EN'`; addNotNullConstraint on `language`; rollback block per data-model.md
-- [ ] T002 [P] Create Migration 006 in `src/main/resources/db/changelog/006-add-cascade-to-tasks.xml`: drop existing FK `fk_tasks_users`; re-add FK with `ON DELETE CASCADE`; rollback restores non-cascade FK
-- [ ] T003 Update `src/main/resources/db/changelog/db.changelog-master.xml`: include 005 and 006 in order after 004
+- [x] T001 Create Migration 005 in `src/main/resources/db/changelog/005-add-language-to-users.xml`: dropNotNullConstraint on `users.timezone`; addColumn `language VARCHAR(2)` NULL; UPDATE backfill to `'EN'`; addNotNullConstraint on `language`; rollback block per data-model.md
+- [x] T002 [P] Create Migration 006 in `src/main/resources/db/changelog/006-add-cascade-to-tasks.xml`: drop existing FK `fk_tasks_users`; re-add FK with `ON DELETE CASCADE`; rollback restores non-cascade FK
+- [x] T003 Update `src/main/resources/db/changelog/db.changelog-master.xml`: include 005 and 006 in order after 004
 
 **Checkpoint**: Schema ready — US2 acceptance criteria satisfied. All other phases can begin.
 
@@ -38,13 +38,13 @@ story handler work begins.
 
 **⚠️ CRITICAL**: No user story implementation can start until T004–T010 are done.
 
-- [ ] T004 Create `src/main/java/ru/zahaand/smarttaskbot/model/Language.java`: enum with values `EN` and `RU`
-- [ ] T005 [P] Add `AWAITING_LANGUAGE` and `AWAITING_TIMEZONE` as first two values in `src/main/java/ru/zahaand/smarttaskbot/model/ConversationState.java`
-- [ ] T006 Update `src/main/java/ru/zahaand/smarttaskbot/model/User.java`: add `@Column(name = "language") @Enumerated(EnumType.STRING) private Language language;`; remove `nullable = false` from `timezone` column annotation
-- [ ] T007 Update `src/main/java/ru/zahaand/smarttaskbot/config/BotConstants.java`: add `CB_LANG = "lang:"`, `CB_LANG_EN = "lang:EN"`, `CB_LANG_RU = "lang:RU"`, `CB_DELETE_ALL_REQUEST = "DELETE_ALL:request"`, `CB_DELETE_ALL_CONFIRM = "DELETE_ALL:confirm"`, `CB_DELETE_ALL_CANCEL = "DELETE_ALL:cancel"`, and `TIMEZONE_CITY_CODES` Map per plan Step 3.8
-- [ ] T008 Create `src/main/java/ru/zahaand/smarttaskbot/service/MessageKey.java`: enum with `(String en, String ru)` constructor and `get(Language)` method; include all 25 constants from data-model.md (WELCOME_BILINGUAL, SELECT_TIMEZONE, ALREADY_REGISTERED, TIMEZONE_CONFIRMED, ENTER_TASK_DESCRIPTION, CHOOSE_REMINDER_DATE, ENTER_REMINDER_TIME, TASK_CREATED, TASK_REMINDER_SET, DELETE_CONFIRM_SINGLE, DELETE_CONFIRM_ALL, TASK_DELETED, ALL_COMPLETED_DELETED, NO_COMPLETED_TASKS, SOMETHING_WENT_WRONG, INVALID_TIME_FORMAT, OPERATION_CANCELLED, USE_BUTTONS, COMING_SOON, BTN_NEW_TASK, BTN_MY_TASKS, BTN_YES_DELETE_ALL, BTN_CANCEL, REMINDER_NOTIFICATION); ENTER_REMINDER_TIME EN string must include "HH MM, or HH-MM"; REMINDER_NOTIFICATION: `EN="⏰ Reminder: %s"` / `RU="⏰ Напоминание: %s"`
-- [ ] T009 Create `src/main/java/ru/zahaand/smarttaskbot/service/MessageService.java`: `@Service` bean with `get(MessageKey, Language)` (null-language falls back to EN) and `get(MessageKey, User)` overload
-- [ ] T010 [P] Create `src/test/java/ru/zahaand/smarttaskbot/service/MessageServiceTest.java`: `@DisplayName` first on each method; `@Nested` per public method (`get(key, language)`, `get(key, user)`); verify EN/RU resolution and null-language EN fallback; cover WELCOME_BILINGUAL, SELECT_TIMEZONE, ALREADY_REGISTERED, and at least one format-string key
+- [x] T004 Create `src/main/java/ru/zahaand/smarttaskbot/model/Language.java`: enum with values `EN` and `RU`
+- [x] T005 [P] Add `AWAITING_LANGUAGE` and `AWAITING_TIMEZONE` as first two values in `src/main/java/ru/zahaand/smarttaskbot/model/ConversationState.java`
+- [x] T006 Update `src/main/java/ru/zahaand/smarttaskbot/model/User.java`: add `@Column(name = "language") @Enumerated(EnumType.STRING) private Language language;`; remove `nullable = false` from `timezone` column annotation
+- [x] T007 Update `src/main/java/ru/zahaand/smarttaskbot/config/BotConstants.java`: add `CB_LANG = "lang:"`, `CB_LANG_EN = "lang:EN"`, `CB_LANG_RU = "lang:RU"`, `CB_DELETE_ALL_REQUEST = "DELETE_ALL:request"`, `CB_DELETE_ALL_CONFIRM = "DELETE_ALL:confirm"`, `CB_DELETE_ALL_CANCEL = "DELETE_ALL:cancel"`, and `TIMEZONE_CITY_CODES` Map per plan Step 3.8
+- [x] T008 Create `src/main/java/ru/zahaand/smarttaskbot/model/MessageKey.java`: enum with `(String en, String ru)` constructor and `get(Language)` method; include all 25 constants from data-model.md (WELCOME_BILINGUAL, SELECT_TIMEZONE, ALREADY_REGISTERED, TIMEZONE_CONFIRMED, ENTER_TASK_DESCRIPTION, CHOOSE_REMINDER_DATE, ENTER_REMINDER_TIME, TASK_CREATED, TASK_REMINDER_SET, DELETE_CONFIRM_SINGLE, DELETE_CONFIRM_ALL, TASK_DELETED, ALL_COMPLETED_DELETED, NO_COMPLETED_TASKS, SOMETHING_WENT_WRONG, INVALID_TIME_FORMAT, OPERATION_CANCELLED, USE_BUTTONS, COMING_SOON, BTN_NEW_TASK, BTN_MY_TASKS, BTN_YES_DELETE_ALL, BTN_CANCEL, REMINDER_NOTIFICATION); ENTER_REMINDER_TIME EN string must include "HH MM, or HH-MM"; REMINDER_NOTIFICATION: `EN="⏰ Reminder: %s"` / `RU="⏰ Напоминание: %s"`; placed in **model** package (CHK013 — pure domain enum, no Spring deps)
+- [x] T009 Create `src/main/java/ru/zahaand/smarttaskbot/service/MessageService.java`: `@Service` bean with `get(MessageKey, Language)` (null-language falls back to EN) and `get(MessageKey, User)` overload
+- [x] T010 [P] Create `src/test/java/ru/zahaand/smarttaskbot/service/MessageServiceTest.java`: `@DisplayName` first on each method; `@Nested` per public method (`get(key, language)`, `get(key, user)`); verify EN/RU resolution and null-language EN fallback; cover WELCOME_BILINGUAL, SELECT_TIMEZONE, ALREADY_REGISTERED, and at least one format-string key
 
 **Checkpoint**: i18n layer ready — all subsequent phases can inject MessageService.
 

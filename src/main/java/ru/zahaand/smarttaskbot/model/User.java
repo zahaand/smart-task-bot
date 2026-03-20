@@ -21,7 +21,13 @@ public class User {
     @Column(name = "username", nullable = true)
     private String username;
 
-    @Column(name = "timezone", nullable = false, length = 50)
+    // nullable during two-step registration (set on language callback, before timezone)
+    @Column(name = "language", nullable = true, length = 2)
+    @Enumerated(EnumType.STRING)
+    private Language language;
+
+    // nullable during two-step registration (set on timezone callback)
+    @Column(name = "timezone", nullable = true, length = 50)
     private String timezone;
 
     @Column(name = "created_at", nullable = false)

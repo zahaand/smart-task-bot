@@ -49,20 +49,19 @@ quality/clarity gaps in the plan's written requirements.
   causing the constraint addition to fail or corrupt data. Is a data-cleanup step or
   precondition specified? [Ambiguity, Plan §Step 1.1]
 
-- [ ] CHK008 — Is the original FK constraint name on `tasks.telegram_user_id` captured
-  in migration 006 so the rollback can precisely restore it? The plan says "drop existing
-  FK… re-add without cascade" but does not record the original constraint name required
-  for an exact rollback. [Clarity, Plan §Step 1.2]
+- [x] CHK008 — FK constraint name `fk_tasks_users` sourced from migration 002
+  (`foreignKeyName="fk_tasks_users"`). Documented in data-model.md §Migration 006.
+  Migration 006 drops `fk_tasks_users`, re-adds as `fk_tasks_users_cascade`; rollback
+  restores `fk_tasks_users`. [Resolved 2026-03-21]
 
-- [ ] CHK009 — Does migration 005 specify the order of operations atomically? The plan
-  adds `language` as nullable, backfills, then adds `NOT NULL`. If the backfill step
-  fails mid-execution, is the changeSet transactional? Are Liquibase `runInTransaction`
-  semantics addressed? [Completeness, Plan §Step 1.1]
+- [x] CHK009 — Migration 005 changeSet will carry `runInTransaction="true"` to make
+  the nullable-add → backfill → NOT NULL sequence atomic. Documented in plan.md Step 1.1.
+  [Resolved 2026-03-21]
 
-- [ ] CHK010 — Is the migration 006 rollback defined with a concrete FK constraint name
-  and `references` clause, or is it left as prose ("restore non-cascade FK")? Rollback
-  blocks that are only described in natural language are not executable by Liquibase.
-  [Clarity, Spec §FR-013, Plan §Step 1.2]
+- [x] CHK010 — Migration 006 rollback uses executable Liquibase XML:
+  `<dropForeignKeyConstraint>` + `<addForeignKeyConstraint>` with explicit constraint
+  names and `references` clause. Prose description replaced in data-model.md §Migration 006.
+  [Resolved 2026-03-21]
 
 ---
 
@@ -81,11 +80,10 @@ quality/clarity gaps in the plan's written requirements.
   actual button callback that triggers the confirmation prompt. `CB_DELETE_ALL_REQUEST`
   is absent from the Step 3.7 routing table. [Conflict, Plan §Step 3.7, §Step 5.3]
 
-- [ ] CHK013 — Is the package placement of `MessageKey.java` in the `service` package
-  justified? `MessageKey` is a pure enum with no Spring dependencies — placing it in
-  `service` rather than `model` may conflict with Constitution Principle III (SRP) if
-  the service package is expected to contain only Spring beans. [Ambiguity, Plan §Step 2.1,
-  Constitution §III]
+- [x] CHK013 — `MessageKey.java` moved to `model` package
+  (`ru.zahaand.smarttaskbot.model.MessageKey`). Pure domain enum, no Spring deps.
+  Updated in: plan.md Step 2.1, data-model.md §MessageKey, tasks.md T008.
+  [Resolved 2026-03-21]
 
 - [ ] CHK014 — Is `userService.findById()` defined or confirmed to exist in the plan?
   Step 3.5 (`TimezoneCallbackHandler` update) and Step 5.4 both call `userService.findById(userId)`,

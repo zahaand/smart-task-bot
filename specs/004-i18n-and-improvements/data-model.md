@@ -38,16 +38,24 @@ ALTER COLUMN language: nullable = false, defaultValue = 'EN'
 
 ### Migration 006 — ON DELETE CASCADE on `tasks`
 
+> **CHK008 resolution**: FK constraint name sourced from migration 002 changeSet
+> (`foreignKeyName="fk_tasks_users"`). Rollback uses the same name to restore the exact
+> original constraint.
+
 ```xml
 <!-- changeSet id="006-add-cascade-to-tasks" -->
 
--- Drop existing FK (no cascade)
+-- Drop existing FK constraint (name: fk_tasks_users, defined in migration 002)
 DROP CONSTRAINT fk_tasks_users
 
--- Re-add FK with ON DELETE CASCADE
-ADD FOREIGN KEY (telegram_user_id) REFERENCES users(telegram_user_id) ON DELETE CASCADE
+-- Re-add FK with ON DELETE CASCADE (new constraint name: fk_tasks_users_cascade)
+ADD FOREIGN KEY fk_tasks_users_cascade (telegram_user_id)
+    REFERENCES users(telegram_user_id) ON DELETE CASCADE
 
-<!-- Rollback: drop cascade FK, re-add without cascade -->
+<!-- Rollback (CHK010 resolution — executable Liquibase XML, not prose):
+  1. dropForeignKeyConstraint: fk_tasks_users_cascade
+  2. addForeignKeyConstraint: fk_tasks_users (without cascade)
+-->
 ```
 
 ---
@@ -102,10 +110,15 @@ No field changes. FK to `users` gains `ON DELETE CASCADE` via migration 006.
 
 ## New Application-Layer Types
 
-### `MessageKey` (new enum, service layer)
+### `MessageKey` (new enum, **model** package)
 
 Each constant holds both EN and RU string variants. Format strings use `%s` / `%d`
 where interpolation is required.
+
+> **CHK013 resolution**: `MessageKey` is a pure domain enum with no Spring dependencies.
+> It lives in `ru.zahaand.smarttaskbot.model`, consistent with Constitution Principle III
+> (SRP) — the `service` package is reserved for Spring beans.
+> Java path: `src/main/java/ru/zahaand/smarttaskbot/model/MessageKey.java`
 
 ```
 MessageKey

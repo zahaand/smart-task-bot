@@ -206,7 +206,11 @@ Keep `timezone` but remove `nullable = false` from `@Column`.
 
 **Step 2.1 — `MessageKey` enum**
 
-`src/main/java/ru/zahaand/smarttaskbot/service/MessageKey.java`
+`src/main/java/ru/zahaand/smarttaskbot/model/MessageKey.java`
+
+> **CHK013 resolution**: `MessageKey` is a pure domain enum (no Spring dependencies).
+> It belongs in the `model` package alongside `Language`, `ConversationState`, and other
+> domain types — not in `service`, which is reserved for Spring beans per Constitution §III.
 
 Enum constants (see data-model.md for full list). Each constant takes `(String en, String ru)`
 constructor arguments and exposes:

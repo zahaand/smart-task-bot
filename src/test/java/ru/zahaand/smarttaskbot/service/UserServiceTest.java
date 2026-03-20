@@ -8,8 +8,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.model.UserState;
 import ru.zahaand.smarttaskbot.repository.UserRepository;
+import ru.zahaand.smarttaskbot.repository.UserStateRepository;
 
 import java.util.Optional;
 
@@ -24,6 +27,9 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private UserStateRepository userStateRepository;
+
     @InjectMocks
     private UserService userService;
 
@@ -33,8 +39,16 @@ class UserServiceTest {
         return User.builder()
                 .telegramUserId(USER_ID)
                 .username("alice")
+                .language(Language.EN)
                 .timezone("Europe/Moscow")
                 .build();
+    }
+
+    private User buildPartialUser() {
+        return User.builder()
+                .telegramUserId(USER_ID)
+                .username("alice")
+                .build(); // language and timezone null
     }
 
     @Nested
@@ -68,19 +82,55 @@ class UserServiceTest {
     class IsRegistered {
 
         @Test
-        @DisplayName("returns true for a registered user")
-        void returnsTrueForRegisteredUser() {
-            when(userRepository.existsById(USER_ID)).thenReturn(true);
+        @DisplayName("returns true when user has both language and timezone set")
+        void returnsTrueWhenFullyRegistered() {
+            when(userRepository.findById(USER_ID))
+                    .thenReturn(Optional.of(buildUser()));
 
             assertThat(userService.isRegistered(USER_ID)).isTrue();
         }
 
         @Test
-        @DisplayName("returns false for an unknown user")
-        void returnsFalseForUnknownUser() {
-            when(userRepository.existsById(USER_ID)).thenReturn(false);
+        @DisplayName("returns false when user has no language (mid-registration)")
+        void returnsFalseWhenLanguageNull() {
+            when(userRepository.findById(USER_ID))
+                    .thenReturn(Optional.of(buildPartialUser()));
 
             assertThat(userService.isRegistered(USER_ID)).isFalse();
+        }
+
+        @Test
+        @DisplayName("returns false for an unknown user")
+        void returnsFalseWhenUserNotFound() {
+            when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+
+            assertThat(userService.isRegistered(USER_ID)).isFalse();
+        }
+    }
+
+    @Nested
+    class CreatePartialUser {
+
+        @Test
+        @DisplayName("saves User and UserState(AWAITING_LANGUAGE) for new user")
+        void savesUserAndUserState() {
+            when(userRepository.existsById(USER_ID)).thenReturn(false);
+
+            userService.createPartialUser(USER_ID, "alice");
+
+            verify(userRepository).save(any(User.class));
+            verify(userStateRepository).save(any(UserState.class));
+        }
+
+        @Test
+        @DisplayName("skips creation when user already exists")
+        void skipsWhenAlreadyExists() {
+            when(userRepository.existsById(USER_ID)).thenReturn(true);
+
+            userService.createPartialUser(USER_ID, "alice");
+
+            verify(userRepository, never()).save(any());
+            verify(userStateRepository, never()).save(any());
         }
     }
 
