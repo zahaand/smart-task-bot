@@ -10,10 +10,7 @@ import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.repository.TaskRepository;
 import ru.zahaand.smarttaskbot.repository.UserRepository;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -139,6 +136,44 @@ public class TaskService {
 
         taskRepository.save(task);
         log.info("Reminder set: taskId={}, userId={}", taskId, telegramUserId);
+
+        return getTaskDto(task, userZone);
+    }
+
+    /**
+     * Sets a reminder on an existing ACTIVE task using a date and time from the inline calendar flow.
+     * The date and time are in the user's local timezone and are converted to UTC before persistence.
+     *
+     * @param telegramUserId owner of the task
+     * @param taskId         ID of the task to remind
+     * @param date           date chosen from the inline calendar
+     * @param time           time entered as free text and parsed by {@link TimeParserService}
+     * @return {@link TaskDto} with the formatted reminder time for the confirmation reply
+     * @throws NoSuchElementException   if the task does not exist or belongs to another user
+     * @throws IllegalArgumentException if the task is already COMPLETED
+     */
+    public TaskDto setReminderFromCalendar(Long telegramUserId, Long taskId,
+                                           LocalDate date, LocalTime time) {
+        final Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
+                .orElseThrow(() -> {
+                    log.error("Task #{} not found for userId={}", taskId, telegramUserId);
+                    return new NoSuchElementException("Task #%d not found.".formatted(taskId));
+                });
+
+        if (task.getStatus() == TaskStatus.COMPLETED) {
+            log.warn("Reminder on completed task #{} by userId={}", taskId, telegramUserId);
+            throw new IllegalArgumentException("Cannot set a reminder on a completed task.");
+        }
+
+        final ZoneId userZone = ZoneId.of(userService.getTimezone(telegramUserId));
+        final Instant reminderInstant = LocalDateTime.of(date, time).atZone(userZone).toInstant();
+
+        task.setReminderTime(reminderInstant);
+        task.setReminderProcessed(false);
+        task.setReminderRetryAt(null);
+
+        taskRepository.save(task);
+        log.info("Reminder set via calendar: taskId={}, userId={}", taskId, telegramUserId);
 
         return getTaskDto(task, userZone);
     }

@@ -5,11 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.handler.callback.CalendarCallbackHandler;
 import ru.zahaand.smarttaskbot.handler.callback.TaskActionCallbackHandler;
 import ru.zahaand.smarttaskbot.handler.callback.TaskListTabCallbackHandler;
 import ru.zahaand.smarttaskbot.handler.callback.TimezoneCallbackHandler;
 import ru.zahaand.smarttaskbot.handler.command.*;
 import ru.zahaand.smarttaskbot.handler.text.NewTaskButtonHandler;
+import ru.zahaand.smarttaskbot.handler.text.ReminderTimeTextHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskCreationTextHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskListButtonHandler;
 import ru.zahaand.smarttaskbot.model.ConversationState;
@@ -45,11 +47,13 @@ public class UpdateDispatcher {
     private final TimezoneCallbackHandler timezoneCallbackHandler;
     private final TaskActionCallbackHandler taskActionCallbackHandler;
     private final TaskListTabCallbackHandler taskListTabCallbackHandler;
+    private final CalendarCallbackHandler calendarCallbackHandler;
 
     // Text/button handlers
     private final NewTaskButtonHandler newTaskButtonHandler;
     private final TaskCreationTextHandler taskCreationTextHandler;
     private final TaskListButtonHandler taskListButtonHandler;
+    private final ReminderTimeTextHandler reminderTimeTextHandler;
 
     // Command handlers
     private final StartCommandHandler startCommandHandler;
@@ -103,9 +107,7 @@ public class UpdateDispatcher {
 
         if (data.startsWith(BotConstants.CB_CAL_DATE)
                 || data.startsWith(BotConstants.CB_CAL_NAV)) {
-            // CalendarCallbackHandler wired in Phase 5
-            log.warn("CalendarCallbackHandler not yet wired — callback ignored: {}", data);
-            notificationService.answerCallbackQuery(callbackQueryId);
+            calendarCallbackHandler.handle(update);
             return;
         }
 
@@ -167,7 +169,10 @@ public class UpdateDispatcher {
         }
 
         // Step 6: ENTERING_REMINDER_TIME — free text is time input
-        // (ReminderTimeTextHandler wired in Phase 5)
+        if (state == ConversationState.ENTERING_REMINDER_TIME) {
+            reminderTimeTextHandler.handle(update);
+            return;
+        }
 
         // Step 7: button-only states — reject free text
         if (state == ConversationState.CONFIRMING_DELETE

@@ -34,10 +34,14 @@ public class NotificationService {
 
     private final AbsSender sender;
     private final TaskListKeyboardBuilder taskListKeyboardBuilder;
+    private final CalendarKeyboardBuilder calendarKeyboardBuilder;
 
-    public NotificationService(@Lazy AbsSender sender, TaskListKeyboardBuilder taskListKeyboardBuilder) {
+    public NotificationService(@Lazy AbsSender sender,
+                               TaskListKeyboardBuilder taskListKeyboardBuilder,
+                               CalendarKeyboardBuilder calendarKeyboardBuilder) {
         this.sender = sender;
         this.taskListKeyboardBuilder = taskListKeyboardBuilder;
+        this.calendarKeyboardBuilder = calendarKeyboardBuilder;
     }
 
     public void sendMessage(Long chatId, String text) {
@@ -136,6 +140,40 @@ public class NotificationService {
         edit.setReplyMarkup(keyboard);
 
         final SendMessage fallback = new SendMessage(chatId.toString(), text);
+        fallback.setReplyMarkup(keyboard);
+
+        safeEdit(edit, fallback);
+    }
+
+    /**
+     * Sends a new inline calendar message for the given month.
+     */
+    public void sendCalendar(Long chatId, int year, int month) {
+        final InlineKeyboardMarkup keyboard = calendarKeyboardBuilder.buildCalendar(year, month);
+        final SendMessage message = new SendMessage(chatId.toString(), "Select a date:");
+        message.setReplyMarkup(keyboard);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send calendar to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Edits an existing calendar message to display a different month.
+     * Falls back to sending a new message via {@link #safeEdit} if the edit fails.
+     */
+    public void editCalendar(Long chatId, Integer messageId, int year, int month) {
+        final InlineKeyboardMarkup keyboard = calendarKeyboardBuilder.buildCalendar(year, month);
+
+        final EditMessageText edit = new EditMessageText();
+        edit.setChatId(chatId.toString());
+        edit.setMessageId(messageId);
+        edit.setText("Select a date:");
+        edit.setReplyMarkup(keyboard);
+
+        final SendMessage fallback = new SendMessage(chatId.toString(), "Select a date:");
         fallback.setReplyMarkup(keyboard);
 
         safeEdit(edit, fallback);
