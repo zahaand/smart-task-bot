@@ -13,6 +13,6 @@ public class UnknownInputHandler {
 
     public void handle(Update update) {
         Long chatId = update.getMessage().getChatId();
-        notificationService.sendMessage(chatId, "I don't understand that command.\nUse /help to see available commands.");
+        notificationService.sendMessage(chatId, "Use the menu buttons below or /help to see available commands.");
     }
 }

@@ -18,8 +18,7 @@ public class StartCommandHandler {
         Long chatId = update.getMessage().getChatId();
 
         if (userService.isRegistered(telegramUserId)) {
-            notificationService.sendMessage(chatId,
-                    "Welcome back! You are already registered.\nUse /help to see available commands.");
+            notificationService.sendPersistentMenu(chatId, "Welcome back! Use the buttons below.");
         } else {
             notificationService.sendTimezoneKeyboard(chatId,
                     "Welcome to Smart Task Bot!\nPlease select your timezone:");

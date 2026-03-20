@@ -36,7 +36,7 @@ public class TimezoneCallbackHandler {
         }
 
         userService.register(telegramUserId, username, timezone);
-        notificationService.sendMessage(chatId,
-                "Timezone set: " + timezone + " ✓\nYou're all set! Use /help to see available commands.");
+        notificationService.sendPersistentMenu(chatId,
+                "Timezone set: " + timezone + " ✓\nYou're all set! Use the buttons below to get started.");
     }
 }

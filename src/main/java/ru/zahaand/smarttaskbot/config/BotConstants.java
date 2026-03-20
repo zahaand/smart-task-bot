@@ -34,9 +34,9 @@ public final class BotConstants {
 
     // ── Persistent menu button labels ────────────────────────────────────────
 
-    public static final String BTN_NEW_TASK = "📝 Новая задача";
-    public static final String BTN_MY_TASKS = "📋 Мои задачи";
-    public static final String BTN_REMINDER = "⏰ Напоминание";
+    public static final String BTN_NEW_TASK = "📝 New Task";
+    public static final String BTN_MY_TASKS = "📋 My Tasks";
+    public static final String BTN_REMINDER = "⏰ Reminders";
 
     /**
      * Predefined timezone options displayed as inline keyboard rows (FR-018).

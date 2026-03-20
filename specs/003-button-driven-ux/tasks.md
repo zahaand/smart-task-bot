@@ -46,9 +46,9 @@ All state-driven routing, the `UserState` persistence layer, and `UpdateDispatch
 **Goal**: Every registered user sees the persistent keyboard after registration and on `/start`.
 **Independent Test**: New user completes timezone selection → persistent keyboard appears. Existing user sends `/start` → keyboard re-appears. All 3 buttons respond meaningfully.
 
-- [ ] T010 [US1] Modify `handler/callback/TimezoneCallbackHandler.java`: after calling `userService.register(...)`, call `notificationService.sendPersistentMenu(chatId, "Timezone set: " + timezone + " ✓\nГотово! Нажми кнопку ниже, чтобы начать.")` instead of plain `sendMessage`
+- [x] T010 [US1] Modify `handler/callback/TimezoneCallbackHandler.java`: after calling `userService.register(...)`, call `notificationService.sendPersistentMenu(chatId, "Timezone set: " + timezone + " ✓\nГотово! Нажми кнопку ниже, чтобы начать.")` instead of plain `sendMessage`
 
-- [ ] T011 [US1] Modify `handler/command/StartCommandHandler.java`: for already-registered users, call `notificationService.sendPersistentMenu(chatId, "С возвращением! Нажми кнопку ниже.")` instead of plain `sendMessage`
+- [x] T011 [US1] Modify `handler/command/StartCommandHandler.java`: for already-registered users, call `notificationService.sendPersistentMenu(chatId, "С возвращением! Нажми кнопку ниже.")` instead of plain `sendMessage`
 
 **Checkpoint**: US1 complete — persistent keyboard visible after registration and on `/start`.
 
@@ -59,11 +59,11 @@ All state-driven routing, the `UserState` persistence layer, and `UpdateDispatch
 **Goal**: User taps "📝 Новая задача" → bot prompts for text → user types text → task created and confirmed.
 **Independent Test**: Tap button, type task text, confirm "✅ Задача #N создана:" appears. Try empty text — bot stays in CREATING_TASK. Try `/cancel` mid-flow — bot cancels with notification.
 
-- [ ] T012 [US2] Create `handler/text/NewTaskButtonHandler.java`: calls `userStateService.setState(userId, CREATING_TASK)`, then `notificationService.sendMessage(chatId, "Введи текст задачи:")`
+- [x] T012 [US2] Create `handler/text/NewTaskButtonHandler.java`: calls `userStateService.setState(userId, CREATING_TASK)`, then `notificationService.sendMessage(chatId, "Введи текст задачи:")`
 
-- [ ] T013 [US2] Create `handler/text/TaskCreationTextHandler.java`: called when state is CREATING_TASK and input is non-command, non-menu text; if blank → `sendMessage("Текст задачи не может быть пустым.")` + stay in state; else → `taskService.createTask(userId, text)` → `notificationService.sendMessage(chatId, "✅ Задача #" + id + " создана: " + text)` → `userStateService.setState(userId, IDLE)`
+- [x] T013 [US2] Create `handler/text/TaskCreationTextHandler.java`: called when state is CREATING_TASK and input is non-command, non-menu text; if blank → `sendMessage("Текст задачи не может быть пустым.")` + stay in state; else → `taskService.createTask(userId, text)` → `notificationService.sendMessage(chatId, "✅ Задача #" + id + " создана: " + text)` → `userStateService.setState(userId, IDLE)`
 
-- [ ] T014 [US2] Modify `handler/UnknownInputHandler.java`: update response text to hint at persistent menu buttons, e.g. `"Используй кнопки меню ниже или /help для списка команд."` (FR-019)
+- [x] T014 [US2] Modify `handler/UnknownInputHandler.java`: update response text to hint at persistent menu buttons, e.g. `"Используй кнопки меню ниже или /help для списка команд."` (FR-019)
 
 **Checkpoint**: US2 complete — full create-task-via-button flow works independently.
 

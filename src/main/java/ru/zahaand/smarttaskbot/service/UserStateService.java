@@ -129,11 +129,11 @@ public class UserStateService {
 
     private static String cancelMessage(ConversationState state) {
         return switch (state) {
-            case CREATING_TASK -> "Создание задачи отменено.";
-            case ENTERING_REMINDER_TIME -> "Установка напоминания отменена.";
-            case CONFIRMING_DELETE -> "Удаление отменено.";
-            case SELECTING_REMINDER_DATE -> "Выбор даты отменён.";
-            default -> "Действие отменено.";
+            case CREATING_TASK -> "Task creation cancelled.";
+            case ENTERING_REMINDER_TIME -> "Reminder setup cancelled.";
+            case CONFIRMING_DELETE -> "Deletion cancelled.";
+            case SELECTING_REMINDER_DATE -> "Date selection cancelled.";
+            default -> "Action cancelled.";
         };
     }
 }

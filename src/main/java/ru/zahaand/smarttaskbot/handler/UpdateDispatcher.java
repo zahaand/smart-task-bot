@@ -7,6 +7,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.handler.callback.TimezoneCallbackHandler;
 import ru.zahaand.smarttaskbot.handler.command.*;
+import ru.zahaand.smarttaskbot.handler.text.NewTaskButtonHandler;
+import ru.zahaand.smarttaskbot.handler.text.TaskCreationTextHandler;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
@@ -22,7 +24,7 @@ import ru.zahaand.smarttaskbot.service.UserStateService;
  * 4. isPersistentMenuButton? → cancel active flow, then route to button handler
  * 5. CREATING_TASK → TaskCreationTextHandler (added in Phase 3)
  * 6. ENTERING_REMINDER_TIME → ReminderTimeTextHandler (added in Phase 5)
- * 7. CONFIRMING_DELETE / SELECTING_REMINDER_DATE → "Пожалуйста, используй кнопки выше."
+ * 7. CONFIRMING_DELETE / SELECTING_REMINDER_DATE → "Please use the buttons above."
  * 8. button handlers (NewTaskButtonHandler, TaskListButtonHandler — added in Phases 3–4)
  * 9. command switch (legacy commands, backward compat)
  * 10. default → UnknownInputHandler
@@ -38,6 +40,10 @@ public class UpdateDispatcher {
 
     // Callback handlers
     private final TimezoneCallbackHandler timezoneCallbackHandler;
+
+    // Text/button handlers
+    private final NewTaskButtonHandler newTaskButtonHandler;
+    private final TaskCreationTextHandler taskCreationTextHandler;
 
     // Command handlers
     private final StartCommandHandler startCommandHandler;
@@ -150,7 +156,10 @@ public class UpdateDispatcher {
         }
 
         // Step 5: CREATING_TASK — free text is task input
-        // (TaskCreationTextHandler wired in Phase 3)
+        if (state == ConversationState.CREATING_TASK) {
+            taskCreationTextHandler.handle(update);
+            return;
+        }
 
         // Step 6: ENTERING_REMINDER_TIME — free text is time input
         // (ReminderTimeTextHandler wired in Phase 5)
@@ -158,7 +167,7 @@ public class UpdateDispatcher {
         // Step 7: button-only states — reject free text
         if (state == ConversationState.CONFIRMING_DELETE
                 || state == ConversationState.SELECTING_REMINDER_DATE) {
-            notificationService.sendMessage(chatId, "Пожалуйста, используй кнопки выше.");
+            notificationService.sendMessage(chatId, "Please use the buttons above.");
             return;
         }
 
@@ -190,11 +199,15 @@ public class UpdateDispatcher {
     }
 
     private void routeMenuButton(Update update, String text) {
-        // Button handlers are wired in Phases 3–4; stubs for now.
-        // NewTaskButtonHandler (Phase 3), TaskListButtonHandler (Phase 4).
+        if (BotConstants.BTN_NEW_TASK.equals(text)) {
+            newTaskButtonHandler.handle(update);
+            return;
+        }
+
+        // TaskListButtonHandler wired in Phase 4
         log.debug("Persistent menu button pressed: '{}' — handler not yet wired", text);
         Long chatId = update.getMessage().getChatId();
-        notificationService.sendMessage(chatId, "Эта функция скоро появится!");
+        notificationService.sendMessage(chatId, "This feature is coming soon!");
     }
 
     boolean isPersistentMenuButton(String text) {
