@@ -36,7 +36,6 @@ public final class BotConstants {
 
     public static final String BTN_NEW_TASK = "📝 New Task";
     public static final String BTN_MY_TASKS = "📋 My Tasks";
-    public static final String BTN_REMINDER = "⏰ Reminders";
 
     /**
      * Predefined timezone options displayed as inline keyboard rows (FR-018).

@@ -22,7 +22,10 @@ public class TaskListKeyboardBuilder {
         final List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         for (TaskDto task : tasks) {
-            rows.add(buildTaskRow(task, activeTab));
+            // Text row: task title as a non-interactive label
+            rows.add(buildTaskTextRow(task));
+            // Action row: operation buttons
+            rows.add(buildTaskActionRow(task, activeTab));
         }
 
         rows.add(buildTabRow(activeTab));
@@ -32,7 +35,15 @@ public class TaskListKeyboardBuilder {
         return markup;
     }
 
-    private List<InlineKeyboardButton> buildTaskRow(TaskDto task, TaskStatus activeTab) {
+    private List<InlineKeyboardButton> buildTaskTextRow(TaskDto task) {
+        String label = "#" + task.getId() + " " + task.getText();
+        if (task.getReminderTime() != null) {
+            label += " [⏰ " + task.getReminderTime() + "]";
+        }
+        return List.of(button(label, BotConstants.CB_NO_OP));
+    }
+
+    private List<InlineKeyboardButton> buildTaskActionRow(TaskDto task, TaskStatus activeTab) {
         final List<InlineKeyboardButton> row = new ArrayList<>();
         final String id = task.getId().toString();
 

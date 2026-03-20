@@ -209,7 +209,7 @@ public class UpdateDispatcher {
             return;
         }
 
-        if (BotConstants.BTN_MY_TASKS.equals(text) || BotConstants.BTN_REMINDER.equals(text)) {
+        if (BotConstants.BTN_MY_TASKS.equals(text)) {
             taskListButtonHandler.handle(update);
             return;
         }
@@ -219,8 +219,7 @@ public class UpdateDispatcher {
 
     boolean isPersistentMenuButton(String text) {
         return BotConstants.BTN_NEW_TASK.equals(text)
-                || BotConstants.BTN_MY_TASKS.equals(text)
-                || BotConstants.BTN_REMINDER.equals(text);
+                || BotConstants.BTN_MY_TASKS.equals(text);
     }
 
     private boolean isCommand(String text) {

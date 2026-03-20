@@ -169,30 +169,21 @@ public class NotificationService {
                     : "✅ No completed tasks yet.";
         }
 
+        // Task titles and action buttons are rendered in the inline keyboard below this header.
         final String header = tab == TaskStatus.ACTIVE ? "📋 Active tasks" : "✅ Completed tasks";
-        final StringBuilder sb = new StringBuilder(header)
-                .append(" (").append(tasks.size()).append("):\n\n");
-
-        for (TaskDto task : tasks) {
-            sb.append("#").append(task.getId()).append(": ").append(task.getText());
-            if (task.getReminderTime() != null) {
-                sb.append(" [⏰ ").append(task.getReminderTime()).append("]");
-            }
-            sb.append("\n");
-        }
+        String text = header + " (" + tasks.size() + "):";
 
         if (truncated) {
-            sb.append("\nShowing first ").append(MAX_TASK_LIST_SIZE).append(" tasks…");
+            text += "\nShowing first " + MAX_TASK_LIST_SIZE + " tasks…";
         }
 
-        return sb.toString().trim();
+        return text;
     }
 
     private ReplyKeyboardMarkup buildPersistentMenuKeyboard() {
         KeyboardRow row = new KeyboardRow();
         row.add(new KeyboardButton(BotConstants.BTN_NEW_TASK));
         row.add(new KeyboardButton(BotConstants.BTN_MY_TASKS));
-        row.add(new KeyboardButton(BotConstants.BTN_REMINDER));
 
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         markup.setKeyboard(List.of(row));

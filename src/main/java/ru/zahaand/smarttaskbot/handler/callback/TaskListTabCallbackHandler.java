@@ -3,7 +3,10 @@ package ru.zahaand.smarttaskbot.handler.callback;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
 import ru.zahaand.smarttaskbot.service.NotificationService;
@@ -29,6 +32,13 @@ public class TaskListTabCallbackHandler {
         final Integer messageId = cq.getMessage().getMessageId();
         final String data = cq.getData();
 
+        // If the tapped tab button already shows ✓ it is already active — silent no-op.
+        final InlineKeyboardMarkup markup = ((Message) cq.getMessage()).getReplyMarkup();
+        if (isAlreadyActiveTab(markup, data)) {
+            notificationService.answerCallbackQuery(cq.getId());
+            return;
+        }
+
         notificationService.answerCallbackQuery(cq.getId());
 
         final TaskStatus tab = data.endsWith("COMPLETED") ? TaskStatus.COMPLETED : TaskStatus.ACTIVE;
@@ -37,5 +47,23 @@ public class TaskListTabCallbackHandler {
                 : taskService.getCompletedTasks(userId);
 
         notificationService.editTaskList(chatId, messageId, tasks, tab);
+    }
+
+    /**
+     * Returns true when the button that triggered this callback already carries ✓,
+     * meaning the user tapped the tab they are currently on.
+     */
+    private boolean isAlreadyActiveTab(InlineKeyboardMarkup markup, String callbackData) {
+        if (markup == null) {
+            return false;
+        }
+        for (List<InlineKeyboardButton> row : markup.getKeyboard()) {
+            for (InlineKeyboardButton btn : row) {
+                if (callbackData.equals(btn.getCallbackData()) && btn.getText().contains("✓")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
