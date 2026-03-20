@@ -1,25 +1,30 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.1 → 1.2.0
-Modified principles: None
+Version change: 1.2.0 → 1.3.0
+Modified principles:
+  - X. Application Language — replaced "English-only" with multilingual support
+    (English or Russian based on user selection during registration).
+    Previous follow-up TODO about translating Russian strings is now VOID:
+    Russian is a supported language; existing Russian strings are valid once
+    they are served through the i18n layer, not hardcoded.
 Added sections:
-  - X. Application Language (NON-NEGOTIABLE) — all user-facing bot text MUST be in English;
-    Russian or any other language in Telegram API output is PROHIBITED.
+  - Development Standard #6: railway.toml builder rule.
+  - VIII. Code Style: constructor placement, blank-line limit, @DisplayName
+    ordering, Mockito when().thenReturn() formatting, @Nested no @DisplayName.
 Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md ✅ (Constitution Check section is dynamically derived; no edit needed)
-  - .specify/templates/spec-template.md ✅ (no structural changes needed)
-  - .specify/templates/tasks-template.md ✅ (no structural changes needed)
-  - .specify/templates/constitution-template.md ✅ (generic slot-based template; Principle X is
-    project-specific and does not warrant a new generic slot in the template)
+  - .specify/templates/plan-template.md ✅ (no changes required)
+  - .specify/templates/spec-template.md ✅ (no changes required)
+  - .specify/templates/tasks-template.md ✅ (no changes required)
+  - .specify/templates/constitution-template.md ✅ (generic; project-specific
+    Principle X does not require a new generic slot)
 Follow-up TODOs:
-  - Code written before 2026-03-20 (Phase 2/3 of 003-button-driven-ux) contains Russian
-    user-facing strings. These MUST be translated to English before the branch is merged.
-    Affected files: TimezoneCallbackHandler, StartCommandHandler, NewTaskButtonHandler,
-    TaskCreationTextHandler, UnknownInputHandler, UserStateService (cancelMessage strings),
-    UpdateDispatcher (sendMessage "Пожалуйста, используй кнопки выше." and
-    "Эта функция скоро появится!"), BotConstants (BTN_* label values).
+  - All hardcoded Russian/English strings MUST be migrated to i18n message files
+    before the feature branch that implements language selection is merged.
+  - Affected files (pre-existing): TimezoneCallbackHandler, StartCommandHandler,
+    NewTaskButtonHandler, TaskCreationTextHandler, UnknownInputHandler,
+    UserStateService, UpdateDispatcher, BotConstants.
 -->
 
 # Smart Task Bot Constitution
@@ -141,6 +146,9 @@ Additional rules:
 
 - All fields MUST be declared `final`.
 - Constructor injection MUST be used; `@Autowired` on fields is PROHIBITED.
+- Class constructors MUST appear after field declarations (dependencies, helpers, constants)
+  and before other methods.
+- No more than one consecutive blank line is permitted anywhere in a class.
 - PROHIBITED: returning `null` from public methods — use `Optional` or throw an exception.
   Private methods MAY return `null` when used as internal control flow signals within
   a single class, provided the usage is limited to a single call site and the intent
@@ -149,6 +157,15 @@ Additional rules:
 - `var` is PROHIBITED except for complex generic types where the explicit type
   is excessively verbose.
 - Private method names MUST start with a verb: `extractTaskId()`, `formatReminder()`.
+- `@DisplayName` annotation on test methods MUST be the first annotation, placed directly
+  above the method signature.
+- In Mockito `when().thenReturn()` chains, `.thenReturn()` MUST start on a new line,
+  indented:
+  ```java
+  when(service.method(arg))
+      .thenReturn(value);
+  ```
+- `@Nested` test classes MUST NOT have a `@DisplayName` annotation.
 
 Rationale: Consistent, explicit code style reduces cognitive load during review and
 signals discipline — a critical quality marker in portfolio code.
@@ -166,22 +183,19 @@ demonstrates mastery of unit-testing discipline — essential for a portfolio pr
 
 ### X. Application Language (NON-NEGOTIABLE)
 
-All user-facing text sent via the Telegram API MUST be in English:
+Bot messages and UI text MUST be displayed in the language selected by the user during
+registration (English or Russian).
 
-- Bot messages and replies
-- Button labels and persistent menu items
-- Error messages and validation hints
-- Reminder notifications
-- Confirmation prompts
+- Before language selection, the welcome message MUST be shown in both languages
+  (English first, then Russian).
+- After language selection, ALL bot responses, button labels, error messages, and
+  notifications MUST be in the selected language.
+- Source code, identifiers, comments, and documentation MUST remain in English only.
+  This rule applies to all layers.
+- PROHIBITED: hardcoded language strings outside of i18n message files.
 
-PROHIBITED: Russian or any other language in bot responses, button labels,
-or any text delivered to the user through the Telegram API.
-
-This constraint applies to all new code. Existing Russian strings introduced before
-this amendment MUST be translated before the containing branch is merged to `main`.
-
-Rationale: The bot is a portfolio project demonstrated to international clients.
-An English-only interface signals professionalism and international readiness.
+Rationale: Supporting both English and Russian makes the bot accessible to the target
+audience while keeping the codebase internationally readable for portfolio reviewers.
 
 ## Technology Stack
 
@@ -212,6 +226,9 @@ commit message.
    instructions in the README and a valid `.env` file.
 5. **Commit hygiene**: Each commit MUST represent a single logical change with a
    clear, descriptive message.
+6. **Railway deployment**: `railway.toml` MUST NOT specify a builder explicitly.
+   Railway auto-detects the builder from the project structure.
+   The `[build]` section MUST contain only `buildCommand`.
 
 ## Governance
 
@@ -233,4 +250,4 @@ Tracking section of the relevant `plan.md` with explicit justification.
 
 **Runtime guidance**: See `.specify/memory/` for feature-specific specs, plans, and tasks.
 
-**Version**: 1.2.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-20
+**Version**: 1.3.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-20
