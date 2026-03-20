@@ -1,12 +1,14 @@
 # smart-task-bot Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-19
+Auto-generated from all feature plans. Last updated: 2026-03-20
 
 ## Active Technologies
 - Java 21 + Spring Boot 3.5.11, TelegramBots Spring Boot Starter 6.9.7.1, (002-quality-and-tests)
 - PostgreSQL (no schema changes in this feature) (002-quality-and-tests)
 - Java 21 + Spring Boot 3.5.11, TelegramBots Spring Boot Starter 6.9.7.1, Spring Data JPA, Liquibase, Lombok, Jackson (for JSONB context serialization — already on classpath via Spring Boot) (003-button-driven-ux)
 - PostgreSQL 15+ — one new table (`user_states`) (003-button-driven-ux)
+- Java 21 + Spring Boot 3.5, TelegramBots Spring Boot Starter 6.9.7.1, (004-i18n-and-improvements)
+- PostgreSQL 15+ — two new migrations (no new tables) (004-i18n-and-improvements)
 
 - Java 21, Spring Boot 3.5.11
 - TelegramBots Spring Boot Starter 6.9.7.1 (long-polling, `TelegramLongPollingBot`)
@@ -79,10 +81,10 @@ DB_PASSWORD=        # PostgreSQL password
 - Lombok used for `@Getter`, `@Setter`, `@NoArgsConstructor`, `@Builder` — not for hiding logic
 
 ## Recent Changes
+- 004-i18n-and-improvements: Added Java 21 + Spring Boot 3.5, TelegramBots Spring Boot Starter 6.9.7.1,
 - 003-button-driven-ux: Added Java 21 + Spring Boot 3.5.11, TelegramBots Spring Boot Starter 6.9.7.1, Spring Data JPA, Liquibase, Lombok, Jackson (for JSONB context serialization — already on classpath via Spring Boot)
 - 002-quality-and-tests: Added Java 21 + Spring Boot 3.5.11, TelegramBots Spring Boot Starter 6.9.7.1,
 
-- 001-task-bot-mvp: Initial MVP — users, tasks, reminders, inline timezone keyboard
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
