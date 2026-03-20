@@ -16,6 +16,8 @@ import ru.zahaand.smarttaskbot.service.UserStateService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
+
 
 /**
  * Handles TASK_DONE, TASK_REMIND, and TASK_DELETE inline button callbacks.
@@ -48,7 +50,11 @@ public class TaskActionCallbackHandler {
             return;
         }
 
-        // TASK_DELETE wired in Phase 6 (T032)
+        if (data.startsWith(BotConstants.CB_TASK_DELETE)) {
+            handleTaskDelete(cq.getId(), userId, chatId, data);
+            return;
+        }
+
         log.warn("TaskActionCallbackHandler: unhandled callback prefix — {}", data);
         notificationService.answerCallbackQuery(cq.getId());
     }
@@ -65,6 +71,24 @@ public class TaskActionCallbackHandler {
                 .build();
         userStateService.setStateWithContext(userId, ConversationState.SELECTING_REMINDER_DATE, ctx);
         notificationService.sendCalendar(chatId, today.getYear(), today.getMonthValue());
+    }
+
+    private void handleTaskDelete(String callbackQueryId, Long userId, Long chatId, String data) {
+        final Long taskId = Long.parseLong(data.substring(BotConstants.CB_TASK_DELETE.length()));
+        notificationService.answerCallbackQuery(callbackQueryId);
+
+        final String taskText;
+        try {
+            taskText = taskService.getTaskText(userId, taskId);
+        } catch (NoSuchElementException e) {
+            log.warn("TASK_DELETE: task #{} not found for userId={}", taskId, userId);
+            notificationService.sendMessage(chatId, "Task not found.");
+            return;
+        }
+
+        final ConversationContext ctx = ConversationContext.builder().taskId(taskId).build();
+        userStateService.setStateWithContext(userId, ConversationState.CONFIRMING_DELETE, ctx);
+        notificationService.sendDeleteConfirmation(chatId, taskId, taskText);
     }
 
     private void handleTaskDone(String callbackQueryId, Long userId, Long chatId,

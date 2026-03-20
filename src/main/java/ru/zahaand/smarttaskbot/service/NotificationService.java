@@ -180,6 +180,32 @@ public class NotificationService {
     }
 
     /**
+     * Sends a delete-confirmation message with [✅ Yes, delete] and [❌ Cancel] inline buttons.
+     */
+    public void sendDeleteConfirmation(Long chatId, Long taskId, String taskText) {
+        final String preview = taskText.length() > 80 ? taskText.substring(0, 80) + "…" : taskText;
+        final String text = "Delete task?\n\n\"" + preview + "\"";
+
+        final InlineKeyboardButton yesBtn = new InlineKeyboardButton("✅ Yes, delete");
+        yesBtn.setCallbackData(BotConstants.CB_CONFIRM_DELETE + taskId);
+
+        final InlineKeyboardButton cancelBtn = new InlineKeyboardButton("❌ Cancel");
+        cancelBtn.setCallbackData(BotConstants.CB_CONFIRM_CANCEL);
+
+        final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(List.of(List.of(yesBtn, cancelBtn)));
+
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(markup);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send delete confirmation to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
      * Attempts to edit an existing message in-place.
      * Falls back to sending a new message if the Telegram edit API rejects the request
      * (e.g. message is older than 48 hours).

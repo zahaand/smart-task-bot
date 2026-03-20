@@ -120,15 +120,15 @@ All state-driven routing, the `UserState` persistence layer, and `UpdateDispatch
 **Goal**: "🗑 Удалить" shows confirmation dialog; user confirms → task permanently deleted; or cancels → no change.
 **Independent Test**: Tap "🗑 Удалить" → confirmation message with task name appears; tap "❌ Отмена" → task unchanged, state IDLE; repeat → tap "✅ Да, удалить" → task gone, confirmed.
 
-- [ ] T029 [US5] Add `deleteByIdAndUserTelegramUserId(Long taskId, Long telegramUserId)` to `repository/TaskRepository.java` using `@Modifying @Query("DELETE FROM Task t WHERE t.id = :taskId AND t.user.telegramUserId = :telegramUserId")`
+- [x] T029 [US5] Add `deleteByIdAndUserTelegramUserId(Long taskId, Long telegramUserId)` to `repository/TaskRepository.java` using `@Modifying @Query("DELETE FROM Task t WHERE t.id = :taskId AND t.user.telegramUserId = :telegramUserId")`
 
-- [ ] T030 [US5] Add `deleteTask(Long telegramUserId, Long taskId)` to `service/TaskService.java`: calls `taskRepository.deleteByIdAndUserTelegramUserId`; returns deleted row count; service layer treats 0 rows as "already gone" (no exception — handled gracefully by caller)
+- [x] T030 [US5] Add `deleteTask(Long telegramUserId, Long taskId)` to `service/TaskService.java`: calls `taskRepository.deleteByIdAndUserTelegramUserId`; returns deleted row count; service layer treats 0 rows as "already gone" (no exception — handled gracefully by caller)
 
-- [ ] T031 [US5] Add `sendDeleteConfirmation(Long chatId, Long taskId, String taskText)` to `service/NotificationService.java`: sends "Удалить задачу '#N: [text]'? Это действие нельзя отменить." with inline buttons `[✅ Да, удалить → CONFIRM_DELETE:<taskId>]` `[❌ Отмена → CONFIRM_CANCEL]`
+- [x] T031 [US5] Add `sendDeleteConfirmation(Long chatId, Long taskId, String taskText)` to `service/NotificationService.java`: sends "Удалить задачу '#N: [text]'? Это действие нельзя отменить." with inline buttons `[✅ Да, удалить → CONFIRM_DELETE:<taskId>]` `[❌ Отмена → CONFIRM_CANCEL]`
 
-- [ ] T032 [US5] Expand `handler/callback/TaskActionCallbackHandler.java` with TASK_DELETE handling: on `TASK_DELETE:<taskId>` → call `answerCallbackQuery`; load task text via `taskService.getActiveTasks` (or dedicated lookup); call `userStateService.setStateWithContext(userId, CONFIRMING_DELETE, ctx{taskId})`; call `notificationService.sendDeleteConfirmation(chatId, taskId, taskText)`
+- [x] T032 [US5] Expand `handler/callback/TaskActionCallbackHandler.java` with TASK_DELETE handling: on `TASK_DELETE:<taskId>` → call `answerCallbackQuery`; load task text via `taskService.getActiveTasks` (or dedicated lookup); call `userStateService.setStateWithContext(userId, CONFIRMING_DELETE, ctx{taskId})`; call `notificationService.sendDeleteConfirmation(chatId, taskId, taskText)`
 
-- [ ] T033 [US5] Create `handler/callback/DeleteConfirmCallbackHandler.java`: handles `CONFIRM_DELETE:<taskId>` → call `answerCallbackQuery`; load taskId from callback data; call `taskService.deleteTask(userId, taskId)`; if 0 rows deleted → send "Задача уже была удалена."; else → send "✅ Задача удалена."; call `userStateService.setState(userId, IDLE)`. Handles `CONFIRM_CANCEL` → call `answerCallbackQuery`; call `userStateService.setState(userId, IDLE)`; send "Удаление отменено."
+- [x] T033 [US5] Create `handler/callback/DeleteConfirmCallbackHandler.java`: handles `CONFIRM_DELETE:<taskId>` → call `answerCallbackQuery`; load taskId from callback data; call `taskService.deleteTask(userId, taskId)`; if 0 rows deleted → send "Задача уже была удалена."; else → send "✅ Задача удалена."; call `userStateService.setState(userId, IDLE)`. Handles `CONFIRM_CANCEL` → call `answerCallbackQuery`; call `userStateService.setState(userId, IDLE)`; send "Удаление отменено."
 
 **Checkpoint**: US5 complete — delete with confirmation works; all P2 flows (US4 + US5) are functional.
 

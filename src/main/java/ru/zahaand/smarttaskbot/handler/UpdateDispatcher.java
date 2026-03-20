@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
-import ru.zahaand.smarttaskbot.handler.callback.CalendarCallbackHandler;
-import ru.zahaand.smarttaskbot.handler.callback.TaskActionCallbackHandler;
-import ru.zahaand.smarttaskbot.handler.callback.TaskListTabCallbackHandler;
-import ru.zahaand.smarttaskbot.handler.callback.TimezoneCallbackHandler;
+import ru.zahaand.smarttaskbot.handler.callback.*;
 import ru.zahaand.smarttaskbot.handler.command.*;
 import ru.zahaand.smarttaskbot.handler.text.NewTaskButtonHandler;
 import ru.zahaand.smarttaskbot.handler.text.ReminderTimeTextHandler;
@@ -27,10 +24,10 @@ import ru.zahaand.smarttaskbot.service.UserStateService;
  * 2. read state
  * 3. isCommand? → /cancel interrupts non-IDLE; other commands bypass state handlers
  * 4. isPersistentMenuButton? → cancel active flow, then route to button handler
- * 5. CREATING_TASK → TaskCreationTextHandler (added in Phase 3)
- * 6. ENTERING_REMINDER_TIME → ReminderTimeTextHandler (added in Phase 5)
+ * 5. CREATING_TASK → TaskCreationTextHandler
+ * 6. ENTERING_REMINDER_TIME → ReminderTimeTextHandler
  * 7. CONFIRMING_DELETE / SELECTING_REMINDER_DATE → "Please use the buttons above."
- * 8. button handlers (NewTaskButtonHandler, TaskListButtonHandler — added in Phases 3–4)
+ * 8. button handlers (NewTaskButtonHandler, TaskListButtonHandler)
  * 9. command switch (legacy commands, backward compat)
  * 10. default → UnknownInputHandler
  */
@@ -48,6 +45,7 @@ public class UpdateDispatcher {
     private final TaskActionCallbackHandler taskActionCallbackHandler;
     private final TaskListTabCallbackHandler taskListTabCallbackHandler;
     private final CalendarCallbackHandler calendarCallbackHandler;
+    private final DeleteConfirmCallbackHandler deleteConfirmCallbackHandler;
 
     // Text/button handlers
     private final NewTaskButtonHandler newTaskButtonHandler;
@@ -113,9 +111,7 @@ public class UpdateDispatcher {
 
         if (data.startsWith(BotConstants.CB_CONFIRM_DELETE)
                 || data.equals(BotConstants.CB_CONFIRM_CANCEL)) {
-            // DeleteConfirmCallbackHandler wired in Phase 6
-            log.warn("DeleteConfirmCallbackHandler not yet wired — callback ignored: {}", data);
-            notificationService.answerCallbackQuery(callbackQueryId);
+            deleteConfirmCallbackHandler.handle(update);
             return;
         }
 

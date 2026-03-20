@@ -1,5 +1,6 @@
 package ru.zahaand.smarttaskbot.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -198,6 +199,34 @@ public class TaskService {
 
         log.info("Task completed: id={}, userId={}", saved.getId(), telegramUserId);
         return new TaskDto(saved.getId(), saved.getText(), null);
+    }
+
+    /**
+     * Returns the task text for the given task ID and owner.
+     *
+     * @param telegramUserId owner of the task
+     * @param taskId         ID of the task
+     * @return task text
+     * @throws NoSuchElementException if the task does not exist or belongs to another user
+     */
+    public String getTaskText(Long telegramUserId, Long taskId) {
+        return taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
+                .map(Task::getText)
+                .orElseThrow(() -> new NoSuchElementException("Task #%d not found.".formatted(taskId)));
+    }
+
+    /**
+     * Deletes a task by ID and owner. Returns the number of rows deleted (0 or 1).
+     *
+     * @param telegramUserId owner of the task
+     * @param taskId         ID of the task to delete
+     * @return 1 if deleted, 0 if the task did not exist or belongs to another user
+     */
+    @Transactional
+    public int deleteTask(Long telegramUserId, Long taskId) {
+        int deleted = taskRepository.deleteByIdAndUserTelegramUserId(taskId, telegramUserId);
+        log.info("Task delete: taskId={}, userId={}, rowsAffected={}", taskId, telegramUserId, deleted);
+        return deleted;
     }
 
     private TaskDto getTaskDto(Task task, ZoneId userZone) {
