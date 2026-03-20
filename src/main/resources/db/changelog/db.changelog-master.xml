@@ -8,5 +8,7 @@
     <include file="db/changelog/002-create-tasks-table.xml"/>
     <include file="db/changelog/003-create-tasks-indexes.xml"/>
     <include file="db/changelog/004-create-user-states-table.xml"/>
+    <include file="db/changelog/005-add-language-to-users.xml"/>
+    <include file="db/changelog/006-add-cascade-to-tasks.xml"/>
 
 </databaseChangeLog>
