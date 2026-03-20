@@ -33,11 +33,13 @@ import java.util.List;
 @Service
 public class NotificationService {
 
-    private static final int MAX_TASK_LIST_SIZE = 20;
-
     private final AbsSender sender;
     private final TaskListKeyboardBuilder taskListKeyboardBuilder;
     private final CalendarKeyboardBuilder calendarKeyboardBuilder;
+
+    private static final DateTimeFormatter TZ_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+
+    private static final int MAX_TASK_LIST_SIZE = 20;
 
     public NotificationService(@Lazy AbsSender sender,
                                TaskListKeyboardBuilder taskListKeyboardBuilder,
@@ -213,7 +215,7 @@ public class NotificationService {
      * Falls back to sending a new message if the Telegram edit API rejects the request
      * (e.g. message is older than 48 hours).
      */
-    public void safeEdit(EditMessageText editRequest, SendMessage fallback) {
+    private void safeEdit(EditMessageText editRequest, SendMessage fallback) {
         try {
             sender.execute(editRequest);
         } catch (TelegramApiException e) {
@@ -259,8 +261,6 @@ public class NotificationService {
 
         return markup;
     }
-
-    private static final DateTimeFormatter TZ_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     private InlineKeyboardMarkup buildTimezoneKeyboard() {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();

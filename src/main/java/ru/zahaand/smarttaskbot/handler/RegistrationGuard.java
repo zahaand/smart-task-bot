@@ -1,6 +1,7 @@
 package ru.zahaand.smarttaskbot.handler;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.service.NotificationService;
@@ -11,6 +12,7 @@ import ru.zahaand.smarttaskbot.service.UserService;
  * protected bot commands. If the user is not found in the database,
  * redirects them to the timezone selection process.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RegistrationGuard {
@@ -23,6 +25,7 @@ public class RegistrationGuard {
         Long chatId = update.getMessage().getChatId();
 
         if (!userService.isRegistered(telegramUserId)) {
+            log.warn("Unregistered access attempt: userId={}", telegramUserId);
             notificationService.sendTimezoneKeyboard(chatId, "Please select your timezone first:");
             return;
         }

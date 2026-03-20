@@ -1,6 +1,7 @@
 package ru.zahaand.smarttaskbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -8,6 +9,7 @@ import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.UserService;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TimezoneCallbackHandler {
@@ -36,6 +38,7 @@ public class TimezoneCallbackHandler {
         }
 
         userService.register(telegramUserId, username, timezone);
+        log.info("User registered: userId={}, timezone={}", telegramUserId, timezone);
         notificationService.sendPersistentMenu(chatId,
                 "Timezone set: " + timezone + " ✓\nYou're all set! Use the buttons below to get started.");
     }

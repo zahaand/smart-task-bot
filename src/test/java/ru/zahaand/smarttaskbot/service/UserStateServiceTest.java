@@ -131,6 +131,42 @@ class UserStateServiceTest {
         }
     }
 
+    // ── updateContext ─────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("updateContext()")
+    class UpdateContext {
+
+        @Test
+        @DisplayName("serializes context JSON and saves")
+        void serializesContextAndSaves() {
+            when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
+            when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+            ConversationContext ctx = ConversationContext.builder().taskId(3L).date("2026-06-01").build();
+            service.updateContext(USER_ID, ctx);
+
+            ArgumentCaptor<UserState> captor = ArgumentCaptor.forClass(UserState.class);
+            verify(userStateRepository).save(captor.capture());
+            assertThat(captor.getValue().getContext()).contains("\"taskId\":3");
+            assertThat(captor.getValue().getContext()).contains("\"date\":\"2026-06-01\"");
+        }
+
+        @Test
+        @DisplayName("refreshes updatedAt timestamp")
+        void refreshesUpdatedAt() {
+            Instant before = Instant.now().minusSeconds(1);
+            when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
+            when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+            service.updateContext(USER_ID, ConversationContext.builder().build());
+
+            ArgumentCaptor<UserState> captor = ArgumentCaptor.forClass(UserState.class);
+            verify(userStateRepository).save(captor.capture());
+            assertThat(captor.getValue().getUpdatedAt()).isAfter(before);
+        }
+    }
+
     // ── getContext ────────────────────────────────────────────────────────────
 
     @Nested

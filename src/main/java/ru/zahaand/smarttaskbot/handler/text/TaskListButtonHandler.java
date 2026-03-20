@@ -11,8 +11,8 @@ import ru.zahaand.smarttaskbot.service.TaskService;
 import java.util.List;
 
 /**
- * Handles "📋 My Tasks" and "⏰ Reminders" persistent menu button taps.
- * Both buttons open the active task list — the reminder flow starts from a task's inline button.
+ * Handles "📋 My Tasks" persistent menu button tap.
+ * Opens the active task list; the reminder flow starts from a task's inline button.
  */
 @Component
 @RequiredArgsConstructor

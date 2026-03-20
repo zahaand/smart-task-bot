@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 /**
  * Parses free-text time input into {@link LocalTime}.
- * Supports 24-hour notation and Russian AM/PM shorthand (утра/вечера).
+ * Supports 24-hour notation and Russian AM/PM suffixes ("утра" = AM, "вечера" = PM).
  * Never throws — all parse failures return {@link Optional#empty()}.
  */
 @Slf4j
@@ -60,7 +60,8 @@ public class TimeParserService {
 
     /**
      * Returns {@code true} when the input is exactly "12 утра" or "12 вечера"
-     * (the ambiguous 12-o'clock case that requires a specific error hint).
+     * (the ambiguous 12-o'clock case, requiring a specific format hint).
+     * These two strings are user-typed input patterns, not bot output.
      */
     public boolean isTwelveOClockAmbiguous(String input) {
         if (input == null || input.isBlank()) {
