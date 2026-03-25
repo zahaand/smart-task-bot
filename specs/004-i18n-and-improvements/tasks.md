@@ -185,7 +185,7 @@ IANA identifier.
 **Independent Test**: Open timezone selection; each button shows correct current time and
 expected city abbreviations (e.g., `10:00 MSK, SPB` for `Europe/Moscow`).
 
-- [ ] T037 [US5] Update `sendTimezoneKeyboard` in `src/main/java/ru/zahaand/smarttaskbot/service/NotificationService.java`: compute each button label as `ZonedDateTime.now(ZoneId.of(tz)).format(DateTimeFormatter.ofPattern("HH:mm")) + " " + BotConstants.TIMEZONE_CITY_CODES.get(tz)`; on `ZoneRulesException` fall back to existing `TIMEZONE_DISPLAY_NAMES.get(tz)` (no crash); city codes always English regardless of user language per FR-011
+- [x] T037 [US5] Update `sendTimezoneKeyboard` in `src/main/java/ru/zahaand/smarttaskbot/service/NotificationService.java`: compute each button label as `ZonedDateTime.now(ZoneId.of(tz)).format(DateTimeFormatter.ofPattern("HH:mm")) + " " + BotConstants.TIMEZONE_CITY_CODES.get(tz)`; on `ZoneRulesException` fall back to existing `TIMEZONE_DISPLAY_NAMES.get(tz)` (no crash); city codes always English regardless of user language per FR-011
 
 **Checkpoint**: US5 complete — timezone buttons show live local time and city codes.
 
@@ -201,9 +201,9 @@ English paragraph, blank line, Russian paragraph. Private methods may be absent.
 **Independent Test for US7**: README renders navigation hint, full English section, `---`
 divider, full Russian section; each section covers all four topics.
 
-- [ ] T038 [P] [US6] Add bilingual Javadoc (EN paragraph, blank line, RU paragraph) to all **new** public classes and their public methods: `Language`, `MessageKey`, `MessageService`, `LanguageCallbackHandler`, `DeleteAllCompletedCallbackHandler` — private methods exempt
-- [ ] T039 [P] [US6] Add bilingual Javadoc to all **modified** public classes and their changed public methods: `User`, `ConversationState`, `UserService`, `UserStateService`, `TaskService`, `TaskRepository`, `NotificationService`, `TaskListKeyboardBuilder`, `TimeParserService`, `StartCommandHandler`, `TimezoneCallbackHandler`, `RegistrationGuard`, `UpdateDispatcher`, `ReminderService`
-- [ ] T040 [US7] Rewrite `README.md` with structure per spec: first line `🇷🇺 Описание на русском ниже / 🇬🇧 Russian description below`; English section covering project description + SDD/Spec Kit/Claude Code methodology, full command list, supported time formats (HH:MM, HH MM, HH-MM), local setup; `---` divider; same four topics in Russian
+- [x] T038 [P] [US6] Add bilingual Javadoc (EN paragraph, blank line, RU paragraph) to all **new** public classes and their public methods: `Language`, `MessageKey`, `MessageService`, `LanguageCallbackHandler`, `DeleteAllCompletedCallbackHandler` — private methods exempt
+- [x] T039 [P] [US6] Add bilingual Javadoc to all **modified** public classes and their changed public methods: `User`, `ConversationState`, `UserService`, `UserStateService`, `TaskService`, `TaskRepository`, `NotificationService`, `TaskListKeyboardBuilder`, `TimeParserService`, `StartCommandHandler`, `TimezoneCallbackHandler`, `RegistrationGuard`, `UpdateDispatcher`, `ReminderService`
+- [x] T040 [US7] Rewrite `README.md` with structure per spec: first line `🇷🇺 Описание на русском ниже / 🇬🇧 Russian description below`; English section covering project description + SDD/Spec Kit/Claude Code methodology, full command list, supported time formats (HH:MM, HH MM, HH-MM), local setup; `---` divider; same four topics in Russian
 
 **Checkpoint**: Documentation phase complete — project ready for portfolio demonstration.
 
@@ -211,8 +211,8 @@ divider, full Russian section; each section covers all four topics.
 
 ## Final Phase: Polish & Cross-Cutting
 
-- [ ] T041 [P] Remove all now-unused hardcoded user-facing string constants from `src/main/java/ru/zahaand/smarttaskbot/config/BotConstants.java` that were replaced by MessageService keys (BTN_NEW_TASK, BTN_MY_TASKS raw string constants, timezone label strings, and any registration prompt strings); verify no compile errors
-- [ ] T042 Run `mvn test` from project root; fix any compilation or test failures across all phases; confirm all new test classes pass
+- [x] T041 [P] Remove all now-unused hardcoded user-facing string constants from `src/main/java/ru/zahaand/smarttaskbot/config/BotConstants.java` that were replaced by MessageService keys (BTN_NEW_TASK, BTN_MY_TASKS raw string constants, timezone label strings, and any registration prompt strings); verify no compile errors
+- [x] T042 Run `mvn test` from project root; fix any compilation or test failures across all phases; confirm all new test classes pass
 
 ---
 

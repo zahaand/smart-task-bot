@@ -194,7 +194,7 @@ class UpdateDispatcherTest {
         @DisplayName("BTN_NEW_TASK in IDLE state routes to NewTaskButtonHandler")
         void newTaskButtonInIdleRoutesToHandler() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
-            Update update = messageUpdate(BotConstants.BTN_NEW_TASK);
+            Update update = messageUpdate(MessageKey.BTN_NEW_TASK.get(ru.zahaand.smarttaskbot.model.Language.EN));
 
             dispatcher.dispatch(update);
 
@@ -205,7 +205,7 @@ class UpdateDispatcherTest {
         @DisplayName("BTN_MY_TASKS in CREATING_TASK → cancelWithNotification then TaskListButtonHandler")
         void myTasksButtonInCreatingTaskCancelsThenRoutes() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CREATING_TASK);
-            Update update = messageUpdate(BotConstants.BTN_MY_TASKS);
+            Update update = messageUpdate(MessageKey.BTN_MY_TASKS.get(ru.zahaand.smarttaskbot.model.Language.EN));
 
             dispatcher.dispatch(update);
 

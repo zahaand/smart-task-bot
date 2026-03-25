@@ -31,6 +31,11 @@ public class TimezoneCallbackHandler {
     private final NotificationService notificationService;
     private final MessageService messageService;
 
+    /**
+     * Processes a {@code tz:*} callback: sets the timezone, transitions to IDLE, and sends the persistent menu.
+     * <p>
+     * Обрабатывает колбэк {@code tz:*}: устанавливает часовой пояс, переходит в IDLE, отправляет меню.
+     */
     public void handle(Update update) {
         final CallbackQuery callbackQuery = update.getCallbackQuery();
         final Long chatId = callbackQuery.getMessage().getChatId();

@@ -28,6 +28,13 @@ public class RegistrationGuard {
     private final UserService userService;
     private final NotificationService notificationService;
 
+    /**
+     * Checks registration completeness and either runs {@code commandAction} or re-prompts the pending step.
+     *
+     * @param commandAction action to run when the user is fully registered
+     * <p>
+     * Проверяет регистрацию и либо выполняет {@code commandAction}, либо запрашивает незавершённый шаг.
+     */
     public void checkAndRoute(Update update, Runnable commandAction) {
         final Long telegramUserId = update.getMessage().getFrom().getId();
         final Long chatId = update.getMessage().getChatId();

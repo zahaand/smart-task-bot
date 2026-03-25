@@ -30,6 +30,12 @@ public class LanguageCallbackHandler {
     private final NotificationService notificationService;
     private final MessageService messageService;
 
+    /**
+     * Routes a {@code lang:EN} or {@code lang:RU} callback: persists the language choice,
+     * advances state to AWAITING_TIMEZONE, and presents the timezone keyboard.
+     * <p>
+     * Обрабатывает выбор языка: сохраняет язык, переводит в AWAITING_TIMEZONE, показывает клавиатуру.
+     */
     public void handle(Update update) {
         final CallbackQuery cq = update.getCallbackQuery();
         final Long userId = cq.getFrom().getId();

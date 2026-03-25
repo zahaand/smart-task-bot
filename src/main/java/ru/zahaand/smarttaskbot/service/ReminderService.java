@@ -17,7 +17,11 @@ import java.util.List;
 /**
  * Scheduler that polls for due reminders and delivers them via {@link NotificationService}.
  * Runs every 60 seconds (fixedDelay — next poll starts after the previous one finishes).
- *
+ * Reminder text is resolved in the task owner's language via {@link MessageService}.
+ * <p>
+ * Планировщик опроса просроченных напоминаний; доставляет их через {@link NotificationService}.
+ * Текст напоминания разрешается на языке владельца задачи через {@link MessageService}.
+ * <p>
  * <p>Lifecycle per task:
  * <ol>
  *   <li>Initial delivery: {@code reminderTime ≤ now}, {@code reminderProcessed = false},
@@ -40,6 +44,11 @@ public class ReminderService {
     private final UserService userService;
     private final MessageService messageService;
 
+    /**
+     * Polls for due reminders and retries in a single transaction every 60 seconds.
+     * <p>
+     * Опрашивает просроченные напоминания и повторные попытки каждые 60 секунд в одной транзакции.
+     */
     @Scheduled(fixedDelay = 60_000)
     @Transactional
     public void processDueReminders() {

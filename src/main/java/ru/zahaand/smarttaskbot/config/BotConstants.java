@@ -43,11 +43,6 @@ public final class BotConstants {
     public static final String CB_TASKS_TAB = "TASKS_TAB:";
     public static final String CB_NO_OP = "NO_OP";
 
-    // ── Persistent menu button labels ────────────────────────────────────────
-
-    public static final String BTN_NEW_TASK = "📝 New Task";
-    public static final String BTN_MY_TASKS = "📋 My Tasks";
-
     /**
      * Predefined timezone options displayed as inline keyboard rows (FR-018).
      * Order determines button layout: each inner list is one keyboard row.

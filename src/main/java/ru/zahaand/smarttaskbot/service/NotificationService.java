@@ -30,6 +30,9 @@ import java.util.List;
  * Service responsible for sending all outgoing communications to Telegram users.
  * Provides methods for sending plain text messages, interactive keyboards,
  * and scheduled task reminders.
+ * <p>
+ * Сервис отправки всех исходящих сообщений пользователям Telegram.
+ * Предоставляет методы для текстовых сообщений, интерактивных клавиатур и напоминаний.
  */
 @Slf4j
 @Service
@@ -334,8 +337,8 @@ public class NotificationService {
 
     private ReplyKeyboardMarkup buildPersistentMenuKeyboard() {
         KeyboardRow row = new KeyboardRow();
-        row.add(new KeyboardButton(BotConstants.BTN_NEW_TASK));
-        row.add(new KeyboardButton(BotConstants.BTN_MY_TASKS));
+        row.add(new KeyboardButton(MessageKey.BTN_NEW_TASK.get(Language.EN)));
+        row.add(new KeyboardButton(MessageKey.BTN_MY_TASKS.get(Language.EN)));
 
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         markup.setKeyboard(List.of(row));
@@ -365,10 +368,7 @@ public class NotificationService {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
             for (String tz : rowTimezones) {
-                final String displayName = BotConstants.TIMEZONE_DISPLAY_NAMES.getOrDefault(tz, tz);
-                final String currentTime = ZonedDateTime.now(ZoneId.of(tz)).format(TZ_TIME_FORMATTER);
-                final String label = displayName + " (now " + currentTime + ")";
-                final InlineKeyboardButton keyboardButton = new InlineKeyboardButton(label);
+                final InlineKeyboardButton keyboardButton = new InlineKeyboardButton(buildTimezoneButtonLabel(tz));
                 keyboardButton.setCallbackData(BotConstants.TZ_CALLBACK_PREFIX + tz);
                 row.add(keyboardButton);
             }
@@ -380,5 +380,22 @@ public class NotificationService {
         markup.setKeyboard(rows);
 
         return markup;
+    }
+
+    /**
+     * Computes a timezone button label as {@code "HH:mm CITY_CODES"} (e.g. {@code "10:00 MSK, SPB"}).
+     * Falls back to {@link BotConstants#TIMEZONE_DISPLAY_NAMES} when the zone rules cannot be loaded.
+     * City codes are always in English per FR-011.
+     * <p>
+     * Вычисляет метку кнопки пояса: «ЧЧ:мм КОД_ГОРОДА». При ошибке — возвращает отображаемое имя.
+     */
+    private String buildTimezoneButtonLabel(String tz) {
+        try {
+            final String currentTime = ZonedDateTime.now(ZoneId.of(tz)).format(TZ_TIME_FORMATTER);
+            return currentTime + " " + BotConstants.TIMEZONE_CITY_CODES.get(tz);
+        } catch (java.time.zone.ZoneRulesException e) {
+            log.warn("ZoneRulesException for tz='{}': {}", tz, e.getMessage());
+            return BotConstants.TIMEZONE_DISPLAY_NAMES.getOrDefault(tz, tz);
+        }
     }
 }

@@ -17,9 +17,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Service for managing task lifecycle: creation, retrieval, reminders, and completion.
- * All business validation and domain logic is performed here.
- * Methods are added incrementally per user story.
+ * Service for managing task lifecycle: creation, retrieval, reminders, completion, and bulk deletion.
+ * All business validation and domain logic is performed here; repository calls are never made from handlers.
+ * <p>
+ * Сервис управления жизненным циклом задач: создание, получение, напоминания, завершение и массовое удаление.
+ * Вся бизнес-логика находится здесь; обработчики не обращаются к репозиторию напрямую.
  */
 @Slf4j
 @Service

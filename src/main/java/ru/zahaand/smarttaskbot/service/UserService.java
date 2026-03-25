@@ -139,6 +139,11 @@ public class UserService {
                 });
     }
 
+    /**
+     * Returns the IANA timezone string for the given user, or throws if the user is not found.
+     * <p>
+     * Возвращает строку часового пояса IANA или бросает исключение, если пользователь не найден.
+     */
     public String getTimezone(Long telegramUserId) {
         return userRepository.findById(telegramUserId)
                 .map(User::getTimezone)

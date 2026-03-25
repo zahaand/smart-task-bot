@@ -19,6 +19,9 @@ import java.util.Optional;
  * Manages per-user conversational state for multi-step dialog flows.
  * All state transitions go through this service; handlers never write to
  * {@link UserStateRepository} directly.
+ * <p>
+ * Управляет состоянием диалога пользователя для многошаговых сценариев.
+ * Все переходы состояний проходят через этот сервис — обработчики не пишут в репозиторий напрямую.
  */
 @Slf4j
 @Service
@@ -34,12 +37,23 @@ public class UserStateService {
 
     // ── State reads ──────────────────────────────────────────────────────────
 
+    /**
+     * Returns the current conversation state for the user, defaulting to IDLE when no row exists.
+     * <p>
+     * Возвращает текущее состояние диалога пользователя; при отсутствии записи — IDLE.
+     */
     public ConversationState getState(Long userId) {
         return userStateRepository.findById(userId)
                 .map(UserState::getState)
                 .orElse(ConversationState.IDLE);
     }
 
+    /**
+     * Deserializes and returns the conversation context stored for the user, or empty if absent/malformed.
+     * Resets state to IDLE on malformed JSON to avoid stuck sessions.
+     * <p>
+     * Десериализует и возвращает контекст диалога; при отсутствии или повреждении — сбрасывает в IDLE.
+     */
     public Optional<ConversationContext> getContext(Long userId) {
         return userStateRepository.findById(userId)
                 .map(UserState::getContext)
@@ -58,6 +72,11 @@ public class UserStateService {
 
     // ── State writes ─────────────────────────────────────────────────────────
 
+    /**
+     * Transitions the user to {@code state} and clears any stored conversation context.
+     * <p>
+     * Переводит пользователя в {@code state} и очищает сохранённый контекст диалога.
+     */
     public void setState(Long userId, ConversationState state) {
         UserState userState = findOrCreate(userId);
         userState.setState(state);
@@ -67,6 +86,11 @@ public class UserStateService {
         log.info("State transition userId={} → {}", userId, state);
     }
 
+    /**
+     * Transitions the user to {@code state} and stores a serialized {@link ConversationContext}.
+     * <p>
+     * Переводит в {@code state} и сохраняет сериализованный {@link ConversationContext}.
+     */
     public void setStateWithContext(Long userId, ConversationState state, ConversationContext context) {
         UserState userState = findOrCreate(userId);
         userState.setState(state);
@@ -76,6 +100,11 @@ public class UserStateService {
         log.info("State transition userId={} → {} (with context)", userId, state);
     }
 
+    /**
+     * Replaces the stored context JSON without changing the current state.
+     * <p>
+     * Заменяет сохранённый JSON-контекст, не изменяя текущее состояние.
+     */
     public void updateContext(Long userId, ConversationContext context) {
         UserState userState = findOrCreate(userId);
         userState.setContext(serializeContext(context));
@@ -106,7 +135,10 @@ public class UserStateService {
     // ── Cancel with notification ──────────────────────────────────────────────
 
     /**
-     * Resets the user to IDLE and sends a context-appropriate cancellation message.
+     * Resets the user to IDLE and sends an OPERATION_CANCELLED message to the chat.
+     * Language falls back to EN — avoids injecting {@link UserService} into this service.
+     * <p>
+     * Сбрасывает в IDLE и отправляет OPERATION_CANCELLED. Язык — EN (UserService не инжектируется).
      */
     public void cancelWithNotification(Long userId, Long chatId, ConversationState activeState) {
         setState(userId, ConversationState.IDLE);

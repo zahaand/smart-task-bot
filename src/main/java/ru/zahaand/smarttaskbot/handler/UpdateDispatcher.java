@@ -24,6 +24,9 @@ import ru.zahaand.smarttaskbot.service.UserStateService;
  * Central router for incoming Telegram updates.
  * Delegates immediately to the appropriate handler — no business logic here.
  * <p>
+ * Центральный маршрутизатор входящих обновлений Telegram.
+ * Немедленно делегирует нужному обработчику — бизнес-логика отсутствует.
+ * <p>
  * routeMessage() step order:
  * 1. resetIfStale
  * 2. read state
@@ -73,6 +76,11 @@ public class UpdateDispatcher {
 
     // ── Entry point ───────────────────────────────────────────────────────────
 
+    /**
+     * Entry point for all incoming Telegram updates. Routes to callback or message handling.
+     * <p>
+     * Точка входа для всех входящих обновлений Telegram. Маршрутизирует колбэки или сообщения.
+     */
     public void dispatch(Update update) {
         if (update.hasCallbackQuery()) {
             routeCallback(update);

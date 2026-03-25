@@ -31,6 +31,11 @@ public class StartCommandHandler {
     private final RegistrationGuard registrationGuard;
     private final MessageService messageService;
 
+    /**
+     * Processes the {@code /start} command using three-branch routing per the class Javadoc.
+     * <p>
+     * Обрабатывает команду {@code /start} по трёхветочной схеме маршрутизации.
+     */
     public void handle(Update update) {
         final Long telegramUserId = update.getMessage().getFrom().getId();
         final Long chatId = update.getMessage().getChatId();

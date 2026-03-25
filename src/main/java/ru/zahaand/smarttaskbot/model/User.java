@@ -5,6 +5,14 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a registered Telegram user.
+ * {@code language} and {@code timezone} are nullable during two-step registration —
+ * both are set to non-null values before the user is considered fully registered.
+ * <p>
+ * JPA-сущность зарегистрированного пользователя Telegram.
+ * Поля {@code language} и {@code timezone} могут быть null в процессе двухшаговой регистрации.
+ */
 @Entity
 @Table(name = "users")
 @Getter

@@ -12,12 +12,25 @@ import java.util.List;
 
 /**
  * Builds the inline keyboard for the task list message.
- * Each task row gets action buttons; a tab row is always appended at the bottom.
+ * Each task row gets action buttons; on the Completed tab a "🗑 Delete All" row is
+ * appended when tasks are present; a tab row is always appended last.
  * Accepts a list already truncated to at most 20 items by the caller.
+ * <p>
+ * Строит инлайн-клавиатуру для списка задач. На вкладке Completed добавляет кнопку
+ * «🗑 Delete All» при наличии задач; последней строкой всегда идёт переключатель вкладок.
  */
 @Component
 public class TaskListKeyboardBuilder {
 
+    /**
+     * Builds the complete inline keyboard for the given task list and active tab.
+     *
+     * @param tasks     task DTOs to render (caller must truncate to ≤20 items)
+     * @param activeTab currently selected tab — determines action buttons and Delete All visibility
+     * @return fully assembled {@link InlineKeyboardMarkup}
+     * <p>
+     * Строит полную инлайн-клавиатуру для списка задач и активной вкладки.
+     */
     public InlineKeyboardMarkup buildKeyboard(List<TaskDto> tasks, TaskStatus activeTab) {
         final List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 

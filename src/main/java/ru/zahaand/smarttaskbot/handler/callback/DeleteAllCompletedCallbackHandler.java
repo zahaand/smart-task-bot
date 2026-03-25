@@ -36,6 +36,11 @@ public class DeleteAllCompletedCallbackHandler {
     private final UserService userService;
     private final MessageService messageService;
 
+    /**
+     * Dispatches the incoming callback to the appropriate sub-handler based on callback data.
+     * <p>
+     * Направляет входящий колбэк в нужный обработчик по данным колбэка.
+     */
     public void handle(Update update) {
         final CallbackQuery cq = update.getCallbackQuery();
         final Long userId = cq.getFrom().getId();
