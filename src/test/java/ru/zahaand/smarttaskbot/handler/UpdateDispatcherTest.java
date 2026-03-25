@@ -56,6 +56,8 @@ class UpdateDispatcherTest {
     CalendarCallbackHandler calendarCallbackHandler;
     @Mock
     DeleteConfirmCallbackHandler deleteConfirmCallbackHandler;
+    @Mock
+    DeleteAllCompletedCallbackHandler deleteAllCompletedCallbackHandler;
 
     @Mock
     NewTaskButtonHandler newTaskButtonHandler;

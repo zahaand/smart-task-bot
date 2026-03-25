@@ -216,6 +216,29 @@ public class TaskService {
     }
 
     /**
+     * Returns the count of COMPLETED tasks for the given user.
+     *
+     * @param telegramUserId owner of the tasks
+     * @return number of completed tasks
+     */
+    public long countCompleted(Long telegramUserId) {
+        return taskRepository.countByUserTelegramUserIdAndStatus(telegramUserId, TaskStatus.COMPLETED);
+    }
+
+    /**
+     * Deletes all COMPLETED tasks for the given user in a single bulk operation.
+     *
+     * @param telegramUserId owner of the tasks
+     * @return number of tasks deleted
+     */
+    @Transactional
+    public int deleteAllCompleted(Long telegramUserId) {
+        int deleted = taskRepository.deleteAllByUserTelegramUserIdAndStatus(telegramUserId, TaskStatus.COMPLETED);
+        log.info("Deleted all completed tasks: count={}, userId={}", deleted, telegramUserId);
+        return deleted;
+    }
+
+    /**
      * Deletes a task by ID and owner. Returns the number of rows deleted (0 or 1).
      *
      * @param telegramUserId owner of the task

@@ -28,6 +28,10 @@ public class TaskListKeyboardBuilder {
             rows.add(buildTaskActionRow(task, activeTab));
         }
 
+        if (activeTab == TaskStatus.COMPLETED && !tasks.isEmpty()) {
+            rows.add(buildDeleteAllRow());
+        }
+
         rows.add(buildTabRow(activeTab));
 
         final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -54,6 +58,10 @@ public class TaskListKeyboardBuilder {
         row.add(button("🗑 Delete", BotConstants.CB_TASK_DELETE + id));
 
         return row;
+    }
+
+    private List<InlineKeyboardButton> buildDeleteAllRow() {
+        return List.of(button("🗑 Delete All", BotConstants.CB_DELETE_ALL_REQUEST));
     }
 
     private List<InlineKeyboardButton> buildTabRow(TaskStatus activeTab) {

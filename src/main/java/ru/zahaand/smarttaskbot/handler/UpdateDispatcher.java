@@ -54,6 +54,7 @@ public class UpdateDispatcher {
     private final TaskListTabCallbackHandler taskListTabCallbackHandler;
     private final CalendarCallbackHandler calendarCallbackHandler;
     private final DeleteConfirmCallbackHandler deleteConfirmCallbackHandler;
+    private final DeleteAllCompletedCallbackHandler deleteAllCompletedCallbackHandler;
 
     // Text/button handlers
     private final NewTaskButtonHandler newTaskButtonHandler;
@@ -125,6 +126,13 @@ public class UpdateDispatcher {
         if (data.startsWith(BotConstants.CB_CONFIRM_DELETE)
                 || data.equals(BotConstants.CB_CONFIRM_CANCEL)) {
             deleteConfirmCallbackHandler.handle(update);
+            return;
+        }
+
+        if (data.equals(BotConstants.CB_DELETE_ALL_REQUEST)
+                || data.equals(BotConstants.CB_DELETE_ALL_CONFIRM)
+                || data.equals(BotConstants.CB_DELETE_ALL_CANCEL)) {
+            deleteAllCompletedCallbackHandler.handle(update);
             return;
         }
 

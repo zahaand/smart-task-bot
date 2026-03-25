@@ -142,11 +142,11 @@ create tasks with correct reminder times identical to `14:00`.
 
 ### Tests for US3 (write first)
 
-- [ ] T028 [P] [US3] Update `src/test/java/ru/zahaand/smarttaskbot/service/TimeParserServiceTest.java`: add `@ParameterizedTest` + `@MethodSource` for SPACE-separated valid cases (`14 00`, `9 05`), HYPHEN-separated valid cases (`14-00`, `9-05`), boundary invalids (`25 00`, `12 99`, `25-00`)
+- [x] T028 [P] [US3] Update `src/test/java/ru/zahaand/smarttaskbot/service/TimeParserServiceTest.java`: add `@ParameterizedTest` + `@MethodSource` for SPACE-separated valid cases (`14 00`, `9 05`), HYPHEN-separated valid cases (`14-00`, `9-05`), boundary invalids (`25 00`, `12 99`, `25-00`)
 
 ### Implementation
 
-- [ ] T029 [US3] Update `src/main/java/ru/zahaand/smarttaskbot/service/TimeParserService.java`: add `private static final Pattern SPACE = Pattern.compile("(\\d{1,2}) (\\d{2})")` and `HYPHEN = Pattern.compile("(\\d{1,2})-(\\d{2})")`; extend `parse()` to try all three patterns in sequence; invalid input returns `Optional.empty()`
+- [x] T029 [US3] Update `src/main/java/ru/zahaand/smarttaskbot/service/TimeParserService.java`: add `private static final Pattern SPACE = Pattern.compile("(\\d{1,2}) (\\d{2})")` and `HYPHEN = Pattern.compile("(\\d{1,2})-(\\d{2})")`; extend `parse()` to try all three patterns in sequence; invalid input returns `Optional.empty()`
 
 **Checkpoint**: US3 complete — all three time formats accepted; US1 ENTER_REMINDER_TIME message already includes all formats in both languages.
 
@@ -162,16 +162,16 @@ list is empty. Repeat and cancel; tasks are preserved.
 
 ### Tests for US4 (write first)
 
-- [ ] T030 [P] [US4] Create `src/test/java/ru/zahaand/smarttaskbot/handler/callback/DeleteAllCompletedCallbackHandlerTest.java`: `@Nested` — request with N > 0 tasks (shows confirmation with count), request with 0 tasks (NO_COMPLETED_TASKS), confirm deletes and refreshes, cancel shows OPERATION_CANCELLED
-- [ ] T031 [P] [US4] Update `src/test/java/ru/zahaand/smarttaskbot/service/TaskServiceTest.java`: add `@Nested` for `deleteAllCompleted` — N tasks deleted returns N, 0 tasks (no-op) returns 0
+- [x] T030 [P] [US4] Create `src/test/java/ru/zahaand/smarttaskbot/handler/callback/DeleteAllCompletedCallbackHandlerTest.java`: `@Nested` — request with N > 0 tasks (shows confirmation with count), request with 0 tasks (NO_COMPLETED_TASKS), confirm deletes and refreshes, cancel shows OPERATION_CANCELLED
+- [x] T031 [P] [US4] Update `src/test/java/ru/zahaand/smarttaskbot/service/TaskServiceTest.java`: add `@Nested` for `deleteAllCompleted` — N tasks deleted returns N, 0 tasks (no-op) returns 0
 
 ### Implementation
 
-- [ ] T032 [P] [US4] Update `src/main/java/ru/zahaand/smarttaskbot/repository/TaskRepository.java`: add Spring Data derived query `countByTelegramUserIdAndStatus(Long telegramUserId, TaskStatus status)`; add `@Modifying @Query("DELETE FROM Task t WHERE t.telegramUserId = :telegramUserId AND t.status = :status") int deleteAllByTelegramUserIdAndStatus(...)` with `@Transactional`
-- [ ] T033 [US4] Update `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java`: add `countCompleted(Long telegramUserId)` delegating to `taskRepository.countByTelegramUserIdAndStatus(..., COMPLETED)`; add `@Transactional deleteAllCompleted(Long telegramUserId)` delegating to repository bulk delete; returns deleted count
-- [ ] T034 [US4] Update `src/main/java/ru/zahaand/smarttaskbot/service/TaskListKeyboardBuilder.java`: on Completed tab, if `taskService.countCompleted(telegramUserId) > 0` append `🗑 Delete All` button with callback data `BotConstants.CB_DELETE_ALL_REQUEST`; no button when count == 0
-- [ ] T035 [US4] Create `src/main/java/ru/zahaand/smarttaskbot/handler/callback/DeleteAllCompletedCallbackHandler.java`: branch on callback data — `CB_DELETE_ALL_REQUEST`: count completed; if 0 → NO_COMPLETED_TASKS; else → send DELETE_CONFIRM_ALL.formatted(count) with `[✅ Yes, delete all]` (CB_DELETE_ALL_CONFIRM) and `[❌ Cancel]` (CB_DELETE_ALL_CANCEL) inline buttons; `CB_DELETE_ALL_CONFIRM`: `taskService.deleteAllCompleted(userId)` + log INFO + send ALL_COMPLETED_DELETED + re-render Completed tab; `CB_DELETE_ALL_CANCEL`: send OPERATION_CANCELLED + re-render Completed tab
-- [ ] T036 [US4] Update `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java`: add routing for `CB_DELETE_ALL_REQUEST`, `CB_DELETE_ALL_CONFIRM`, `CB_DELETE_ALL_CANCEL` to `DeleteAllCompletedCallbackHandler` after the `lang:` branch per plan Step 3.7
+- [x] T032 [P] [US4] Update `src/main/java/ru/zahaand/smarttaskbot/repository/TaskRepository.java`: add Spring Data derived query `countByTelegramUserIdAndStatus(Long telegramUserId, TaskStatus status)`; add `@Modifying @Query("DELETE FROM Task t WHERE t.telegramUserId = :telegramUserId AND t.status = :status") int deleteAllByTelegramUserIdAndStatus(...)` with `@Transactional`
+- [x] T033 [US4] Update `src/main/java/ru/zahaand/smarttaskbot/service/TaskService.java`: add `countCompleted(Long telegramUserId)` delegating to `taskRepository.countByTelegramUserIdAndStatus(..., COMPLETED)`; add `@Transactional deleteAllCompleted(Long telegramUserId)` delegating to repository bulk delete; returns deleted count
+- [x] T034 [US4] Update `src/main/java/ru/zahaand/smarttaskbot/service/TaskListKeyboardBuilder.java`: on Completed tab, if `taskService.countCompleted(telegramUserId) > 0` append `🗑 Delete All` button with callback data `BotConstants.CB_DELETE_ALL_REQUEST`; no button when count == 0
+- [x] T035 [US4] Create `src/main/java/ru/zahaand/smarttaskbot/handler/callback/DeleteAllCompletedCallbackHandler.java`: branch on callback data — `CB_DELETE_ALL_REQUEST`: count completed; if 0 → NO_COMPLETED_TASKS; else → send DELETE_CONFIRM_ALL.formatted(count) with `[✅ Yes, delete all]` (CB_DELETE_ALL_CONFIRM) and `[❌ Cancel]` (CB_DELETE_ALL_CANCEL) inline buttons; `CB_DELETE_ALL_CONFIRM`: `taskService.deleteAllCompleted(userId)` + log INFO + send ALL_COMPLETED_DELETED + re-render Completed tab; `CB_DELETE_ALL_CANCEL`: send OPERATION_CANCELLED + re-render Completed tab
+- [x] T036 [US4] Update `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java`: add routing for `CB_DELETE_ALL_REQUEST`, `CB_DELETE_ALL_CONFIRM`, `CB_DELETE_ALL_CANCEL` to `DeleteAllCompletedCallbackHandler` after the `lang:` branch per plan Step 3.7
 
 **Checkpoint**: US4 complete — bulk delete with confirmation fully functional; idempotent on double-tap.
 

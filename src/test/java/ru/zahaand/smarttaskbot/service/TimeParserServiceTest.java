@@ -39,8 +39,23 @@ class TimeParserServiceTest {
         );
     }
 
+    static Stream<Case> spaceSeparatedCases() {
+        return Stream.of(
+                new Case("14 00", Optional.of(LocalTime.of(14, 0))),
+                new Case("9 05", Optional.of(LocalTime.of(9, 5)))
+        );
+    }
+
+    static Stream<Case> hyphenSeparatedCases() {
+        return Stream.of(
+                new Case("14-00", Optional.of(LocalTime.of(14, 0))),
+                new Case("9-05", Optional.of(LocalTime.of(9, 5)))
+        );
+    }
+
     static Stream<String> rejectedInputs() {
-        return Stream.of("12 утра", "12 вечера", "0 утра", "25:00", "14:60", "abc");
+        return Stream.of("12 утра", "12 вечера", "0 утра", "25:00", "14:60", "abc",
+                "25 00", "12 99", "25-00");
     }
 
     @Nested
@@ -57,6 +72,28 @@ class TimeParserServiceTest {
         @DisplayName("trims leading/trailing whitespace before matching")
         void trimsWhitespace() {
             assertThat(parser.parse("  14:30  ")).isEqualTo(Optional.of(LocalTime.of(14, 30)));
+        }
+    }
+
+    @Nested
+    @DisplayName("parse() — space-separated HH mm")
+    class SpaceSeparated {
+
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserServiceTest#spaceSeparatedCases")
+        void parsesSpaceSeparatedInput(Case c) {
+            assertThat(parser.parse(c.input())).isEqualTo(c.expected());
+        }
+    }
+
+    @Nested
+    @DisplayName("parse() — hyphen-separated HH-mm")
+    class HyphenSeparated {
+
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserServiceTest#hyphenSeparatedCases")
+        void parsesHyphenSeparatedInput(Case c) {
+            assertThat(parser.parse(c.input())).isEqualTo(c.expected());
         }
     }
 

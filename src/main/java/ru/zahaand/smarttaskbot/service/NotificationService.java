@@ -268,6 +268,32 @@ public class NotificationService {
     }
 
     /**
+     * Sends a delete-all-confirmation message with [✅ Yes, delete all] and [❌ Cancel] inline buttons.
+     *
+     * @param chatId target chat
+     * @param text   pre-formatted confirmation prompt (e.g. "Delete all 3 completed tasks?")
+     */
+    public void sendDeleteAllConfirmation(Long chatId, String text) {
+        final InlineKeyboardButton yesBtn = new InlineKeyboardButton("✅ Yes, delete all");
+        yesBtn.setCallbackData(BotConstants.CB_DELETE_ALL_CONFIRM);
+
+        final InlineKeyboardButton cancelBtn = new InlineKeyboardButton("❌ Cancel");
+        cancelBtn.setCallbackData(BotConstants.CB_DELETE_ALL_CANCEL);
+
+        final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(List.of(List.of(yesBtn, cancelBtn)));
+
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(markup);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send delete-all confirmation to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
      * Attempts to edit an existing message in-place.
      * Falls back to sending a new message if the Telegram edit API rejects the request
      * (e.g. message is older than 48 hours).

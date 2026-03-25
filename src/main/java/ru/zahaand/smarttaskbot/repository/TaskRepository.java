@@ -22,6 +22,14 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     int deleteByIdAndUserTelegramUserId(@Param("taskId") Long taskId,
                                         @Param("telegramUserId") Long telegramUserId);
 
+    long countByUserTelegramUserIdAndStatus(Long telegramUserId, TaskStatus status);
+
+    @Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("DELETE FROM Task t WHERE t.user.telegramUserId = :telegramUserId AND t.status = :status")
+    int deleteAllByUserTelegramUserIdAndStatus(@Param("telegramUserId") Long telegramUserId,
+                                               @Param("status") TaskStatus status);
+
     @Query("""
             SELECT t FROM Task t
             WHERE t.reminderProcessed = false

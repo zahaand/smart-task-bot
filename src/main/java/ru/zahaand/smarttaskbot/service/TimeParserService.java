@@ -17,9 +17,17 @@ import java.util.regex.Pattern;
 @Service
 public class TimeParserService {
 
-    // HH:mm or H:mm  (24-hour)
+    // HH:mm or H:mm  (24-hour, colon-separated)
     private static final Pattern P_HH_MM = Pattern.compile(
             "^(\\d{1,2}):(\\d{2})$");
+
+    // HH mm or H mm  (24-hour, space-separated)
+    private static final Pattern P_HH_SPACE_MM = Pattern.compile(
+            "^(\\d{1,2}) (\\d{2})$");
+
+    // HH-mm or H-mm  (24-hour, hyphen-separated)
+    private static final Pattern P_HH_HYPHEN_MM = Pattern.compile(
+            "^(\\d{1,2})-(\\d{2})$");
 
     // N утра  (N ∈ 1–11, whole-hour AM)
     private static final Pattern P_N_UTRA = Pattern.compile(
@@ -78,6 +86,22 @@ public class TimeParserService {
 
         // 1. HH:mm / H:mm  (must be tried before the утра/вечера patterns that also contain ":")
         m = P_HH_MM.matcher(input);
+        if (m.matches()) {
+            final int hour = Integer.parseInt(m.group(1));
+            final int minute = Integer.parseInt(m.group(2));
+            return validTime(hour, minute);
+        }
+
+        // 1b. HH mm / H mm  (space-separated 24-hour)
+        m = P_HH_SPACE_MM.matcher(input);
+        if (m.matches()) {
+            final int hour = Integer.parseInt(m.group(1));
+            final int minute = Integer.parseInt(m.group(2));
+            return validTime(hour, minute);
+        }
+
+        // 1c. HH-mm / H-mm  (hyphen-separated 24-hour)
+        m = P_HH_HYPHEN_MM.matcher(input);
         if (m.matches()) {
             final int hour = Integer.parseInt(m.group(1));
             final int minute = Integer.parseInt(m.group(2));

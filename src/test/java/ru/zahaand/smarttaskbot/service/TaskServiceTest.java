@@ -222,6 +222,45 @@ class TaskServiceTest {
         }
     }
 
+    @Nested
+    class CountCompleted {
+
+        @Test
+        @DisplayName("returns completed task count for user")
+        void returnsCount() {
+            when(taskRepository.countByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.COMPLETED)).thenReturn(3L);
+
+            long result = taskService.countCompleted(USER_ID);
+
+            assertThat(result).isEqualTo(3L);
+        }
+    }
+
+    @Nested
+    class DeleteAllCompleted {
+
+        @Test
+        @DisplayName("returns deleted count when completed tasks exist")
+        void returnsCountWhenTasksDeleted() {
+            when(taskRepository.deleteAllByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.COMPLETED)).thenReturn(3);
+
+            int result = taskService.deleteAllCompleted(USER_ID);
+
+            assertThat(result).isEqualTo(3);
+            verify(taskRepository).deleteAllByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.COMPLETED);
+        }
+
+        @Test
+        @DisplayName("returns 0 when no completed tasks exist")
+        void returnsZeroWhenNoCompletedTasks() {
+            when(taskRepository.deleteAllByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.COMPLETED)).thenReturn(0);
+
+            int result = taskService.deleteAllCompleted(USER_ID);
+
+            assertThat(result).isEqualTo(0);
+        }
+    }
+
     static Stream<String> blankTexts() {
         return Stream.of("", "   ", null);
     }
