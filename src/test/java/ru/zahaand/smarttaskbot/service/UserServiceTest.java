@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,33 +48,6 @@ class UserServiceTest {
                 .telegramUserId(USER_ID)
                 .username("alice")
                 .build(); // language and timezone null
-    }
-
-    @Nested
-    class Register {
-
-        @Test
-        @DisplayName("saves new user when not yet registered")
-        void savesNewUser() {
-            when(userRepository.existsById(USER_ID)).thenReturn(false);
-
-            userService.register(USER_ID, "alice", "Europe/Moscow");
-
-            ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-            verify(userRepository).save(captor.capture());
-            assertThat(captor.getValue().getTelegramUserId()).isEqualTo(USER_ID);
-            assertThat(captor.getValue().getTimezone()).isEqualTo("Europe/Moscow");
-        }
-
-        @Test
-        @DisplayName("does not save when user already registered (idempotent)")
-        void doesNotSaveWhenAlreadyRegistered() {
-            when(userRepository.existsById(USER_ID)).thenReturn(true);
-
-            userService.register(USER_ID, "alice", "Europe/Moscow");
-
-            verify(userRepository, never()).save(any());
-        }
     }
 
     @Nested

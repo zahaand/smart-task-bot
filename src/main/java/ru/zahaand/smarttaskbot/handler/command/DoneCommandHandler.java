@@ -5,8 +5,12 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
+import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.util.NoSuchElementException;
 
@@ -21,53 +25,51 @@ public class DoneCommandHandler {
 
     private final TaskService taskService;
     private final NotificationService notificationService;
-
-    private static final String USAGE_HINT =
-            "Please provide a task ID.\nUsage: /done <task_id>";
+    private final UserService userService;
+    private final MessageService messageService;
 
     public void handle(Update update) {
-        Message message = update.getMessage();
-        Long chatId = message.getChatId();
-        Long telegramUserId = message.getFrom().getId();
-        String messageText = message.getText();
+        final Message message = update.getMessage();
+        final Long chatId = message.getChatId();
+        final Long telegramUserId = message.getFrom().getId();
+        final String messageText = message.getText();
+        final User user = userService.findById(telegramUserId);
 
-        String argsText = extractArgs(messageText);
+        final String argsText = extractArgs(messageText);
 
         if (argsText.isBlank()) {
-            notificationService.sendMessage(chatId, USAGE_HINT);
+            notificationService.sendMessage(chatId, messageService.get(MessageKey.DONE_USAGE_HINT, user));
             return;
         }
 
-        Long taskId = getTaskId(argsText, chatId);
+        final Long taskId = getTaskId(argsText, chatId, user);
         if (taskId == null) {
             return;
         }
 
         try {
-            TaskDto task = taskService.completeTask(telegramUserId, taskId);
-
+            final TaskDto task = taskService.completeTask(telegramUserId, taskId);
             notificationService.sendMessage(chatId,
-                    "Task completed ✓\n#" + task.getId() + " " + task.getText());
-
+                    messageService.get(MessageKey.TASK_COMPLETED, user)
+                            + "\n#" + task.getId() + " " + task.getText());
         } catch (NoSuchElementException e) {
             notificationService.sendMessage(chatId, e.getMessage());
         }
     }
 
     private String extractArgs(String messageText) {
-        int spaceIndex = messageText.indexOf(' ');
+        final int spaceIndex = messageText.indexOf(' ');
         if (spaceIndex == -1) {
             return "";
         }
-
         return messageText.substring(spaceIndex + 1).trim();
     }
 
-    private Long getTaskId(String argsText, Long chatId) {
+    private Long getTaskId(String argsText, Long chatId, User user) {
         try {
             return Long.parseLong(argsText.split("\\s+")[0]);
         } catch (NumberFormatException e) {
-            notificationService.sendMessage(chatId, USAGE_HINT);
+            notificationService.sendMessage(chatId, messageService.get(MessageKey.DONE_USAGE_HINT, user));
             return null;
         }
     }

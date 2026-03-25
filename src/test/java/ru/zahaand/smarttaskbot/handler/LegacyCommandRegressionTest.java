@@ -17,7 +17,9 @@ import ru.zahaand.smarttaskbot.handler.text.ReminderTimeTextHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskCreationTextHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskListButtonHandler;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
+import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +38,13 @@ class LegacyCommandRegressionTest {
     UserStateService userStateService;
     @Mock
     NotificationService notificationService;
+
+    @Mock
+    LanguageCallbackHandler languageCallbackHandler;
+    @Mock
+    MessageService messageService;
+    @Mock
+    UserService userService;
 
     @Mock
     TimezoneCallbackHandler timezoneCallbackHandler;

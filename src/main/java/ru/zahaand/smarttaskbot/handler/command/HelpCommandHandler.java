@@ -3,25 +3,24 @@ package ru.zahaand.smarttaskbot.handler.command;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
+import ru.zahaand.smarttaskbot.service.UserService;
 
 @Component
 @RequiredArgsConstructor
 public class HelpCommandHandler {
 
     private final NotificationService notificationService;
-
-    private static final String HELP_TEXT = """
-            Smart Task Bot — available commands:
-
-            /newtask <text>              — create a new task
-            /tasks                       — list your active tasks
-            /remind <id> DD.MM.YYYY HH:mm  — set a reminder
-            /done <id>                   — mark a task as completed
-            /help                        — show this message""";
+    private final UserService userService;
+    private final MessageService messageService;
 
     public void handle(Update update) {
-        Long chatId = update.getMessage().getChatId();
-        notificationService.sendMessage(chatId, HELP_TEXT);
+        final Long chatId = update.getMessage().getChatId();
+        final Long userId = update.getMessage().getFrom().getId();
+        final User user = userService.findById(userId);
+        notificationService.sendMessage(chatId, messageService.get(MessageKey.HELP_TEXT, user));
     }
 }

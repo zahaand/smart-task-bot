@@ -14,9 +14,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
-import ru.zahaand.smarttaskbot.service.NotificationService;
-import ru.zahaand.smarttaskbot.service.TaskService;
-import ru.zahaand.smarttaskbot.service.UserStateService;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.service.*;
 
 import java.util.Optional;
 
@@ -32,6 +32,10 @@ class DeleteConfirmCallbackHandlerTest {
     UserStateService userStateService;
     @Mock
     NotificationService notificationService;
+    @Mock
+    UserService userService;
+    @Mock
+    MessageService messageService;
     @InjectMocks
     DeleteConfirmCallbackHandler handler;
 
@@ -58,6 +62,17 @@ class DeleteConfirmCallbackHandlerTest {
         when(cq.getMessage()).thenReturn(message);
         when(message.getChatId()).thenReturn(CHAT_ID);
         when(cq.getId()).thenReturn(CB_ID);
+
+        when(messageService.get(any(MessageKey.class), nullable(Language.class))).thenAnswer(inv -> {
+            MessageKey key = inv.getArgument(0);
+            return switch (key) {
+                case SESSION_EXPIRED -> "Your session has expired.";
+                case TASK_DELETED -> "✅ Task deleted.";
+                case TASK_ALREADY_DELETED -> "Task has already been deleted.";
+                case OPERATION_CANCELLED -> "Operation cancelled.";
+                default -> key.name();
+            };
+        });
     }
 
     // ── stale state guard ─────────────────────────────────────────────────────
@@ -155,7 +170,7 @@ class DeleteConfirmCallbackHandlerTest {
 
             verify(notificationService).answerCallbackQuery(CB_ID);
             verify(userStateService).setState(USER_ID, ConversationState.IDLE);
-            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Deletion cancelled."));
+            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Operation cancelled."));
             verify(taskService, never()).deleteTask(any(), any());
         }
     }

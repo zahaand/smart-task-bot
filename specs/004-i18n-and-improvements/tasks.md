@@ -61,29 +61,73 @@ confirmation, error, reminder notification — arrives in Russian.
 
 ### Tests for US1 (write first)
 
-- [ ] T011 [P] [US1] Write `src/test/java/ru/zahaand/smarttaskbot/handler/command/StartCommandHandlerTest.java`: `@Nested` per scenario — new-user creates partial user and sends bilingual welcome; returning-user sends ALREADY_REGISTERED in user's language + main menu; mid-registration redirect to RegistrationGuard
-- [ ] T012 [P] [US1] Write `src/test/java/ru/zahaand/smarttaskbot/handler/callback/LanguageCallbackHandlerTest.java`: `@Nested` — valid `lang:EN`, valid `lang:RU`, invalid language code, missing user
+- [x] T011 [P] [US1] Write `src/test/java/ru/zahaand/smarttaskbot/handler/command/StartCommandHandlerTest.java`:
+  `@Nested` per scenario — new-user creates partial user and sends bilingual welcome; returning-user sends
+  ALREADY_REGISTERED in user's language + main menu; mid-registration redirect to RegistrationGuard
+- [x] T012 [P] [US1] Write `src/test/java/ru/zahaand/smarttaskbot/handler/callback/LanguageCallbackHandlerTest.java`:
+  `@Nested` — valid `lang:EN`, valid `lang:RU`, invalid language code, missing user
 
 ### Registration Flow
 
-- [ ] T013 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/service/UserService.java`: add `createPartialUser(telegramUserId, username)` (single `@Transactional` — persists User with language=null + timezone=null AND UserState AWAITING_LANGUAGE atomically); add `updateLanguage(telegramUserId, Language)`, `updateTimezone(telegramUserId, String)`; redefine `isRegistered()` as `language != null AND timezone != null`; add `isLanguagePending()` and `isTimezonePending()`; remove or repurpose old `register()` method
-- [ ] T014 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/service/UserStateService.java`: remove `initRegistration()` — UserState creation is exclusively owned by `UserService.createPartialUser()`; ensure `transitionTo()` handles AWAITING_LANGUAGE and AWAITING_TIMEZONE
-- [ ] T015 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/service/NotificationService.java`: add `sendLanguageKeyboard(chatId)` — sends WELCOME_BILINGUAL text with `[🇬🇧 English]` (lang:EN) and `[🇷🇺 Русский]` (lang:RU) inline buttons; add `sendTimezoneKeyboard(chatId, Language)` overload — shows SELECT_TIMEZONE in user's language; add `sendPersistentMenu(chatId, String, Language)` overload — uses MessageService for BTN_NEW_TASK and BTN_MY_TASKS labels
-- [ ] T016 [US1] Rewrite `src/main/java/ru/zahaand/smarttaskbot/handler/command/StartCommandHandler.java`: if `isRegistered(userId)` → send ALREADY_REGISTERED + persistent menu in user's language; else if user does not exist → `createPartialUser()` + `sendLanguageKeyboard()`; else → RegistrationGuard handles mid-registration; add `@Slf4j` logging per plan Step 3.3
-- [ ] T017 [US1] Create `src/main/java/ru/zahaand/smarttaskbot/handler/callback/LanguageCallbackHandler.java`: parse lang:EN / lang:RU from callback data; `updateLanguage()`; `transitionTo(AWAITING_TIMEZONE)`; `sendTimezoneKeyboard(chatId, language)`; log INFO with userId and language
-- [ ] T018 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/handler/callback/TimezoneCallbackHandler.java`: remove user-creation logic (User already exists from `/start`); only call `updateTimezone()` and `transitionTo(IDLE)`; replace hardcoded confirmation string with `messageService.get(TIMEZONE_CONFIRMED, user).formatted(timezone)`; send persistent menu
-- [ ] T019 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/handler/RegistrationGuard.java`: implement three-state routing — no User row → `sendLanguageKeyboard()`; language IS NULL → `sendLanguageKeyboard()`; timezone IS NULL → `sendTimezoneKeyboard(chatId, user.getLanguage())`; fully registered → `commandAction.run()`
-- [ ] T020 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java`: add `lang:` prefix routing to `LanguageCallbackHandler` as the first branch in `routeCallback()`; replace Russian fallback strings (`"Пожалуйста, используй кнопки выше."`, `"Эта функция скоро появится!"`) with `messageService.get(USE_BUTTONS/COMING_SOON, user)`
+- [x] T013 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/service/UserService.java`: add
+  `createPartialUser(telegramUserId, username)` (single `@Transactional` — persists User with language=null +
+  timezone=null AND UserState AWAITING_LANGUAGE atomically); add `updateLanguage(telegramUserId, Language)`,
+  `updateTimezone(telegramUserId, String)`; redefine `isRegistered()` as `language != null AND timezone != null`; add
+  `isLanguagePending()` and `isTimezonePending()`; remove or repurpose old `register()` method
+- [x] T014 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/service/UserStateService.java`: remove
+  `initRegistration()` — UserState creation is exclusively owned by `UserService.createPartialUser()`; ensure
+  `transitionTo()` handles AWAITING_LANGUAGE and AWAITING_TIMEZONE
+- [x] T015 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/service/NotificationService.java`: add
+  `sendLanguageKeyboard(chatId)` — sends WELCOME_BILINGUAL text with `[🇬🇧 English]` (lang:EN) and `[🇷🇺 Русский]` (lang:
+  RU) inline buttons; add `sendTimezoneKeyboard(chatId, Language)` overload — shows SELECT_TIMEZONE in user's language;
+  add `sendPersistentMenu(chatId, String, Language)` overload — uses MessageService for BTN_NEW_TASK and BTN_MY_TASKS
+  labels
+- [x] T016 [US1] Rewrite `src/main/java/ru/zahaand/smarttaskbot/handler/command/StartCommandHandler.java`: if
+  `isRegistered(userId)` → send ALREADY_REGISTERED + persistent menu in user's language; else if user does not exist →
+  `createPartialUser()` + `sendLanguageKeyboard()`; else → RegistrationGuard handles mid-registration; add `@Slf4j`
+  logging per plan Step 3.3
+- [x] T017 [US1] Create `src/main/java/ru/zahaand/smarttaskbot/handler/callback/LanguageCallbackHandler.java`: parse
+  lang:EN / lang:RU from callback data; `updateLanguage()`; `transitionTo(AWAITING_TIMEZONE)`;
+  `sendTimezoneKeyboard(chatId, language)`; log INFO with userId and language
+- [x] T018 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/handler/callback/TimezoneCallbackHandler.java`: remove
+  user-creation logic (User already exists from `/start`); only call `updateTimezone()` and `transitionTo(IDLE)`;
+  replace hardcoded confirmation string with `messageService.get(TIMEZONE_CONFIRMED, user).formatted(timezone)`; send
+  persistent menu
+- [x] T019 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/handler/RegistrationGuard.java`: implement three-state
+  routing — no User row → `sendLanguageKeyboard()`; language IS NULL → `sendLanguageKeyboard()`; timezone IS NULL →
+  `sendTimezoneKeyboard(chatId, user.getLanguage())`; fully registered → `commandAction.run()`
+- [x] T020 [US1] Update `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java`: add `lang:` prefix
+  routing to `LanguageCallbackHandler` as the first branch in `routeCallback()`; replace Russian fallback strings (
+  `"Пожалуйста, используй кнопки выше."`, `"Эта функция скоро появится!"`) with
+  `messageService.get(USE_BUTTONS/COMING_SOON, user)`
 
 ### Handler Migration to MessageService (FR-005)
 
-- [ ] T021 [P] [US1] Inject `MessageService` + `UserService` into `src/main/java/ru/zahaand/smarttaskbot/handler/command/UnknownInputHandler.java`; replace hardcoded fallback string with `messageService.get(USE_BUTTONS, user)`
-- [ ] T022 [P] [US1] Inject `MessageService` + `UserService` into `HelpCommandHandler.java`, `DoneCommandHandler.java`, `RemindCommandHandler.java`, `NewTaskCommandHandler.java` under `src/main/java/ru/zahaand/smarttaskbot/handler/command/`; replace all hardcoded user-facing strings with MessageService calls
-- [ ] T023 [P] [US1] Inject `MessageService` + `UserService` into `NewTaskButtonHandler.java`, `TaskCreationTextHandler.java`, `ReminderTimeTextHandler.java`, `TaskListButtonHandler.java` under `src/main/java/ru/zahaand/smarttaskbot/handler/text/`; replace all hardcoded prompt strings with MessageService calls
-- [ ] T024 [P] [US1] Inject `MessageService` + `UserService` into `src/main/java/ru/zahaand/smarttaskbot/handler/command/TaskListCommandHandler.java` and `src/main/java/ru/zahaand/smarttaskbot/handler/callback/TaskListTabCallbackHandler.java`; replace hardcoded strings; pass user to keyboard builders for language-aware labels
-- [ ] T025 [P] [US1] Inject `MessageService` + `UserService` into `CalendarCallbackHandler.java`, `TaskActionCallbackHandler.java`, `DeleteConfirmCallbackHandler.java` under `src/main/java/ru/zahaand/smarttaskbot/handler/callback/`; replace all hardcoded confirmation and error strings with MessageService calls
-- [ ] T026 [US1] Inject `MessageService` into `src/main/java/ru/zahaand/smarttaskbot/service/UserStateService.java`; replace any hardcoded cancel or stale-state messages with `messageService.get(OPERATION_CANCELLED / SOMETHING_WENT_WRONG, user)` calls
-- [ ] T027 [US1] Inject `UserService` + `MessageService` into `src/main/java/ru/zahaand/smarttaskbot/service/ReminderService.java`; resolve owner Language via `userService.findById(task.getTelegramUserId()).getLanguage()`; replace `"⏰ Reminder: " + task.getTitle()` with `messageService.get(REMINDER_NOTIFICATION, user).formatted(task.getTitle())`
+- [x] T021 [P] [US1] Inject `MessageService` + `UserService` into
+  `src/main/java/ru/zahaand/smarttaskbot/handler/command/UnknownInputHandler.java`; replace hardcoded fallback string
+  with `messageService.get(USE_BUTTONS, user)`
+- [x] T022 [P] [US1] Inject `MessageService` + `UserService` into `HelpCommandHandler.java`, `DoneCommandHandler.java`,
+  `RemindCommandHandler.java`, `NewTaskCommandHandler.java` under
+  `src/main/java/ru/zahaand/smarttaskbot/handler/command/`; replace all hardcoded user-facing strings with
+  MessageService calls
+- [x] T023 [P] [US1] Inject `MessageService` + `UserService` into `NewTaskButtonHandler.java`,
+  `TaskCreationTextHandler.java`, `ReminderTimeTextHandler.java`, `TaskListButtonHandler.java` under
+  `src/main/java/ru/zahaand/smarttaskbot/handler/text/`; replace all hardcoded prompt strings with MessageService calls
+- [x] T024 [P] [US1] Inject `MessageService` + `UserService` into
+  `src/main/java/ru/zahaand/smarttaskbot/handler/command/TaskListCommandHandler.java` and
+  `src/main/java/ru/zahaand/smarttaskbot/handler/callback/TaskListTabCallbackHandler.java`; replace hardcoded strings;
+  pass user to keyboard builders for language-aware labels
+- [x] T025 [P] [US1] Inject `MessageService` + `UserService` into `CalendarCallbackHandler.java`,
+  `TaskActionCallbackHandler.java`, `DeleteConfirmCallbackHandler.java` under
+  `src/main/java/ru/zahaand/smarttaskbot/handler/callback/`; replace all hardcoded confirmation and error strings with
+  MessageService calls
+- [x] T026 [US1] Inject `MessageService` into `src/main/java/ru/zahaand/smarttaskbot/service/UserStateService.java`;
+  replace any hardcoded cancel or stale-state messages with
+  `messageService.get(OPERATION_CANCELLED / SOMETHING_WENT_WRONG, user)` calls
+- [x] T027 [US1] Inject `UserService` + `MessageService` into
+  `src/main/java/ru/zahaand/smarttaskbot/service/ReminderService.java`; resolve owner Language via
+  `userService.findById(task.getTelegramUserId()).getLanguage()`; replace `"⏰ Reminder: " + task.getTitle()` with
+  `messageService.get(REMINDER_NOTIFICATION, user).formatted(task.getTitle())`
 
 **Checkpoint**: US1 complete — every bot message is bilingual; new-user registration two-step flow works; zero hardcoded strings in handlers and services.
 

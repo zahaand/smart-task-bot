@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.Task;
+import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.repository.TaskRepository;
 
 import java.time.Instant;
@@ -35,6 +37,8 @@ public class ReminderService {
 
     private final TaskRepository taskRepository;
     private final NotificationService notificationService;
+    private final UserService userService;
+    private final MessageService messageService;
 
     @Scheduled(fixedDelay = 60_000)
     @Transactional
@@ -50,7 +54,7 @@ public class ReminderService {
 
         for (Task task : tasks) {
             try {
-                notificationService.sendReminder(task);
+                sendReminderMessage(task);
                 task.setReminderProcessed(true);
             } catch (Exception e) {
                 log.warn("Failed to send reminder for task #{}: {}", task.getId(), e.getMessage());
@@ -66,7 +70,7 @@ public class ReminderService {
 
         for (Task task : tasks) {
             try {
-                notificationService.sendReminder(task);
+                sendReminderMessage(task);
                 task.setReminderProcessed(true);
             } catch (Exception e) {
                 log.warn("Retry failed for task #{}, discarding reminder: {}", task.getId(), e.getMessage());
@@ -75,5 +79,12 @@ public class ReminderService {
         }
 
         taskRepository.saveAll(tasks);
+    }
+
+    private void sendReminderMessage(Task task) {
+        final User user = userService.findById(task.getUser().getTelegramUserId());
+        final String text = messageService.get(MessageKey.REMINDER_NOTIFICATION, user)
+                .formatted(task.getText());
+        notificationService.sendMessage(user.getTelegramUserId(), text);
     }
 }

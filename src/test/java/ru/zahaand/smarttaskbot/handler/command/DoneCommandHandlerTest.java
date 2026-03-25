@@ -11,13 +11,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
+import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.util.NoSuchElementException;
 
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +31,12 @@ class DoneCommandHandlerTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private MessageService messageService;
 
     @InjectMocks
     private DoneCommandHandler handler;
@@ -48,6 +57,16 @@ class DoneCommandHandlerTest {
         when(message.getChatId()).thenReturn(CHAT_ID);
         when(message.getFrom()).thenReturn(from);
         when(from.getId()).thenReturn(USER_ID);
+
+        lenient().when(userService.findById(USER_ID)).thenReturn(new User());
+        lenient().when(messageService.get(any(MessageKey.class), any(User.class))).thenAnswer(inv -> {
+            MessageKey key = inv.getArgument(0);
+            return switch (key) {
+                case DONE_USAGE_HINT -> "Please provide a task ID.\nUsage: /done <task_id>";
+                case TASK_COMPLETED -> "Task completed ✓";
+                default -> key.name();
+            };
+        });
     }
 
     @Nested

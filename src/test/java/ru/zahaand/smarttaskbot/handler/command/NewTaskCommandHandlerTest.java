@@ -13,8 +13,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
+import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.util.stream.Stream;
 
@@ -29,6 +33,12 @@ class NewTaskCommandHandlerTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private MessageService messageService;
 
     @InjectMocks
     private NewTaskCommandHandler handler;
@@ -49,6 +59,9 @@ class NewTaskCommandHandlerTest {
         when(message.getChatId()).thenReturn(CHAT_ID);
         when(message.getFrom()).thenReturn(from);
         when(from.getId()).thenReturn(USER_ID);
+
+        lenient().when(userService.findById(USER_ID)).thenReturn(new User());
+        lenient().when(messageService.get(any(MessageKey.class), any(User.class))).thenReturn("Task created ✓");
     }
 
     @Nested

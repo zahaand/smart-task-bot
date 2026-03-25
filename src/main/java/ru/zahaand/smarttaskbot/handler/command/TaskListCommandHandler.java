@@ -4,15 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
+import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.util.List;
 
 /**
  * Handles the {@code /tasks} command.
- * Fetches all ACTIVE tasks for the user and formats them into a numbered list.
- * Reminder times are shown in the user's local timezone when set.
  */
 @Component
 @RequiredArgsConstructor
@@ -20,26 +22,28 @@ public class TaskListCommandHandler {
 
     private final TaskService taskService;
     private final NotificationService notificationService;
+    private final UserService userService;
+    private final MessageService messageService;
 
     public void handle(Update update) {
-        Long chatId = update.getMessage().getChatId();
-        Long telegramUserId = update.getMessage().getFrom().getId();
+        final Long chatId = update.getMessage().getChatId();
+        final Long telegramUserId = update.getMessage().getFrom().getId();
+        final User user = userService.findById(telegramUserId);
 
-        List<TaskDto> tasks = taskService.getActiveTasks(telegramUserId);
+        final List<TaskDto> tasks = taskService.getActiveTasks(telegramUserId);
 
         if (tasks.isEmpty()) {
-            notificationService.sendMessage(chatId,
-                    "You have no active tasks.\nUse /newtask to create one.");
+            notificationService.sendMessage(chatId, messageService.get(MessageKey.NO_ACTIVE_TASKS, user));
             return;
         }
 
-        StringBuilder builder = new StringBuilder("Your active tasks:\n");
+        final StringBuilder builder = new StringBuilder(
+                messageService.get(MessageKey.TASKS_ACTIVE_HEADER, user) + ":\n");
         for (TaskDto task : tasks) {
             builder.append("\n#")
                     .append(task.getId())
                     .append(" ")
                     .append(task.getText());
-
             if (task.getReminderTime() != null) {
                 builder.append("  ⏰ ").append(task.getReminderTime());
             }

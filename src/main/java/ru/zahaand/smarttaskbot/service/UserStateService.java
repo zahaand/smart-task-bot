@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.UserState;
 import ru.zahaand.smarttaskbot.repository.UserStateRepository;
 
@@ -27,6 +28,7 @@ public class UserStateService {
     private final UserStateRepository userStateRepository;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    private final MessageService messageService;
 
     private static final long STALE_HOURS = 24;
 
@@ -108,7 +110,9 @@ public class UserStateService {
      */
     public void cancelWithNotification(Long userId, Long chatId, ConversationState activeState) {
         setState(userId, ConversationState.IDLE);
-        notificationService.sendMessage(chatId, cancelMessage(activeState));
+        // Language resolved as null → EN fallback; avoids injecting UserService here
+        notificationService.sendMessage(chatId,
+                messageService.get(MessageKey.OPERATION_CANCELLED, (ru.zahaand.smarttaskbot.model.Language) null));
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -127,13 +131,5 @@ public class UserStateService {
         }
     }
 
-    private static String cancelMessage(ConversationState state) {
-        return switch (state) {
-            case CREATING_TASK -> "Task creation cancelled.";
-            case ENTERING_REMINDER_TIME -> "Reminder setup cancelled.";
-            case CONFIRMING_DELETE -> "Deletion cancelled.";
-            case SELECTING_REMINDER_DATE -> "Date selection cancelled.";
-            default -> "Action cancelled.";
-        };
-    }
+
 }

@@ -15,7 +15,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
+import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
 import java.time.LocalDate;
@@ -33,6 +37,10 @@ class CalendarCallbackHandlerTest {
     UserStateService userStateService;
     @Mock
     NotificationService notificationService;
+    @Mock
+    UserService userService;
+    @Mock
+    MessageService messageService;
     @InjectMocks
     CalendarCallbackHandler handler;
 
@@ -60,6 +68,11 @@ class CalendarCallbackHandlerTest {
         when(message.getChatId()).thenReturn(CHAT_ID);
         when(message.getMessageId()).thenReturn(MSG_ID);
         when(cq.getId()).thenReturn(CB_ID);
+
+        lenient().when(messageService.get(any(MessageKey.class), nullable(Language.class))).thenAnswer(inv -> {
+            MessageKey key = inv.getArgument(0);
+            return key.name().toLowerCase().replace('_', ' ');
+        });
     }
 
     // ── stale state guard ─────────────────────────────────────────────────────

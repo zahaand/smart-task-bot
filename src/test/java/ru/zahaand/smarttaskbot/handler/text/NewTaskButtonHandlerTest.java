@@ -10,9 +10,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
+import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,6 +28,10 @@ class NewTaskButtonHandlerTest {
     UserStateService userStateService;
     @Mock
     NotificationService notificationService;
+    @Mock
+    UserService userService;
+    @Mock
+    MessageService messageService;
     @InjectMocks
     NewTaskButtonHandler handler;
 
@@ -42,6 +52,9 @@ class NewTaskButtonHandlerTest {
         when(message.getChatId()).thenReturn(CHAT_ID);
         when(message.getFrom()).thenReturn(from);
         when(from.getId()).thenReturn(USER_ID);
+
+        when(userService.findById(USER_ID)).thenReturn(new User());
+        when(messageService.get(any(MessageKey.class), any(User.class))).thenReturn("Enter task description:");
     }
 
     @Test
@@ -50,6 +63,6 @@ class NewTaskButtonHandlerTest {
         handler.handle(update);
 
         verify(userStateService).setState(USER_ID, ConversationState.CREATING_TASK);
-        verify(notificationService).sendMessage(eq(CHAT_ID), eq("Enter task text:"));
+        verify(notificationService).sendMessage(eq(CHAT_ID), eq("Enter task description:"));
     }
 }

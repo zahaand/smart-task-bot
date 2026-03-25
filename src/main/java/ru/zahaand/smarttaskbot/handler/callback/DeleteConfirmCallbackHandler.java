@@ -8,9 +8,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
-import ru.zahaand.smarttaskbot.service.NotificationService;
-import ru.zahaand.smarttaskbot.service.TaskService;
-import ru.zahaand.smarttaskbot.service.UserStateService;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.*;
 
 /**
  * Handles CONFIRM_DELETE and CONFIRM_CANCEL callbacks produced by the delete-confirmation prompt.
@@ -28,6 +29,8 @@ public class DeleteConfirmCallbackHandler {
     private final TaskService taskService;
     private final UserStateService userStateService;
     private final NotificationService notificationService;
+    private final UserService userService;
+    private final MessageService messageService;
 
     public void handle(Update update) {
         final CallbackQuery cq = update.getCallbackQuery();
@@ -38,7 +41,8 @@ public class DeleteConfirmCallbackHandler {
         if (userStateService.getState(userId) != ConversationState.CONFIRMING_DELETE) {
             notificationService.answerCallbackQuery(cq.getId());
             userStateService.setState(userId, ConversationState.IDLE);
-            notificationService.sendMessage(chatId, "Your session has expired. Please start over.");
+            notificationService.sendMessage(chatId,
+                    messageService.get(MessageKey.SESSION_EXPIRED, resolveLanguage(userId)));
             return;
         }
 
@@ -56,7 +60,8 @@ public class DeleteConfirmCallbackHandler {
             log.warn("DeleteConfirmCallbackHandler: missing taskId in context for userId={}", userId);
             notificationService.answerCallbackQuery(callbackQueryId);
             userStateService.setState(userId, ConversationState.IDLE);
-            notificationService.sendMessage(chatId, "Your session has expired. Please start over.");
+            notificationService.sendMessage(chatId,
+                    messageService.get(MessageKey.SESSION_EXPIRED, resolveLanguage(userId)));
             return;
         }
 
@@ -64,17 +69,30 @@ public class DeleteConfirmCallbackHandler {
         userStateService.setState(userId, ConversationState.IDLE);
 
         final int deleted = taskService.deleteTask(userId, ctx.getTaskId());
+        final Language language = resolveLanguage(userId);
         if (deleted == 0) {
             log.warn("DeleteConfirmCallbackHandler: task #{} already gone for userId={}", ctx.getTaskId(), userId);
-            notificationService.sendMessage(chatId, "Task has already been deleted.");
+            notificationService.sendMessage(chatId,
+                    messageService.get(MessageKey.TASK_ALREADY_DELETED, language));
         } else {
-            notificationService.sendMessage(chatId, "✅ Task deleted.");
+            notificationService.sendMessage(chatId,
+                    messageService.get(MessageKey.TASK_DELETED, language));
         }
     }
 
     private void handleConfirmCancel(String callbackQueryId, Long userId, Long chatId) {
         notificationService.answerCallbackQuery(callbackQueryId);
         userStateService.setState(userId, ConversationState.IDLE);
-        notificationService.sendMessage(chatId, "Deletion cancelled.");
+        notificationService.sendMessage(chatId,
+                messageService.get(MessageKey.OPERATION_CANCELLED, resolveLanguage(userId)));
+    }
+
+    private Language resolveLanguage(Long userId) {
+        try {
+            final User user = userService.findById(userId);
+            return user.getLanguage();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

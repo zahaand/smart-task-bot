@@ -8,11 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
-import ru.zahaand.smarttaskbot.model.ConversationState;
-import ru.zahaand.smarttaskbot.model.TaskStatus;
-import ru.zahaand.smarttaskbot.service.NotificationService;
-import ru.zahaand.smarttaskbot.service.TaskService;
-import ru.zahaand.smarttaskbot.service.UserStateService;
+import ru.zahaand.smarttaskbot.model.*;
+import ru.zahaand.smarttaskbot.service.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,6 +29,8 @@ public class TaskActionCallbackHandler {
     private final TaskService taskService;
     private final UserStateService userStateService;
     private final NotificationService notificationService;
+    private final UserService userService;
+    private final MessageService messageService;
 
     public void handle(Update update) {
         final CallbackQuery cq = update.getCallbackQuery();
@@ -82,13 +81,23 @@ public class TaskActionCallbackHandler {
             taskText = taskService.getTaskText(userId, taskId);
         } catch (NoSuchElementException e) {
             log.warn("TASK_DELETE: task #{} not found for userId={}", taskId, userId);
-            notificationService.sendMessage(chatId, "Task not found.");
+            notificationService.sendMessage(chatId,
+                    messageService.get(MessageKey.SOMETHING_WENT_WRONG, resolveLanguage(userId)));
             return;
         }
 
         final ConversationContext ctx = ConversationContext.builder().taskId(taskId).build();
         userStateService.setStateWithContext(userId, ConversationState.CONFIRMING_DELETE, ctx);
         notificationService.sendDeleteConfirmation(chatId, taskId, taskText);
+    }
+
+    private Language resolveLanguage(Long userId) {
+        try {
+            final User user = userService.findById(userId);
+            return user.getLanguage();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void handleTaskDone(String callbackQueryId, Long userId, Long chatId,

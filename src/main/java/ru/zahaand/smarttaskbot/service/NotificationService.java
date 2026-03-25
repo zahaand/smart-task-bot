@@ -15,6 +15,8 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.Task;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
 
@@ -36,6 +38,7 @@ public class NotificationService {
     private final AbsSender sender;
     private final TaskListKeyboardBuilder taskListKeyboardBuilder;
     private final CalendarKeyboardBuilder calendarKeyboardBuilder;
+    private final MessageService messageService;
 
     private static final DateTimeFormatter TZ_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -43,10 +46,12 @@ public class NotificationService {
 
     public NotificationService(@Lazy AbsSender sender,
                                TaskListKeyboardBuilder taskListKeyboardBuilder,
-                               CalendarKeyboardBuilder calendarKeyboardBuilder) {
+                               CalendarKeyboardBuilder calendarKeyboardBuilder,
+                               MessageService messageService) {
         this.sender = sender;
         this.taskListKeyboardBuilder = taskListKeyboardBuilder;
         this.calendarKeyboardBuilder = calendarKeyboardBuilder;
+        this.messageService = messageService;
     }
 
     public void sendMessage(Long chatId, String text) {
@@ -68,6 +73,58 @@ public class NotificationService {
             sender.execute(message);
         } catch (TelegramApiException e) {
             log.error("Failed to send timezone keyboard to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Sends the bilingual welcome message with [🇬🇧 English] / [🇷🇺 Русский] inline buttons.
+     * Always uses WELCOME_BILINGUAL (same in both languages by design).
+     * <p>
+     * Отправляет двуязычное приветствие с кнопками выбора языка.
+     */
+    public void sendLanguageKeyboard(Long chatId) {
+        final String text = messageService.get(MessageKey.WELCOME_BILINGUAL, Language.EN);
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+
+        final InlineKeyboardButton enBtn = new InlineKeyboardButton("🇬🇧 English");
+        enBtn.setCallbackData(BotConstants.CB_LANG_EN);
+
+        final InlineKeyboardButton ruBtn = new InlineKeyboardButton("🇷🇺 Русский");
+        ruBtn.setCallbackData(BotConstants.CB_LANG_RU);
+
+        final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(List.of(List.of(enBtn, ruBtn)));
+        message.setReplyMarkup(markup);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send language keyboard to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Sends the timezone selection keyboard with a language-aware prompt.
+     * <p>
+     * Отправляет клавиатуру выбора часового пояса с текстом на языке пользователя.
+     */
+    public void sendTimezoneKeyboard(Long chatId, Language language) {
+        sendTimezoneKeyboard(chatId, messageService.get(MessageKey.SELECT_TIMEZONE, language));
+    }
+
+    /**
+     * Sends a message with the persistent reply keyboard, using language-aware button labels.
+     * <p>
+     * Отправляет сообщение с постоянной клавиатурой с кнопками на языке пользователя.
+     */
+    public void sendPersistentMenu(Long chatId, String text, Language language) {
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(buildPersistentMenuKeyboard(language));
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send persistent menu to chatId={}: {}", chatId, e.getMessage(), e);
         }
     }
 
@@ -255,6 +312,19 @@ public class NotificationService {
         row.add(new KeyboardButton(BotConstants.BTN_MY_TASKS));
 
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        markup.setKeyboard(List.of(row));
+        markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
+
+        return markup;
+    }
+
+    private ReplyKeyboardMarkup buildPersistentMenuKeyboard(Language language) {
+        final KeyboardRow row = new KeyboardRow();
+        row.add(new KeyboardButton(messageService.get(MessageKey.BTN_NEW_TASK, language)));
+        row.add(new KeyboardButton(messageService.get(MessageKey.BTN_MY_TASKS, language)));
+
+        final ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         markup.setKeyboard(List.of(row));
         markup.setResizeKeyboard(true);
         markup.setIsPersistent(true);

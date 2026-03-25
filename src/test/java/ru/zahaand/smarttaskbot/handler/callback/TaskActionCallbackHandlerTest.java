@@ -16,10 +16,10 @@ import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
-import ru.zahaand.smarttaskbot.service.NotificationService;
-import ru.zahaand.smarttaskbot.service.TaskService;
-import ru.zahaand.smarttaskbot.service.UserStateService;
+import ru.zahaand.smarttaskbot.service.*;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,6 +37,10 @@ class TaskActionCallbackHandlerTest {
     UserStateService userStateService;
     @Mock
     NotificationService notificationService;
+    @Mock
+    UserService userService;
+    @Mock
+    MessageService messageService;
     @InjectMocks
     TaskActionCallbackHandler handler;
 
@@ -65,6 +69,8 @@ class TaskActionCallbackHandlerTest {
         when(message.getChatId()).thenReturn(CHAT_ID);
         when(message.getMessageId()).thenReturn(MSG_ID);
         when(cq.getId()).thenReturn(CB_ID);
+
+        lenient().when(messageService.get(any(MessageKey.class), nullable(Language.class))).thenReturn("Something went wrong. Please try again.");
     }
 
     @Nested
@@ -132,8 +138,8 @@ class TaskActionCallbackHandlerTest {
         }
 
         @Test
-        @DisplayName("sends \"Task not found.\" when task no longer exists")
-        void sendsNotFoundWhenTaskGone() {
+        @DisplayName("sends error message when task no longer exists")
+        void sendsErrorWhenTaskGone() {
             when(cq.getData()).thenReturn(BotConstants.CB_TASK_DELETE + TASK_ID);
             when(taskService.getTaskText(USER_ID, TASK_ID))
                     .thenThrow(new NoSuchElementException("Task #7 not found."));
@@ -141,7 +147,7 @@ class TaskActionCallbackHandlerTest {
             handler.handle(update);
 
             verify(notificationService).answerCallbackQuery(CB_ID);
-            verify(notificationService).sendMessage(eq(CHAT_ID), contains("not found"));
+            verify(notificationService).sendMessage(eq(CHAT_ID), contains("Something went wrong"));
             verify(notificationService, never()).sendDeleteConfirmation(any(), any(), any());
         }
     }

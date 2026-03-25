@@ -13,10 +13,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
-import ru.zahaand.smarttaskbot.service.NotificationService;
-import ru.zahaand.smarttaskbot.service.TaskService;
-import ru.zahaand.smarttaskbot.service.TimeParserService;
-import ru.zahaand.smarttaskbot.service.UserStateService;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -36,6 +35,10 @@ class ReminderTimeTextHandlerTest {
     UserStateService userStateService;
     @Mock
     NotificationService notificationService;
+    @Mock
+    UserService userService;
+    @Mock
+    MessageService messageService;
     @InjectMocks
     ReminderTimeTextHandler handler;
 
@@ -58,6 +61,18 @@ class ReminderTimeTextHandlerTest {
         when(message.getChatId()).thenReturn(CHAT_ID);
         when(message.getFrom()).thenReturn(from);
         when(from.getId()).thenReturn(USER_ID);
+
+        when(userService.findById(USER_ID)).thenReturn(new User());
+        when(messageService.get(any(MessageKey.class), any(User.class))).thenAnswer(inv -> {
+            MessageKey key = inv.getArgument(0);
+            return switch (key) {
+                case TASK_REMINDER_SET -> "Reminder set for %s ✓";
+                case SESSION_EXPIRED -> "Your session has expired. Please start over.";
+                case TWELVE_OCLOCK_HINT -> "For 12 o'clock use the 24-hour format: 00:00 or 12:00.";
+                case INVALID_TIME_FORMAT -> "Invalid time format. Use HH:MM, HH MM, or HH-MM.";
+                default -> key.name();
+            };
+        });
     }
 
     @Nested
@@ -115,7 +130,7 @@ class ReminderTimeTextHandlerTest {
 
             handler.handle(update);
 
-            verify(notificationService).sendMessage(eq(CHAT_ID), contains("Could not parse"));
+            verify(notificationService).sendMessage(eq(CHAT_ID), contains("Invalid time format"));
             verify(taskService, never()).setReminderFromCalendar(any(), any(), any(), any());
             verify(userStateService, never()).setState(any(), any());
         }

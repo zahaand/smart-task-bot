@@ -12,7 +12,12 @@ import ru.zahaand.smarttaskbot.handler.text.ReminderTimeTextHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskCreationTextHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskListButtonHandler;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
+import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
 /**
@@ -39,8 +44,11 @@ public class UpdateDispatcher {
     private final RegistrationGuard registrationGuard;
     private final UserStateService userStateService;
     private final NotificationService notificationService;
+    private final MessageService messageService;
+    private final UserService userService;
 
     // Callback handlers
+    private final LanguageCallbackHandler languageCallbackHandler;
     private final TimezoneCallbackHandler timezoneCallbackHandler;
     private final TaskActionCallbackHandler taskActionCallbackHandler;
     private final TaskListTabCallbackHandler taskListTabCallbackHandler;
@@ -88,6 +96,11 @@ public class UpdateDispatcher {
         // NO_OP: silent answer, no further action
         if (data.equals(BotConstants.CB_NO_OP)) {
             notificationService.answerCallbackQuery(callbackQueryId);
+            return;
+        }
+
+        if (data.startsWith(BotConstants.CB_LANG)) {
+            languageCallbackHandler.handle(update);
             return;
         }
 
@@ -173,7 +186,8 @@ public class UpdateDispatcher {
         // Step 7: button-only states — reject free text
         if (state == ConversationState.CONFIRMING_DELETE
                 || state == ConversationState.SELECTING_REMINDER_DATE) {
-            notificationService.sendMessage(chatId, "Please use the buttons above.");
+            final User buttonUser = findUserSafely(userId);
+            notificationService.sendMessage(chatId, messageService.get(MessageKey.USE_BUTTONS, buttonUser != null ? buttonUser.getLanguage() : null));
             return;
         }
 
@@ -205,12 +219,14 @@ public class UpdateDispatcher {
     }
 
     private void routeMenuButton(Update update, String text) {
-        if (BotConstants.BTN_NEW_TASK.equals(text)) {
+        if (MessageKey.BTN_NEW_TASK.get(Language.EN).equals(text)
+                || MessageKey.BTN_NEW_TASK.get(Language.RU).equals(text)) {
             newTaskButtonHandler.handle(update);
             return;
         }
 
-        if (BotConstants.BTN_MY_TASKS.equals(text)) {
+        if (MessageKey.BTN_MY_TASKS.get(Language.EN).equals(text)
+                || MessageKey.BTN_MY_TASKS.get(Language.RU).equals(text)) {
             taskListButtonHandler.handle(update);
             return;
         }
@@ -219,8 +235,18 @@ public class UpdateDispatcher {
     }
 
     boolean isPersistentMenuButton(String text) {
-        return BotConstants.BTN_NEW_TASK.equals(text)
-                || BotConstants.BTN_MY_TASKS.equals(text);
+        return MessageKey.BTN_NEW_TASK.get(Language.EN).equals(text)
+                || MessageKey.BTN_NEW_TASK.get(Language.RU).equals(text)
+                || MessageKey.BTN_MY_TASKS.get(Language.EN).equals(text)
+                || MessageKey.BTN_MY_TASKS.get(Language.RU).equals(text);
+    }
+
+    private User findUserSafely(Long userId) {
+        try {
+            return userService.findById(userId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private boolean isCommand(String text) {

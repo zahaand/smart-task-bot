@@ -8,7 +8,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
+import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
 import java.time.YearMonth;
@@ -30,6 +35,8 @@ public class CalendarCallbackHandler {
 
     private final UserStateService userStateService;
     private final NotificationService notificationService;
+    private final UserService userService;
+    private final MessageService messageService;
 
     public void handle(Update update) {
         final CallbackQuery cq = update.getCallbackQuery();
@@ -38,12 +45,12 @@ public class CalendarCallbackHandler {
         final Integer messageId = cq.getMessage().getMessageId();
         final String data = cq.getData();
 
-        // Guard: only valid while user is in SELECTING_REMINDER_DATE
         if (userStateService.getState(userId) != ConversationState.SELECTING_REMINDER_DATE) {
             notificationService.answerCallbackQuery(cq.getId());
             userStateService.setState(userId, ConversationState.IDLE);
-            notificationService.sendMessage(chatId,
-                    "Your session has expired. Please start over.");
+            final User user = findUserSafely(userId);
+            notificationService.sendMessage(chatId, messageService.get(MessageKey.SESSION_EXPIRED,
+                    user != null ? user.getLanguage() : (Language) null));
             return;
         }
 
@@ -53,8 +60,6 @@ public class CalendarCallbackHandler {
             handleDate(cq.getId(), userId, chatId, data);
         }
     }
-
-    // ── nav ───────────────────────────────────────────────────────────────────
 
     private void handleNav(String callbackQueryId, Long userId, Long chatId,
                            Integer messageId, String data) {
@@ -68,12 +73,8 @@ public class CalendarCallbackHandler {
         }
 
         YearMonth target = YearMonth.of(ctx.getViewingYear(), ctx.getViewingMonth()).plusMonths(delta);
-
-        // Server-side guard: never navigate before the current month
         final YearMonth current = YearMonth.now();
         if (target.isBefore(current)) {
-            // Silently answer — the "←" button should already carry NO_OP for the current month,
-            // but this handles any race condition or stale keyboard.
             notificationService.answerCallbackQuery(callbackQueryId);
             return;
         }
@@ -88,10 +89,8 @@ public class CalendarCallbackHandler {
         notificationService.answerCallbackQuery(callbackQueryId);
     }
 
-    // ── date selection ────────────────────────────────────────────────────────
-
     private void handleDate(String callbackQueryId, Long userId, Long chatId, String data) {
-        final String dateStr = data.substring(BotConstants.CB_CAL_DATE.length()); // YYYY-MM-DD
+        final String dateStr = data.substring(BotConstants.CB_CAL_DATE.length());
         final ConversationContext ctx = userStateService.getContext(userId).orElse(null);
 
         if (ctx == null || ctx.getTaskId() == null) {
@@ -106,7 +105,17 @@ public class CalendarCallbackHandler {
                 .build();
         userStateService.setStateWithContext(userId, ConversationState.ENTERING_REMINDER_TIME, next);
         notificationService.answerCallbackQuery(callbackQueryId);
-        notificationService.sendMessage(chatId,
-                "Enter the time (e.g. 14:30, 9:00, 21:00):");
+
+        final User user = findUserSafely(userId);
+        notificationService.sendMessage(chatId, messageService.get(MessageKey.ENTER_REMINDER_TIME,
+                user != null ? user.getLanguage() : (Language) null));
+    }
+
+    private User findUserSafely(Long userId) {
+        try {
+            return userService.findById(userId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

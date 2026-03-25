@@ -1,5 +1,6 @@
 package ru.zahaand.smarttaskbot.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,8 +9,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.Task;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
+import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.repository.TaskRepository;
 
 import java.time.Instant;
@@ -17,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,17 +32,38 @@ class ReminderServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private MessageService messageService;
+
     @InjectMocks
     private ReminderService reminderService;
 
+    private static final Long USER_TELEGRAM_ID = 42L;
+
+    private User testUser;
+
+    @BeforeEach
+    void setUp() {
+        testUser = new User();
+        testUser.setTelegramUserId(USER_TELEGRAM_ID);
+
+        lenient().when(userService.findById(anyLong())).thenReturn(testUser);
+        lenient().when(messageService.get(any(MessageKey.class), any(User.class))).thenReturn("⏰ Reminder: %s");
+    }
+
     private Task buildTask(long id) {
-        return Task.builder()
+        Task task = Task.builder()
                 .id(id)
                 .text("Task " + id)
                 .status(TaskStatus.ACTIVE)
                 .reminderProcessed(false)
                 .createdAt(LocalDateTime.now())
                 .build();
+        task.setUser(testUser);
+        return task;
     }
 
     @Nested
@@ -75,7 +99,7 @@ class ReminderServiceTest {
 
             reminderService.processDueReminders();
 
-            verify(notificationService, never()).sendReminder(any());
+            verify(notificationService, never()).sendMessage(anyLong(), anyString());
         }
 
         @Test
@@ -96,7 +120,7 @@ class ReminderServiceTest {
             Task task = buildTask(1L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of(task));
             when(taskRepository.findDueRetries(any())).thenReturn(List.of());
-            doThrow(new RuntimeException("network error")).when(notificationService).sendReminder(task);
+            doThrow(new RuntimeException("network error")).when(notificationService).sendMessage(anyLong(), anyString());
 
             Instant before = Instant.now();
             reminderService.processDueReminders();
@@ -113,7 +137,7 @@ class ReminderServiceTest {
             Task task = buildTask(1L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of(task));
             when(taskRepository.findDueRetries(any())).thenReturn(List.of());
-            doThrow(new RuntimeException("network error")).when(notificationService).sendReminder(task);
+            doThrow(new RuntimeException("network error")).when(notificationService).sendMessage(anyLong(), anyString());
 
             reminderService.processDueReminders();
 
@@ -138,7 +162,7 @@ class ReminderServiceTest {
             Task task = buildTask(1L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of());
             when(taskRepository.findDueRetries(any())).thenReturn(List.of(task));
-            doThrow(new RuntimeException("network error")).when(notificationService).sendReminder(task);
+            doThrow(new RuntimeException("network error")).when(notificationService).sendMessage(anyLong(), anyString());
 
             reminderService.processDueReminders();
 
@@ -152,7 +176,8 @@ class ReminderServiceTest {
             Task succeedingTask = buildTask(2L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of(failingTask, succeedingTask));
             when(taskRepository.findDueRetries(any())).thenReturn(List.of());
-            doThrow(new RuntimeException("fail")).when(notificationService).sendReminder(failingTask);
+            doThrow(new RuntimeException("fail")).doNothing()
+                    .when(notificationService).sendMessage(anyLong(), anyString());
 
             reminderService.processDueReminders();
 
@@ -166,7 +191,8 @@ class ReminderServiceTest {
             Task succeedingTask = buildTask(2L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of());
             when(taskRepository.findDueRetries(any())).thenReturn(List.of(failingTask, succeedingTask));
-            doThrow(new RuntimeException("fail")).when(notificationService).sendReminder(failingTask);
+            doThrow(new RuntimeException("fail")).doNothing()
+                    .when(notificationService).sendMessage(anyLong(), anyString());
 
             reminderService.processDueReminders();
 
@@ -180,7 +206,8 @@ class ReminderServiceTest {
             Task task2 = buildTask(2L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of(task1, task2));
             when(taskRepository.findDueRetries(any())).thenReturn(List.of());
-            doThrow(new RuntimeException("fail")).when(notificationService).sendReminder(task1);
+            doThrow(new RuntimeException("fail")).doNothing()
+                    .when(notificationService).sendMessage(anyLong(), anyString());
 
             reminderService.processDueReminders();
 
@@ -198,7 +225,8 @@ class ReminderServiceTest {
             Task task2 = buildTask(2L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of());
             when(taskRepository.findDueRetries(any())).thenReturn(List.of(task1, task2));
-            doThrow(new RuntimeException("fail")).when(notificationService).sendReminder(task1);
+            doThrow(new RuntimeException("fail")).doNothing()
+                    .when(notificationService).sendMessage(anyLong(), anyString());
 
             reminderService.processDueReminders();
 

@@ -119,6 +119,70 @@ public enum MessageKey {
             "❌ Отмена"
     ),
 
+    // ── Task operations (extended) ────────────────────────────────────────────
+
+    TASK_COMPLETED(
+            "Task completed ✓",
+            "Задача выполнена ✓"
+    ),
+    TASK_ALREADY_DELETED(
+            "Task has already been deleted.",
+            "Задача уже была удалена."
+    ),
+    NO_ACTIVE_TASKS(
+            "You have no active tasks.\nUse /newtask to create one.",
+            "У вас нет активных задач.\nИспользуйте /newtask для создания."
+    ),
+    TASKS_ACTIVE_HEADER(
+            "Your active tasks",
+            "Ваши активные задачи"
+    ),
+
+    // ── Errors & help ─────────────────────────────────────────────────────────
+
+    SESSION_EXPIRED(
+            "Your session has expired. Please start over.",
+            "Сессия истекла. Пожалуйста, начните заново."
+    ),
+    HELP_TEXT(
+            """
+                    Smart Task Bot — available commands:
+                    
+                    /newtask <text>              — create a new task
+                    /tasks                       — list your active tasks
+                    /remind <id> DD.MM.YYYY HH:mm  — set a reminder
+                    /done <id>                   — mark a task as completed
+                    /help                        — show this message""",
+            """
+                    Smart Task Bot — доступные команды:
+                    
+                    /newtask <текст>                — создать новую задачу
+                    /tasks                          — список активных задач
+                    /remind <id> ДД.ММ.ГГГГ ЧЧ:мм  — установить напоминание
+                    /done <id>                      — отметить задачу выполненной
+                    /help                           — показать это сообщение"""
+    ),
+    DONE_USAGE_HINT(
+            "Please provide a task ID.\nUsage: /done <task_id>",
+            "Укажите ID задачи.\nИспользование: /done <task_id>"
+    ),
+    REMIND_USAGE_HINT(
+            "Usage: /remind <id> DD.MM.YYYY HH:mm\nExample: /remind 42 25.03.2026 09:00",
+            "Использование: /remind <id> ДД.ММ.ГГГГ ЧЧ:мм\nПример: /remind 42 25.03.2026 09:00"
+    ),
+    REMIND_FORMAT_ERROR(
+            "Invalid date format.\nUsage: /remind <id> DD.MM.YYYY HH:mm\nExample: /remind 42 25.03.2026 09:00",
+            "Неверный формат даты.\nИспользование: /remind <id> ДД.ММ.ГГГГ ЧЧ:мм\nПример: /remind 42 25.03.2026 09:00"
+    ),
+    TASK_TEXT_EMPTY(
+            "Task text cannot be empty.",
+            "Описание задачи не может быть пустым."
+    ),
+    TWELVE_OCLOCK_HINT(
+            "For 12 o'clock use the 24-hour format: 00:00 (midnight) or 12:00 (noon).",
+            "Для 12 часов используйте 24-часовой формат: 00:00 (полночь) или 12:00 (полдень)."
+    ),
+
     // ── Reminder notifications ────────────────────────────────────────────────
 
     REMINDER_NOTIFICATION(

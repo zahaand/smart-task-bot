@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
+import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
 /**
@@ -17,12 +21,15 @@ public class NewTaskButtonHandler {
 
     private final UserStateService userStateService;
     private final NotificationService notificationService;
+    private final UserService userService;
+    private final MessageService messageService;
 
     public void handle(Update update) {
         final Long userId = update.getMessage().getFrom().getId();
         final Long chatId = update.getMessage().getChatId();
+        final User user = userService.findById(userId);
 
         userStateService.setState(userId, ConversationState.CREATING_TASK);
-        notificationService.sendMessage(chatId, "Enter task text:");
+        notificationService.sendMessage(chatId, messageService.get(MessageKey.ENTER_TASK_DESCRIPTION, user));
     }
 }

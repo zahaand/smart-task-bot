@@ -19,7 +19,10 @@ import ru.zahaand.smarttaskbot.handler.text.ReminderTimeTextHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskCreationTextHandler;
 import ru.zahaand.smarttaskbot.handler.text.TaskListButtonHandler;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
+import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +38,13 @@ class UpdateDispatcherTest {
     UserStateService userStateService;
     @Mock
     NotificationService notificationService;
+
+    @Mock
+    LanguageCallbackHandler languageCallbackHandler;
+    @Mock
+    MessageService messageService;
+    @Mock
+    UserService userService;
 
     @Mock
     TimezoneCallbackHandler timezoneCallbackHandler;
@@ -235,6 +245,8 @@ class UpdateDispatcherTest {
         @DisplayName("free text in CONFIRMING_DELETE → sends \"Please use the buttons above.\"")
         void freeTextInConfirmingDeleteSendsButtonsMessage() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CONFIRMING_DELETE);
+            when(messageService.get(any(MessageKey.class), (ru.zahaand.smarttaskbot.model.Language) any()))
+                    .thenReturn("Please use the buttons above.");
             Update update = messageUpdate("yes please delete");
 
             dispatcher.dispatch(update);

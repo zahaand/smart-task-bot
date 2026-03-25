@@ -148,24 +148,12 @@ public class UserService {
                 });
     }
 
-    // ── Legacy (kept for backward compatibility until Phase 3 handler migration) ──
-
     /**
-     * @deprecated Use {@link #createPartialUser} for new registrations.
-     * Removed in Phase 3 once all handlers are migrated to the two-step flow.
+     * Returns true when a User row exists for the given Telegram user ID.
+     *
+     * Возвращает true, если строка User существует для указанного пользователя.
      */
-    @Deprecated
-    @Transactional
-    public void register(Long telegramUserId, String username, String timezone) {
-        if (userRepository.existsById(telegramUserId)) {
-            return;
-        }
-        User user = new User();
-        user.setTelegramUserId(telegramUserId);
-        user.setUsername(username);
-        user.setTimezone(timezone);
-        user.setLanguage(Language.EN);
-        userRepository.save(user);
-        log.info("User registered (legacy): userId={}", telegramUserId);
+    public boolean userExists(Long telegramUserId) {
+        return userRepository.existsById(telegramUserId);
     }
 }

@@ -34,6 +34,8 @@ class NotificationServiceTest {
     TaskListKeyboardBuilder taskListKeyboardBuilder;
     @Mock
     CalendarKeyboardBuilder calendarKeyboardBuilder;
+    @Mock
+    MessageService messageService;
 
     NotificationService service;
 
@@ -42,7 +44,7 @@ class NotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new NotificationService(sender, taskListKeyboardBuilder, calendarKeyboardBuilder);
+        service = new NotificationService(sender, taskListKeyboardBuilder, calendarKeyboardBuilder, messageService);
     }
 
     // ── sendTaskList ───────────────────────────────────────────────────────────

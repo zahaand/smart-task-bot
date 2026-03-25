@@ -12,12 +12,11 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
-import ru.zahaand.smarttaskbot.service.NotificationService;
-import ru.zahaand.smarttaskbot.service.TaskService;
-import ru.zahaand.smarttaskbot.service.UserStateService;
+import ru.zahaand.smarttaskbot.model.MessageKey;
+import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.service.*;
 
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +28,10 @@ class TaskCreationTextHandlerTest {
     UserStateService userStateService;
     @Mock
     NotificationService notificationService;
+    @Mock
+    UserService userService;
+    @Mock
+    MessageService messageService;
     @InjectMocks
     TaskCreationTextHandler handler;
 
@@ -49,6 +52,16 @@ class TaskCreationTextHandlerTest {
         when(message.getChatId()).thenReturn(CHAT_ID);
         when(message.getFrom()).thenReturn(from);
         when(from.getId()).thenReturn(USER_ID);
+
+        when(userService.findById(USER_ID)).thenReturn(new User());
+        when(messageService.get(any(MessageKey.class), any(User.class))).thenAnswer(inv -> {
+            MessageKey key = inv.getArgument(0);
+            return switch (key) {
+                case TASK_TEXT_EMPTY -> "Task text cannot be empty.";
+                case TASK_CREATED -> "Task created ✓";
+                default -> key.name();
+            };
+        });
     }
 
     @Nested

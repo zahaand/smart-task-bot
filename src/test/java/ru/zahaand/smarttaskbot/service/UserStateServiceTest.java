@@ -12,6 +12,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.UserState;
 import ru.zahaand.smarttaskbot.repository.UserStateRepository;
 
@@ -20,8 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +34,9 @@ class UserStateServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private MessageService messageService;
+
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -43,7 +47,7 @@ class UserStateServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new UserStateService(userStateRepository, notificationService, objectMapper);
+        service = new UserStateService(userStateRepository, notificationService, objectMapper, messageService);
     }
 
     // ── getState ─────────────────────────────────────────────────────────────
@@ -267,47 +271,51 @@ class UserStateServiceTest {
     class CancelWithNotification {
 
         @Test
-        @DisplayName("CREATING_TASK → sends \"Task creation cancelled.\"")
+        @DisplayName("CREATING_TASK → sends \"Operation cancelled.\"")
         void creatingTask() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(messageService.get(any(MessageKey.class), nullable(Language.class))).thenReturn("Operation cancelled.");
 
             service.cancelWithNotification(USER_ID, CHAT_ID, ConversationState.CREATING_TASK);
 
-            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Task creation cancelled."));
+            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Operation cancelled."));
         }
 
         @Test
-        @DisplayName("ENTERING_REMINDER_TIME → sends \"Reminder setup cancelled.\"")
+        @DisplayName("ENTERING_REMINDER_TIME → sends \"Operation cancelled.\"")
         void enteringReminderTime() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(messageService.get(any(MessageKey.class), nullable(Language.class))).thenReturn("Operation cancelled.");
 
             service.cancelWithNotification(USER_ID, CHAT_ID, ConversationState.ENTERING_REMINDER_TIME);
 
-            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Reminder setup cancelled."));
+            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Operation cancelled."));
         }
 
         @Test
-        @DisplayName("CONFIRMING_DELETE → sends \"Deletion cancelled.\"")
+        @DisplayName("CONFIRMING_DELETE → sends \"Operation cancelled.\"")
         void confirmingDelete() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(messageService.get(any(MessageKey.class), nullable(Language.class))).thenReturn("Operation cancelled.");
 
             service.cancelWithNotification(USER_ID, CHAT_ID, ConversationState.CONFIRMING_DELETE);
 
-            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Deletion cancelled."));
+            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Operation cancelled."));
         }
 
         @Test
-        @DisplayName("SELECTING_REMINDER_DATE → sends \"Date selection cancelled.\"")
+        @DisplayName("SELECTING_REMINDER_DATE → sends \"Operation cancelled.\"")
         void selectingReminderDate() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(messageService.get(any(MessageKey.class), nullable(Language.class))).thenReturn("Operation cancelled.");
 
             service.cancelWithNotification(USER_ID, CHAT_ID, ConversationState.SELECTING_REMINDER_DATE);
 
-            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Date selection cancelled."));
+            verify(notificationService).sendMessage(eq(CHAT_ID), eq("Operation cancelled."));
         }
     }
 }
