@@ -279,9 +279,15 @@ with the new version, and the README accurately describes all current features.
 
 ## Assumptions
 
-- The existing `LanguageCallbackHandler` and `TimezoneCallbackHandler` can be reused
-  for the Settings flows with a minimal distinguishing flag or entry-point callback prefix
-  to differentiate registration-context from settings-context.
+- Language change via Settings is handled directly by `SettingsCallbackHandler` (calls
+  `UserService.updateLanguage()`) — only two options (EN/RU), presented as inline buttons
+  with `SETTINGS_LANG:EN` / `SETTINGS_LANG:RU` callbacks; no handler-level reuse of
+  `LanguageCallbackHandler` is needed.
+- Timezone change via Settings uses a two-step flow: `SettingsCallbackHandler` handles the
+  `SETTINGS_TZ_REQUEST` callback (shows the timezone-selection keyboard, sets state
+  `AWAITING_TIMEZONE`), then the existing `TimezoneCallbackHandler` handles the `CB_TZ:IANA`
+  selection with minimal context-aware changes — updating timezone of an already-registered
+  user and returning to IDLE with a settings confirmation, instead of continuing registration.
 - `CalendarKeyboardBuilder` has no injected Spring dependencies and is eligible for
   `@UtilityClass`; it will be renamed `CalendarKeyboardBuilderUtils` (confirmed by
   code inspection in the 004 branch).
