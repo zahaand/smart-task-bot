@@ -51,6 +51,8 @@ class UpdateDispatcherTest {
     @Mock
     SettingsCallbackHandler settingsCallbackHandler;
     @Mock
+    TaskDetailCallbackHandler taskDetailCallbackHandler;
+    @Mock
     TaskActionCallbackHandler taskActionCallbackHandler;
     @Mock
     TaskListTabCallbackHandler taskListTabCallbackHandler;
@@ -161,6 +163,14 @@ class UpdateDispatcherTest {
             verifyNoInteractions(calendarCallbackHandler, taskListTabCallbackHandler,
                     taskActionCallbackHandler, deleteConfirmCallbackHandler,
                     timezoneCallbackHandler);
+        }
+
+        @DisplayName("TASK_DETAIL: callback routes to TaskDetailCallbackHandler")
+        @Test
+        void taskDetailRoutesToTaskDetailHandler() {
+            Update update = callbackUpdate(BotConstantsUtils.CB_TASK_DETAIL + "7");
+            dispatcher.dispatch(update);
+            verify(taskDetailCallbackHandler).handle(update);
         }
 
         @DisplayName("CONFIRM_DELETE: callback routes to DeleteConfirmCallbackHandler")

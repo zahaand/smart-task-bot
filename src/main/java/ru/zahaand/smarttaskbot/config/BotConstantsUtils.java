@@ -42,6 +42,7 @@ public class BotConstantsUtils {
     public static final String CB_CAL_NAV = "CAL_NAV:";
     public static final String CB_CONFIRM_DELETE = "CONFIRM_DELETE:";
     public static final String CB_CONFIRM_CANCEL = "CONFIRM_CANCEL";
+    public static final String CB_TASK_DETAIL = "TASK_DETAIL:";
     public static final String CB_TASKS_TAB = "TASKS_TAB:";
     public static final String CB_NO_OP = "NO_OP";
 

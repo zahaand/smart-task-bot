@@ -233,6 +233,51 @@ class NotificationServiceTest {
         }
     }
 
+    // ── sendTaskDetail ──────────────────────────────────────────────────────
+
+    @Nested
+    class SendTaskDetail {
+
+        @DisplayName("message text contains task ID and task text")
+        @Test
+        void messageTextContainsTaskIdAndText() throws TelegramApiException {
+            TaskDto task = new TaskDto(5L, "Buy groceries", null);
+            service.sendTaskDetail(CHAT_ID, task, Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            assertThat(captor.getValue().getText()).contains("5").contains("Buy groceries");
+        }
+
+        @DisplayName("inline keyboard contains three action buttons (Remind, Complete, Delete)")
+        @Test
+        void keyboardContainsThreeActionButtons() throws TelegramApiException {
+            TaskDto task = new TaskDto(5L, "Buy groceries", null);
+            service.sendTaskDetail(CHAT_ID, task, Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
+            assertThat(markup.getKeyboard()).hasSize(1);
+            assertThat(markup.getKeyboard().get(0)).hasSize(3);
+        }
+
+        @DisplayName("action button callbacks contain correct task ID")
+        @Test
+        void buttonCallbacksContainTaskId() throws TelegramApiException {
+            TaskDto task = new TaskDto(7L, "Test task", null);
+            service.sendTaskDetail(CHAT_ID, task, Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
+            List<InlineKeyboardButton> buttons = markup.getKeyboard().get(0);
+            assertThat(buttons.get(0).getCallbackData()).startsWith("TASK_REMIND:").endsWith("7");
+            assertThat(buttons.get(1).getCallbackData()).startsWith("TASK_DONE:").endsWith("7");
+            assertThat(buttons.get(2).getCallbackData()).startsWith("TASK_DELETE:").endsWith("7");
+        }
+    }
+
     // ── sendTaskCreatedWithActions ────────────────────────────────────────────
 
     @Nested

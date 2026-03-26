@@ -203,12 +203,29 @@ public class TaskService {
     }
 
     /**
+     * Returns a single task as a DTO for the given task ID and owner.
+     * <p>
+     * Возвращает задачу как DTO по ID задачи и владельцу.
+     *
+     * @param telegramUserId owner of the task
+     * @param taskId         ID of the task
+     * @return {@link TaskDto} with formatted reminder time in the user's timezone
+     * @throws BotException if the task does not exist or belongs to another user
+     */
+    public TaskDto getTask(Long telegramUserId, Long taskId) {
+        final Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
+                .orElseThrow(() -> new BotException(MessageKey.TASK_NOT_FOUND, taskId));
+        final ZoneId userZone = ZoneId.of(userService.getTimezone(telegramUserId));
+        return getTaskDto(task, userZone);
+    }
+
+    /**
      * Returns the task text for the given task ID and owner.
      *
      * @param telegramUserId owner of the task
      * @param taskId         ID of the task
      * @return task text
-     * @throws NoSuchElementException if the task does not exist or belongs to another user
+     * @throws BotException if the task does not exist or belongs to another user
      */
     public String getTaskText(Long telegramUserId, Long taskId) {
         return taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)

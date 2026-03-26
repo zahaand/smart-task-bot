@@ -354,6 +354,42 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Sends a task detail message with Remind / Complete / Delete inline action buttons.
+     * Used when the user taps a task in the list to see its details.
+     * <p>
+     * Отправляет детальное сообщение о задаче с инлайн-кнопками действий.
+     * Используется при нажатии на задачу в списке.
+     */
+    public void sendTaskDetail(Long chatId, TaskDto task, Language language) {
+        final String text = messageService.get(MessageKey.TASK_DETAIL_HEADER, language)
+                .formatted(task.getId(), task.getText());
+
+        final InlineKeyboardButton remindBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_REMIND, language));
+        remindBtn.setCallbackData(BotConstantsUtils.CB_TASK_REMIND + task.getId());
+
+        final InlineKeyboardButton doneBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_COMPLETE, language));
+        doneBtn.setCallbackData(BotConstantsUtils.CB_TASK_DONE + task.getId());
+
+        final InlineKeyboardButton deleteBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_DELETE, language));
+        deleteBtn.setCallbackData(BotConstantsUtils.CB_TASK_DELETE + task.getId());
+
+        final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(List.of(List.of(remindBtn, doneBtn, deleteBtn)));
+
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(markup);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send task detail to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
     private String buildTaskListText(List<TaskDto> tasks, TaskStatus tab, boolean truncated, Language language) {
         if (tasks.isEmpty()) {
             return tab == TaskStatus.ACTIVE

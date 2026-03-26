@@ -16,12 +16,14 @@ import java.util.List;
 
 /**
  * Builds the inline keyboard for the task list message.
- * Each task row gets action buttons; on the Completed tab a "🗑 Delete All" row is
- * appended when tasks are present; a tab row is always appended last.
+ * Each task is a single clickable button leading to the task detail view.
+ * On the Completed tab a "🗑 Delete All" row is appended when tasks are present;
+ * a tab row is always appended last.
  * Accepts a list already truncated to at most 20 items by the caller.
  * All button labels are resolved via {@link MessageService} in the user's language.
  * <p>
  * Строит инлайн-клавиатуру для сообщения со списком задач.
+ * Каждая задача — одна кнопка, ведущая к детальному просмотру задачи.
  * На вкладке «Выполненные» добавляет кнопку «🗑 Удалить все» при наличии задач;
  * последней строкой всегда идёт переключатель вкладок.
  * Все подписи кнопок разрешаются через {@link MessageService} на языке пользователя.
@@ -37,7 +39,7 @@ public class TaskListKeyboardBuilder {
      * Builds the complete inline keyboard for the given task list, active tab, and user language.
      *
      * @param tasks     task DTOs to render (caller must truncate to ≤20 items)
-     * @param activeTab currently selected tab — determines action buttons and Delete All visibility
+     * @param activeTab currently selected tab — determines Delete All visibility
      * @param language  user's language for button label localization (null falls back to EN)
      * @return fully assembled {@link InlineKeyboardMarkup}
      * <p>
@@ -47,10 +49,7 @@ public class TaskListKeyboardBuilder {
         final List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         for (TaskDto task : tasks) {
-            // Text row: task title as a non-interactive label
-            rows.add(buildTaskTextRow(task));
-            // Action row: operation buttons
-            rows.add(buildTaskActionRow(task, activeTab, language));
+            rows.add(buildTaskButton(task));
         }
 
         if (activeTab == TaskStatus.COMPLETED && !tasks.isEmpty()) {
@@ -64,25 +63,12 @@ public class TaskListKeyboardBuilder {
         return markup;
     }
 
-    private List<InlineKeyboardButton> buildTaskTextRow(TaskDto task) {
+    private List<InlineKeyboardButton> buildTaskButton(TaskDto task) {
         String label = "#" + task.getId() + " " + task.getText();
         if (task.getReminderTime() != null) {
             label += " [⏰ " + task.getReminderTime() + "]";
         }
-        return List.of(button(label, BotConstantsUtils.CB_NO_OP));
-    }
-
-    private List<InlineKeyboardButton> buildTaskActionRow(TaskDto task, TaskStatus activeTab, Language language) {
-        final List<InlineKeyboardButton> row = new ArrayList<>();
-        final String id = task.getId().toString();
-
-        if (activeTab == TaskStatus.ACTIVE) {
-            row.add(button(messageService.get(MessageKey.BTN_REMIND, language), BotConstantsUtils.CB_TASK_REMIND + id));
-            row.add(button(messageService.get(MessageKey.BTN_COMPLETE, language), BotConstantsUtils.CB_TASK_DONE + id));
-        }
-        row.add(button(messageService.get(MessageKey.BTN_DELETE, language), BotConstantsUtils.CB_TASK_DELETE + id));
-
-        return row;
+        return List.of(button(label, BotConstantsUtils.CB_TASK_DETAIL + task.getId()));
     }
 
     private List<InlineKeyboardButton> buildDeleteAllRow(Language language) {

@@ -331,6 +331,13 @@ public enum MessageKey {
     CANNOT_REMIND_COMPLETED(
             "Cannot set a reminder on a completed task.",
             "Нельзя установить напоминание на выполненную задачу."
+    ),
+
+    // ── Task detail view ─────────────────────────────────────────────────────
+
+    TASK_DETAIL_HEADER(
+            "📋 Task #%d\n\n%s",
+            "📋 Задача #%d\n\n%s"
     );
 
     private final String en;

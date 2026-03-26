@@ -29,10 +29,6 @@ class TaskListKeyboardBuilderTest {
 
     @BeforeEach
     void setUp() {
-        // Lenient: not every test exercises every button variant
-        lenient().when(messageService.get(MessageKey.BTN_REMIND, Language.EN)).thenReturn("⏰ Remind");
-        lenient().when(messageService.get(MessageKey.BTN_COMPLETE, Language.EN)).thenReturn("✅ Complete");
-        lenient().when(messageService.get(MessageKey.BTN_DELETE, Language.EN)).thenReturn("🗑 Delete");
         lenient().when(messageService.get(MessageKey.BTN_DELETE_ALL, Language.EN)).thenReturn("🗑 Delete All");
         lenient().when(messageService.get(MessageKey.TAB_ACTIVE, Language.EN)).thenReturn("Active");
         lenient().when(messageService.get(MessageKey.TAB_COMPLETED, Language.EN)).thenReturn("Completed");
@@ -40,92 +36,40 @@ class TaskListKeyboardBuilderTest {
         builder = new TaskListKeyboardBuilder(messageService);
     }
 
-    private static TaskDto activeTask(long id) {
+    private static TaskDto task(long id) {
         return new TaskDto(id, "Task " + id, null);
     }
 
-    private static TaskDto completedTask(long id) {
-        return new TaskDto(id, "Task " + id, null);
-    }
-
-    // For N tasks: 2 rows per task (text + action) + 1 tab row = 2N + 1
     private List<List<InlineKeyboardButton>> rows(List<TaskDto> tasks, TaskStatus tab) {
         return builder.buildKeyboard(tasks, tab, Language.EN).getKeyboard();
     }
 
     @Nested
-    class ActiveTaskRows {
+    class TaskButtons {
 
-        @DisplayName("text row is a single NO_OP button containing the task id and text")
+        @DisplayName("each task is a single button with TASK_DETAIL:<id> callback")
         @Test
-        void textRowIsNoop() {
-            TaskDto task = activeTask(3L);
-            List<List<InlineKeyboardButton>> rows = rows(List.of(task), TaskStatus.ACTIVE);
-            // row 0 = text row
-            List<InlineKeyboardButton> textRow = rows.get(0);
-            assertThat(textRow).hasSize(1);
-            assertThat(textRow.get(0).getCallbackData()).isEqualTo(BotConstantsUtils.CB_NO_OP);
-            assertThat(textRow.get(0).getText()).contains("#3").contains("Task 3");
+        void taskButtonHasDetailCallback() {
+            List<List<InlineKeyboardButton>> rows = rows(List.of(task(3L)), TaskStatus.ACTIVE);
+            List<InlineKeyboardButton> taskRow = rows.get(0);
+            assertThat(taskRow).hasSize(1);
+            assertThat(taskRow.get(0).getCallbackData())
+                    .isEqualTo(BotConstantsUtils.CB_TASK_DETAIL + "3");
         }
 
-        @DisplayName("action row has exactly 3 buttons: Remind, Complete, Delete")
+        @DisplayName("task button text contains task id and text")
         @Test
-        void actionRowHasThreeButtons() {
-            TaskDto task = activeTask(3L);
-            List<List<InlineKeyboardButton>> rows = rows(List.of(task), TaskStatus.ACTIVE);
-            // row 1 = action row
-            List<InlineKeyboardButton> actionRow = rows.get(1);
-            assertThat(actionRow).hasSize(3);
+        void taskButtonTextContainsIdAndText() {
+            List<List<InlineKeyboardButton>> rows = rows(List.of(task(5L)), TaskStatus.ACTIVE);
+            assertThat(rows.get(0).get(0).getText()).contains("#5").contains("Task 5");
         }
 
-        @DisplayName("Remind button has TASK_REMIND:<id> callback")
+        @DisplayName("task button includes reminder time when set")
         @Test
-        void remindButtonCallback() {
-            TaskDto task = activeTask(5L);
-            List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
-            assertThat(actionRow.get(0).getCallbackData())
-                    .isEqualTo(BotConstantsUtils.CB_TASK_REMIND + "5");
-        }
-
-        @DisplayName("Complete button has TASK_DONE:<id> callback")
-        @Test
-        void completeButtonCallback() {
-            TaskDto task = activeTask(5L);
-            List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
-            assertThat(actionRow.get(1).getCallbackData())
-                    .isEqualTo(BotConstantsUtils.CB_TASK_DONE + "5");
-        }
-
-        @DisplayName("Delete button has TASK_DELETE:<id> callback")
-        @Test
-        void deleteButtonCallback() {
-            TaskDto task = activeTask(5L);
-            List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
-            assertThat(actionRow.get(2).getCallbackData())
-                    .isEqualTo(BotConstantsUtils.CB_TASK_DELETE + "5");
-        }
-    }
-
-    @Nested
-    class CompletedTaskRows {
-
-        @DisplayName("action row for completed task has exactly 1 button: Delete")
-        @Test
-        void completedActionRowHasOneButton() {
-            TaskDto task = completedTask(9L);
-            List<List<InlineKeyboardButton>> rows = rows(List.of(task), TaskStatus.COMPLETED);
-            // row 1 = action row
-            List<InlineKeyboardButton> actionRow = rows.get(1);
-            assertThat(actionRow).hasSize(1);
-        }
-
-        @DisplayName("Delete button for completed task has TASK_DELETE:<id> callback")
-        @Test
-        void completedDeleteButtonCallback() {
-            TaskDto task = completedTask(9L);
-            List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.COMPLETED).get(1);
-            assertThat(actionRow.get(0).getCallbackData())
-                    .isEqualTo(BotConstantsUtils.CB_TASK_DELETE + "9");
+        void taskButtonIncludesReminderTime() {
+            TaskDto taskWithReminder = new TaskDto(1L, "Buy milk", "25.03.2026 09:00");
+            List<List<InlineKeyboardButton>> rows = rows(List.of(taskWithReminder), TaskStatus.ACTIVE);
+            assertThat(rows.get(0).get(0).getText()).contains("⏰").contains("25.03.2026 09:00");
         }
     }
 
@@ -177,19 +121,40 @@ class TaskListKeyboardBuilderTest {
             assertThat(rows(List.of(), TaskStatus.ACTIVE)).hasSize(1);
         }
 
-        @DisplayName("3 active tasks → 7 rows (2 per task + 1 tab)")
+        @DisplayName("3 active tasks → 4 rows (1 per task + 1 tab)")
         @Test
         void threeTasks() {
-            List<TaskDto> tasks = List.of(activeTask(1), activeTask(2), activeTask(3));
-            assertThat(rows(tasks, TaskStatus.ACTIVE)).hasSize(7);
+            List<TaskDto> tasks = List.of(task(1), task(2), task(3));
+            assertThat(rows(tasks, TaskStatus.ACTIVE)).hasSize(4);
         }
 
-        @DisplayName("task text row carries reminder time when set")
+        @DisplayName("2 completed tasks → 4 rows (1 per task + Delete All + tab)")
         @Test
-        void textRowIncludesReminderWhenSet() {
-            TaskDto task = new TaskDto(1L, "Buy milk", "25.03.2026 09:00");
-            List<InlineKeyboardButton> textRow = rows(List.of(task), TaskStatus.ACTIVE).get(0);
-            assertThat(textRow.get(0).getText()).contains("⏰").contains("25.03.2026 09:00");
+        void completedTasksIncludeDeleteAll() {
+            List<TaskDto> tasks = List.of(task(1), task(2));
+            assertThat(rows(tasks, TaskStatus.COMPLETED)).hasSize(4);
+        }
+    }
+
+    @Nested
+    class DeleteAllRow {
+
+        @DisplayName("Delete All row is present for non-empty COMPLETED tab")
+        @Test
+        void deleteAllPresent() {
+            List<List<InlineKeyboardButton>> rows = rows(List.of(task(1)), TaskStatus.COMPLETED);
+            // rows: task button, Delete All, tab
+            List<InlineKeyboardButton> deleteAllRow = rows.get(1);
+            assertThat(deleteAllRow.get(0).getCallbackData())
+                    .isEqualTo(BotConstantsUtils.CB_DELETE_ALL_REQUEST);
+        }
+
+        @DisplayName("Delete All row is absent for ACTIVE tab")
+        @Test
+        void deleteAllAbsentForActive() {
+            List<List<InlineKeyboardButton>> rows = rows(List.of(task(1)), TaskStatus.ACTIVE);
+            // rows: task button, tab — no Delete All
+            assertThat(rows).hasSize(2);
         }
     }
 }

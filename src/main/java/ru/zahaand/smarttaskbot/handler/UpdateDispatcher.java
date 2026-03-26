@@ -67,6 +67,7 @@ public class UpdateDispatcher {
     private final LanguageCallbackHandler languageCallbackHandler;
     private final TimezoneCallbackHandler timezoneCallbackHandler;
     private final SettingsCallbackHandler settingsCallbackHandler;
+    private final TaskDetailCallbackHandler taskDetailCallbackHandler;
     private final TaskActionCallbackHandler taskActionCallbackHandler;
     private final TaskListTabCallbackHandler taskListTabCallbackHandler;
     private final CalendarCallbackHandler calendarCallbackHandler;
@@ -129,6 +130,11 @@ public class UpdateDispatcher {
 
         if (data.startsWith(BotConstantsUtils.CB_TZ)) {
             timezoneCallbackHandler.handle(update);
+            return;
+        }
+
+        if (data.startsWith(BotConstantsUtils.CB_TASK_DETAIL)) {
+            taskDetailCallbackHandler.handle(update);
             return;
         }
 
