@@ -1,6 +1,30 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.3.1 → 1.4.0
+Added sections:
+  - Development Standard #7: DTO naming — all DTO classes MUST carry the Dto suffix.
+  - Development Standard #8: Utility classes — static-only helpers MUST use @UtilityClass
+    and the Utils suffix.
+  - Development Standard #9: No XML comments in Liquibase migrations — documentation
+    belongs in changeset id and remarks attributes only.
+  - Development Standard #10: Apache Commons usage — StringUtils / CollectionUtils MUST
+    replace manual null/blank/empty checks; commons-lang3 MUST be an explicit pom.xml dep.
+Modified principles: None
+Removed sections: None
+Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ (no changes required)
+  - .specify/templates/spec-template.md ✅ (no changes required)
+  - .specify/templates/tasks-template.md ✅ (no changes required)
+  - .specify/templates/constitution-template.md ✅ (generic; project-specific standards
+    do not require new generic slots)
+Follow-up TODOs:
+  - Verify pom.xml declares commons-lang3 as an explicit dependency.
+  - Audit existing utility-like classes for @UtilityClass and Utils suffix compliance.
+  - Audit existing DTO classes for Dto suffix compliance (e.g. any CreateTaskRequest).
+  - Audit Liquibase migration XML files for existing <!-- --> comments and remove them.
+
+==================
 Version change: 1.3.0 → 1.3.1
 Modified principles:
   - VIII. Code Style — removed Mockito when().thenReturn() formatting rule.
@@ -235,6 +259,20 @@ commit message.
 6. **Railway deployment**: `railway.toml` MUST NOT specify a builder explicitly.
    Railway auto-detects the builder from the project structure.
    The `[build]` section MUST contain only `buildCommand`.
+7. **DTO naming**: All Data Transfer Object classes MUST carry the `Dto` suffix
+   (e.g. `TaskDto`, `CreateTaskRequestDto`). Names without the suffix are PROHIBITED
+   for objects whose sole purpose is transferring data between layers.
+8. **Utility classes**: Classes with no injected Spring beans and only static methods
+   MUST be annotated with Lombok `@UtilityClass` and MUST use the `Utils` suffix
+   (e.g. `TimeParserUtils`, `CalendarUtils`). `@UtilityClass` makes the constructor
+   private and all methods implicitly static; no additional boilerplate is needed.
+9. **No comments in Liquibase migrations**: Migration XML files MUST NOT contain
+   XML comments (`<!-- -->`). All documentation MUST go in the `id` and `remarks`
+   attributes of the changeset element only.
+10. **Apache Commons usage**: `StringUtils` MUST be used for all string null/blank
+    checks instead of manual `null` checks or `.isEmpty()`. `CollectionUtils` MUST
+    be used for collection null/empty checks. `commons-lang3` MUST be declared as an
+    explicit dependency in `pom.xml` (not relied on as a transitive dependency).
 
 ## Governance
 
@@ -256,4 +294,4 @@ Tracking section of the relevant `plan.md` with explicit justification.
 
 **Runtime guidance**: See `.specify/memory/` for feature-specific specs, plans, and tasks.
 
-**Version**: 1.3.1 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-26
+**Version**: 1.4.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-26
