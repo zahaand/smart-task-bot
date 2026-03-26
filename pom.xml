@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.zahaand</groupId>
     <artifactId>smart-task-bot</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>smart-task-bot</name>
     <description>smart-task-bot</description>
     <url/>
