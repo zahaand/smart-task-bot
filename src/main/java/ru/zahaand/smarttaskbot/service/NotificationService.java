@@ -64,18 +64,6 @@ public class NotificationService {
         }
     }
 
-    public void sendTimezoneKeyboard(Long chatId, String text) {
-        SendMessage message = new SendMessage(chatId.toString(), text);
-
-        message.setReplyMarkup(buildTimezoneKeyboard(Language.EN));
-
-        try {
-            sender.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Failed to send timezone keyboard to chatId={}: {}", chatId, e.getMessage(), e);
-        }
-    }
-
     /**
      * Sends the bilingual welcome message with [🇬🇧 English] / [🇷🇺 Русский] inline buttons.
      * Always uses WELCOME_BILINGUAL (same in both languages by design).
@@ -86,10 +74,12 @@ public class NotificationService {
         final String text = messageService.get(MessageKey.WELCOME_BILINGUAL, Language.EN);
         final SendMessage message = new SendMessage(chatId.toString(), text);
 
-        final InlineKeyboardButton enBtn = new InlineKeyboardButton("🇬🇧 English");
+        final InlineKeyboardButton enBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_LANG_EN, Language.EN));
         enBtn.setCallbackData(BotConstants.CB_LANG_EN);
 
-        final InlineKeyboardButton ruBtn = new InlineKeyboardButton("🇷🇺 Русский");
+        final InlineKeyboardButton ruBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_LANG_RU, Language.EN));
         ruBtn.setCallbackData(BotConstants.CB_LANG_RU);
 
         final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -154,21 +144,6 @@ public class NotificationService {
             sender.execute(answer);
         } catch (TelegramApiException e) {
             log.warn("Failed to answer callbackQueryId={}: {}", callbackQueryId, e.getMessage());
-        }
-    }
-
-    /**
-     * Sends a message and attaches the persistent 3-button reply keyboard.
-     * The keyboard stays visible across messages until explicitly removed.
-     */
-    public void sendPersistentMenu(Long chatId, String text) {
-        SendMessage message = new SendMessage(chatId.toString(), text);
-        message.setReplyMarkup(buildPersistentMenuKeyboard());
-
-        try {
-            sender.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Failed to send persistent menu to chatId={}: {}", chatId, e.getMessage(), e);
         }
     }
 
@@ -358,19 +333,6 @@ public class NotificationService {
         }
 
         return text;
-    }
-
-    private ReplyKeyboardMarkup buildPersistentMenuKeyboard() {
-        KeyboardRow row = new KeyboardRow();
-        row.add(new KeyboardButton(MessageKey.BTN_NEW_TASK.get(Language.EN)));
-        row.add(new KeyboardButton(MessageKey.BTN_MY_TASKS.get(Language.EN)));
-
-        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
-        markup.setKeyboard(List.of(row));
-        markup.setResizeKeyboard(true);
-        markup.setIsPersistent(true);
-
-        return markup;
     }
 
     private ReplyKeyboardMarkup buildPersistentMenuKeyboard(Language language) {
