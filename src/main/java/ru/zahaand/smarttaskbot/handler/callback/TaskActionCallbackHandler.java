@@ -69,7 +69,7 @@ public class TaskActionCallbackHandler {
                 .viewingMonth(today.getMonthValue())
                 .build();
         userStateService.setStateWithContext(userId, ConversationState.SELECTING_REMINDER_DATE, ctx);
-        notificationService.sendCalendar(chatId, today.getYear(), today.getMonthValue());
+        notificationService.sendCalendar(chatId, today.getYear(), today.getMonthValue(), resolveLanguage(userId));
     }
 
     private void handleTaskDelete(String callbackQueryId, Long userId, Long chatId, String data) {
@@ -88,7 +88,7 @@ public class TaskActionCallbackHandler {
 
         final ConversationContext ctx = ConversationContext.builder().taskId(taskId).build();
         userStateService.setStateWithContext(userId, ConversationState.CONFIRMING_DELETE, ctx);
-        notificationService.sendDeleteConfirmation(chatId, taskId, taskText);
+        notificationService.sendDeleteConfirmation(chatId, taskId, taskText, resolveLanguage(userId));
     }
 
     private Language resolveLanguage(Long userId) {
@@ -107,6 +107,6 @@ public class TaskActionCallbackHandler {
         notificationService.answerCallbackQuery(callbackQueryId);
 
         final List<TaskDto> activeTasks = taskService.getActiveTasks(userId);
-        notificationService.editTaskList(chatId, messageId, activeTasks, TaskStatus.ACTIVE);
+        notificationService.editTaskList(chatId, messageId, activeTasks, TaskStatus.ACTIVE, resolveLanguage(userId));
     }
 }

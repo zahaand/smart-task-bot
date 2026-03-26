@@ -8,9 +8,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
+import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class TaskListTabCallbackHandler {
 
     private final TaskService taskService;
     private final NotificationService notificationService;
+    private final UserService userService;
 
     public void handle(Update update) {
         final CallbackQuery cq = update.getCallbackQuery();
@@ -41,12 +44,21 @@ public class TaskListTabCallbackHandler {
 
         notificationService.answerCallbackQuery(cq.getId());
 
+        final Language language = resolveLanguage(userId);
         final TaskStatus tab = data.endsWith("COMPLETED") ? TaskStatus.COMPLETED : TaskStatus.ACTIVE;
         final List<TaskDto> tasks = tab == TaskStatus.ACTIVE
                 ? taskService.getActiveTasks(userId)
                 : taskService.getCompletedTasks(userId);
 
-        notificationService.editTaskList(chatId, messageId, tasks, tab);
+        notificationService.editTaskList(chatId, messageId, tasks, tab, language);
+    }
+
+    private Language resolveLanguage(Long userId) {
+        try {
+            return userService.findById(userId).getLanguage();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

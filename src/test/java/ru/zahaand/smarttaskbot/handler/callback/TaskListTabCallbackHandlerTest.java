@@ -14,9 +14,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
+import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
+import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.util.List;
 
@@ -29,6 +32,8 @@ class TaskListTabCallbackHandlerTest {
     TaskService taskService;
     @Mock
     NotificationService notificationService;
+    @Mock
+    UserService userService;
     @InjectMocks
     TaskListTabCallbackHandler handler;
 
@@ -73,6 +78,9 @@ class TaskListTabCallbackHandlerTest {
         void activeTabEditsWithActiveTasks() {
             String callbackData = BotConstants.CB_TASKS_TAB + "ACTIVE";
             List<TaskDto> tasks = List.of(new TaskDto(1L, "Buy milk", null));
+            User user = mock(User.class);
+            when(user.getLanguage()).thenReturn(Language.EN);
+            when(userService.findById(USER_ID)).thenReturn(user);
             when(taskService.getActiveTasks(USER_ID)).thenReturn(tasks);
             // No ✓ in label → not already the active tab
             Update update = buildUpdate(callbackData, markupWithButton(callbackData, "📋 Active"));
@@ -80,7 +88,7 @@ class TaskListTabCallbackHandlerTest {
             handler.handle(update);
 
             verify(taskService).getActiveTasks(USER_ID);
-            verify(notificationService).editTaskList(CHAT_ID, MESSAGE_ID, tasks, TaskStatus.ACTIVE);
+            verify(notificationService).editTaskList(CHAT_ID, MESSAGE_ID, tasks, TaskStatus.ACTIVE, Language.EN);
         }
 
         @Test
@@ -88,13 +96,16 @@ class TaskListTabCallbackHandlerTest {
         void completedTabEditsWithCompletedTasks() {
             String callbackData = BotConstants.CB_TASKS_TAB + "COMPLETED";
             List<TaskDto> tasks = List.of();
+            User user = mock(User.class);
+            when(user.getLanguage()).thenReturn(Language.EN);
+            when(userService.findById(USER_ID)).thenReturn(user);
             when(taskService.getCompletedTasks(USER_ID)).thenReturn(tasks);
             Update update = buildUpdate(callbackData, markupWithButton(callbackData, "✅ Completed"));
 
             handler.handle(update);
 
             verify(taskService).getCompletedTasks(USER_ID);
-            verify(notificationService).editTaskList(CHAT_ID, MESSAGE_ID, tasks, TaskStatus.COMPLETED);
+            verify(notificationService).editTaskList(CHAT_ID, MESSAGE_ID, tasks, TaskStatus.COMPLETED, Language.EN);
         }
 
         @Test
@@ -108,7 +119,7 @@ class TaskListTabCallbackHandlerTest {
 
             verify(notificationService).answerCallbackQuery("cbId");
             verifyNoInteractions(taskService);
-            verify(notificationService, never()).editTaskList(any(), any(), any(), any());
+            verify(notificationService, never()).editTaskList(any(), any(), any(), any(), any());
         }
     }
 }

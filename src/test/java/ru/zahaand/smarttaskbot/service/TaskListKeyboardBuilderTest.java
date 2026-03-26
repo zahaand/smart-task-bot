@@ -1,20 +1,43 @@
 package ru.zahaand.smarttaskbot.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 
+@ExtendWith(MockitoExtension.class)
 class TaskListKeyboardBuilderTest {
 
-    private final TaskListKeyboardBuilder builder = new TaskListKeyboardBuilder();
+    @Mock
+    MessageService messageService;
+
+    TaskListKeyboardBuilder builder;
+
+    @BeforeEach
+    void setUp() {
+        // Lenient: not every test exercises every button variant
+        lenient().when(messageService.get(MessageKey.BTN_REMIND, Language.EN)).thenReturn("⏰ Remind");
+        lenient().when(messageService.get(MessageKey.BTN_COMPLETE, Language.EN)).thenReturn("✅ Complete");
+        lenient().when(messageService.get(MessageKey.BTN_DELETE, Language.EN)).thenReturn("🗑 Delete");
+        lenient().when(messageService.get(MessageKey.BTN_DELETE_ALL, Language.EN)).thenReturn("🗑 Delete All");
+        lenient().when(messageService.get(MessageKey.TAB_ACTIVE, Language.EN)).thenReturn("Active");
+        lenient().when(messageService.get(MessageKey.TAB_COMPLETED, Language.EN)).thenReturn("Completed");
+        builder = new TaskListKeyboardBuilder(messageService);
+    }
 
     private static TaskDto activeTask(long id) {
         return new TaskDto(id, "Task " + id, null);
@@ -26,7 +49,7 @@ class TaskListKeyboardBuilderTest {
 
     // For N tasks: 2 rows per task (text + action) + 1 tab row = 2N + 1
     private List<List<InlineKeyboardButton>> rows(List<TaskDto> tasks, TaskStatus tab) {
-        return builder.buildKeyboard(tasks, tab).getKeyboard();
+        return builder.buildKeyboard(tasks, tab, Language.EN).getKeyboard();
     }
 
     @Nested

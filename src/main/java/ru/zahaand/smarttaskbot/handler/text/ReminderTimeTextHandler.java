@@ -3,6 +3,7 @@ package ru.zahaand.smarttaskbot.handler.text;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
@@ -31,9 +32,11 @@ public class ReminderTimeTextHandler {
     private final MessageService messageService;
 
     public void handle(Update update) {
-        final Long userId = update.getMessage().getFrom().getId();
-        final Long chatId = update.getMessage().getChatId();
-        final String text = update.getMessage().getText().trim();
+        Message message = update.getMessage();
+        final Long userId = message.getFrom().getId();
+        final Long chatId = message.getChatId();
+        final String text = message.getText().trim();
+
         final User user = userService.findById(userId);
 
         final Optional<LocalTime> parsed = timeParserService.parse(text);

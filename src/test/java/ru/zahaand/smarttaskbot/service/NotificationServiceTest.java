@@ -14,16 +14,16 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
@@ -45,6 +45,8 @@ class NotificationServiceTest {
     @BeforeEach
     void setUp() {
         service = new NotificationService(sender, taskListKeyboardBuilder, calendarKeyboardBuilder, messageService);
+        lenient().when(messageService.get(any(MessageKey.class), nullable(Language.class)))
+                .thenAnswer(inv -> ((MessageKey) inv.getArgument(0)).get(inv.getArgument(1)));
     }
 
     // ── sendTaskList ───────────────────────────────────────────────────────────
@@ -56,9 +58,9 @@ class NotificationServiceTest {
         @Test
         @DisplayName("empty ACTIVE list sends empty-state message")
         void emptyActiveListSendsEmptyMessage() throws TelegramApiException {
-            when(taskListKeyboardBuilder.buildKeyboard(any(), any())).thenReturn(new InlineKeyboardMarkup());
+            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
 
-            service.sendTaskList(CHAT_ID, List.of(), TaskStatus.ACTIVE);
+            service.sendTaskList(CHAT_ID, List.of(), TaskStatus.ACTIVE, null);
 
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());
@@ -69,9 +71,9 @@ class NotificationServiceTest {
         @DisplayName("non-empty ACTIVE list sends header with count")
         void nonEmptyActiveListSendsHeader() throws TelegramApiException {
             List<TaskDto> tasks = List.of(new TaskDto(1L, "Buy milk", null));
-            when(taskListKeyboardBuilder.buildKeyboard(any(), any())).thenReturn(new InlineKeyboardMarkup());
+            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
 
-            service.sendTaskList(CHAT_ID, tasks, TaskStatus.ACTIVE);
+            service.sendTaskList(CHAT_ID, tasks, TaskStatus.ACTIVE, null);
 
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());
@@ -85,9 +87,9 @@ class NotificationServiceTest {
             for (int i = 1; i <= 21; i++) {
                 tasks.add(new TaskDto((long) i, "Task " + i, null));
             }
-            when(taskListKeyboardBuilder.buildKeyboard(any(), any())).thenReturn(new InlineKeyboardMarkup());
+            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
 
-            service.sendTaskList(CHAT_ID, tasks, TaskStatus.ACTIVE);
+            service.sendTaskList(CHAT_ID, tasks, TaskStatus.ACTIVE, null);
 
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());
@@ -103,15 +105,15 @@ class NotificationServiceTest {
     class SendCalendar {
 
         @Test
-        @DisplayName("sends message with text 'Select a date:'")
-        void sendsSelectADateText() throws TelegramApiException {
+        @DisplayName("sends message with localized 'Choose reminder date:' text")
+        void sendsChooseReminderDateText() throws TelegramApiException {
             when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt())).thenReturn(new InlineKeyboardMarkup());
 
-            service.sendCalendar(CHAT_ID, 2026, 6);
+            service.sendCalendar(CHAT_ID, 2026, 6, null);
 
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());
-            assertThat(captor.getValue().getText()).isEqualTo("Select a date:");
+            assertThat(captor.getValue().getText()).isEqualTo(MessageKey.CHOOSE_REMINDER_DATE.get(null));
         }
     }
 
@@ -126,7 +128,7 @@ class NotificationServiceTest {
         void sendsEditWithCorrectIds() throws TelegramApiException {
             when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt())).thenReturn(new InlineKeyboardMarkup());
 
-            service.editCalendar(CHAT_ID, MESSAGE_ID, 2026, 6);
+            service.editCalendar(CHAT_ID, MESSAGE_ID, 2026, 6, null);
 
             ArgumentCaptor<EditMessageText> captor = ArgumentCaptor.forClass(EditMessageText.class);
             verify(sender).execute(captor.capture());
@@ -144,7 +146,7 @@ class NotificationServiceTest {
         @Test
         @DisplayName("message text contains 'Delete task'")
         void messageTextContainsDeleteTask() throws TelegramApiException {
-            service.sendDeleteConfirmation(CHAT_ID, 5L, "Buy groceries");
+            service.sendDeleteConfirmation(CHAT_ID, 5L, "Buy groceries", null);
 
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());
@@ -156,7 +158,7 @@ class NotificationServiceTest {
         void longTextIsTruncatedAt80Chars() throws TelegramApiException {
             String longText = "A".repeat(100);
 
-            service.sendDeleteConfirmation(CHAT_ID, 5L, longText);
+            service.sendDeleteConfirmation(CHAT_ID, 5L, longText, null);
 
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());

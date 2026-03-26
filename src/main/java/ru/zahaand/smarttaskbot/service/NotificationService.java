@@ -15,10 +15,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.zahaand.smarttaskbot.config.BotConstants;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
-import ru.zahaand.smarttaskbot.model.Language;
-import ru.zahaand.smarttaskbot.model.MessageKey;
-import ru.zahaand.smarttaskbot.model.Task;
-import ru.zahaand.smarttaskbot.model.TaskStatus;
+import ru.zahaand.smarttaskbot.model.*;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -70,7 +67,7 @@ public class NotificationService {
     public void sendTimezoneKeyboard(Long chatId, String text) {
         SendMessage message = new SendMessage(chatId.toString(), text);
 
-        message.setReplyMarkup(buildTimezoneKeyboard());
+        message.setReplyMarkup(buildTimezoneKeyboard(Language.EN));
 
         try {
             sender.execute(message);
@@ -107,12 +104,19 @@ public class NotificationService {
     }
 
     /**
-     * Sends the timezone selection keyboard with a language-aware prompt.
+     * Sends the timezone selection keyboard with a language-aware prompt and localized city codes.
      * <p>
-     * Отправляет клавиатуру выбора часового пояса с текстом на языке пользователя.
+     * Отправляет клавиатуру выбора часового пояса с текстом и кодами городов на языке пользователя.
      */
     public void sendTimezoneKeyboard(Long chatId, Language language) {
-        sendTimezoneKeyboard(chatId, messageService.get(MessageKey.SELECT_TIMEZONE, language));
+        final String text = messageService.get(MessageKey.SELECT_TIMEZONE, language);
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(buildTimezoneKeyboard(language));
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send timezone keyboard to chatId={}: {}", chatId, e.getMessage(), e);
+        }
     }
 
     /**
@@ -132,8 +136,10 @@ public class NotificationService {
     }
 
     public void sendReminder(Task task) {
-        Long chatId = task.getUser().getTelegramUserId();
-        sendMessage(chatId, "⏰ Reminder: " + task.getText());
+        final User user = task.getUser();
+        final String text = messageService.get(MessageKey.REMINDER_NOTIFICATION, user.getLanguage())
+                .formatted(task.getText());
+        sendMessage(user.getTelegramUserId(), text);
     }
 
     /**
@@ -169,13 +175,17 @@ public class NotificationService {
     /**
      * Sends a new task-list message with inline action buttons and a tab row.
      * Truncates to {@link #MAX_TASK_LIST_SIZE} tasks and appends a note when the list overflows.
+     * Button labels are rendered in the given language (null falls back to EN).
+     * <p>
+     * Отправляет новое сообщение со списком задач и инлайн-кнопками.
+     * Усекает до {@link #MAX_TASK_LIST_SIZE} задач; подписи кнопок на языке пользователя.
      */
-    public void sendTaskList(Long chatId, List<TaskDto> tasks, TaskStatus tab) {
+    public void sendTaskList(Long chatId, List<TaskDto> tasks, TaskStatus tab, Language language) {
         final boolean truncated = tasks.size() > MAX_TASK_LIST_SIZE;
         final List<TaskDto> visible = truncated ? tasks.subList(0, MAX_TASK_LIST_SIZE) : tasks;
 
-        final String text = buildTaskListText(visible, tab, truncated);
-        final InlineKeyboardMarkup keyboard = taskListKeyboardBuilder.buildKeyboard(visible, tab);
+        final String text = buildTaskListText(visible, tab, truncated, language);
+        final InlineKeyboardMarkup keyboard = taskListKeyboardBuilder.buildKeyboard(visible, tab, language);
 
         final SendMessage message = new SendMessage(chatId.toString(), text);
         message.setReplyMarkup(keyboard);
@@ -190,13 +200,17 @@ public class NotificationService {
     /**
      * Edits an existing task-list message in-place.
      * Falls back to a new message via {@link #safeEdit} if the Telegram edit API rejects the request.
+     * Button labels are rendered in the given language (null falls back to EN).
+     * <p>
+     * Редактирует существующее сообщение со списком задач на месте; при неудаче отправляет новое.
+     * Подписи кнопок на языке пользователя.
      */
-    public void editTaskList(Long chatId, Integer messageId, List<TaskDto> tasks, TaskStatus tab) {
+    public void editTaskList(Long chatId, Integer messageId, List<TaskDto> tasks, TaskStatus tab, Language language) {
         final boolean truncated = tasks.size() > MAX_TASK_LIST_SIZE;
         final List<TaskDto> visible = truncated ? tasks.subList(0, MAX_TASK_LIST_SIZE) : tasks;
 
-        final String text = buildTaskListText(visible, tab, truncated);
-        final InlineKeyboardMarkup keyboard = taskListKeyboardBuilder.buildKeyboard(visible, tab);
+        final String text = buildTaskListText(visible, tab, truncated, language);
+        final InlineKeyboardMarkup keyboard = taskListKeyboardBuilder.buildKeyboard(visible, tab, language);
 
         final EditMessageText edit = new EditMessageText();
         edit.setChatId(chatId.toString());
@@ -213,9 +227,10 @@ public class NotificationService {
     /**
      * Sends a new inline calendar message for the given month.
      */
-    public void sendCalendar(Long chatId, int year, int month) {
+    public void sendCalendar(Long chatId, int year, int month, Language language) {
         final InlineKeyboardMarkup keyboard = calendarKeyboardBuilder.buildCalendar(year, month);
-        final SendMessage message = new SendMessage(chatId.toString(), "Select a date:");
+        final String text = messageService.get(MessageKey.CHOOSE_REMINDER_DATE, language);
+        final SendMessage message = new SendMessage(chatId.toString(), text);
         message.setReplyMarkup(keyboard);
 
         try {
@@ -229,16 +244,17 @@ public class NotificationService {
      * Edits an existing calendar message to display a different month.
      * Falls back to sending a new message via {@link #safeEdit} if the edit fails.
      */
-    public void editCalendar(Long chatId, Integer messageId, int year, int month) {
+    public void editCalendar(Long chatId, Integer messageId, int year, int month, Language language) {
         final InlineKeyboardMarkup keyboard = calendarKeyboardBuilder.buildCalendar(year, month);
+        final String text = messageService.get(MessageKey.CHOOSE_REMINDER_DATE, language);
 
         final EditMessageText edit = new EditMessageText();
         edit.setChatId(chatId.toString());
         edit.setMessageId(messageId);
-        edit.setText("Select a date:");
+        edit.setText(text);
         edit.setReplyMarkup(keyboard);
 
-        final SendMessage fallback = new SendMessage(chatId.toString(), "Select a date:");
+        final SendMessage fallback = new SendMessage(chatId.toString(), text);
         fallback.setReplyMarkup(keyboard);
 
         safeEdit(edit, fallback);
@@ -247,14 +263,17 @@ public class NotificationService {
     /**
      * Sends a delete-confirmation message with [✅ Yes, delete] and [❌ Cancel] inline buttons.
      */
-    public void sendDeleteConfirmation(Long chatId, Long taskId, String taskText) {
+    public void sendDeleteConfirmation(Long chatId, Long taskId, String taskText, Language language) {
         final String preview = taskText.length() > 80 ? taskText.substring(0, 80) + "…" : taskText;
-        final String text = "Delete task?\n\n\"" + preview + "\"";
+        final String text = messageService.get(MessageKey.TASK_DELETE_CONFIRM, language)
+                .formatted(taskId, preview);
 
-        final InlineKeyboardButton yesBtn = new InlineKeyboardButton("✅ Yes, delete");
+        final InlineKeyboardButton yesBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_YES_DELETE, language));
         yesBtn.setCallbackData(BotConstants.CB_CONFIRM_DELETE + taskId);
 
-        final InlineKeyboardButton cancelBtn = new InlineKeyboardButton("❌ Cancel");
+        final InlineKeyboardButton cancelBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_CANCEL, language));
         cancelBtn.setCallbackData(BotConstants.CB_CONFIRM_CANCEL);
 
         final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -273,14 +292,17 @@ public class NotificationService {
     /**
      * Sends a delete-all-confirmation message with [✅ Yes, delete all] and [❌ Cancel] inline buttons.
      *
-     * @param chatId target chat
-     * @param text   pre-formatted confirmation prompt (e.g. "Delete all 3 completed tasks?")
+     * @param chatId    target chat
+     * @param text      pre-formatted confirmation prompt (e.g. "Delete all 3 completed tasks?")
+     * @param language  user's language for button labels
      */
-    public void sendDeleteAllConfirmation(Long chatId, String text) {
-        final InlineKeyboardButton yesBtn = new InlineKeyboardButton("✅ Yes, delete all");
+    public void sendDeleteAllConfirmation(Long chatId, String text, Language language) {
+        final InlineKeyboardButton yesBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_YES_DELETE_ALL, language));
         yesBtn.setCallbackData(BotConstants.CB_DELETE_ALL_CONFIRM);
 
-        final InlineKeyboardButton cancelBtn = new InlineKeyboardButton("❌ Cancel");
+        final InlineKeyboardButton cancelBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_CANCEL, language));
         cancelBtn.setCallbackData(BotConstants.CB_DELETE_ALL_CANCEL);
 
         final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -317,19 +339,22 @@ public class NotificationService {
         }
     }
 
-    private String buildTaskListText(List<TaskDto> tasks, TaskStatus tab, boolean truncated) {
+    private String buildTaskListText(List<TaskDto> tasks, TaskStatus tab, boolean truncated, Language language) {
         if (tasks.isEmpty()) {
             return tab == TaskStatus.ACTIVE
-                    ? "📋 No active tasks yet. Tap \"📝 New Task\" to create one."
-                    : "✅ No completed tasks yet.";
+                    ? messageService.get(MessageKey.TASKS_EMPTY_ACTIVE, language)
+                    : messageService.get(MessageKey.TASKS_EMPTY_COMPLETED, language);
         }
 
         // Task titles and action buttons are rendered in the inline keyboard below this header.
-        final String header = tab == TaskStatus.ACTIVE ? "📋 Active tasks" : "✅ Completed tasks";
+        final String header = tab == TaskStatus.ACTIVE
+                ? messageService.get(MessageKey.TASKS_ACTIVE_LIST_HEADER, language)
+                : messageService.get(MessageKey.TASKS_COMPLETED_HEADER, language);
         String text = header + " (" + tasks.size() + "):";
 
         if (truncated) {
-            text += "\nShowing first " + MAX_TASK_LIST_SIZE + " tasks…";
+            text += "\n" + messageService.get(MessageKey.TASKS_TRUNCATED, language)
+                    .formatted(MAX_TASK_LIST_SIZE);
         }
 
         return text;
@@ -361,14 +386,14 @@ public class NotificationService {
         return markup;
     }
 
-    private InlineKeyboardMarkup buildTimezoneKeyboard() {
+    private InlineKeyboardMarkup buildTimezoneKeyboard(Language language) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         for (List<String> rowTimezones : BotConstants.TIMEZONE_ROWS) {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
             for (String tz : rowTimezones) {
-                final InlineKeyboardButton keyboardButton = new InlineKeyboardButton(buildTimezoneButtonLabel(tz));
+                final InlineKeyboardButton keyboardButton = new InlineKeyboardButton(buildTimezoneButtonLabel(tz, language));
                 keyboardButton.setCallbackData(BotConstants.TZ_CALLBACK_PREFIX + tz);
                 row.add(keyboardButton);
             }
@@ -383,16 +408,20 @@ public class NotificationService {
     }
 
     /**
-     * Computes a timezone button label as {@code "HH:mm CITY_CODES"} (e.g. {@code "10:00 MSK, SPB"}).
+     * Computes a timezone button label as {@code "HH:mm CITY_CODES"} in the user's language
+     * (e.g. {@code "10:00 MSK, SPB"} for EN or {@code "10:00 МСК, СПБ"} for RU).
      * Falls back to {@link BotConstants#TIMEZONE_DISPLAY_NAMES} when the zone rules cannot be loaded.
-     * City codes are always in English per FR-011.
      * <p>
-     * Вычисляет метку кнопки пояса: «ЧЧ:мм КОД_ГОРОДА». При ошибке — возвращает отображаемое имя.
+     * Вычисляет метку кнопки пояса «ЧЧ:мм КОД_ГОРОДА» на языке пользователя.
+     * При ошибке загрузки правил зоны возвращает отображаемое имя из {@link BotConstants#TIMEZONE_DISPLAY_NAMES}.
      */
-    private String buildTimezoneButtonLabel(String tz) {
+    private String buildTimezoneButtonLabel(String tz, Language language) {
         try {
             final String currentTime = ZonedDateTime.now(ZoneId.of(tz)).format(TZ_TIME_FORMATTER);
-            return currentTime + " " + BotConstants.TIMEZONE_CITY_CODES.get(tz);
+            final java.util.Map<String, String> codes = language == Language.RU
+                    ? BotConstants.TIMEZONE_CITY_CODES_RU
+                    : BotConstants.TIMEZONE_CITY_CODES;
+            return currentTime + " " + codes.get(tz);
         } catch (java.time.zone.ZoneRulesException e) {
             log.warn("ZoneRulesException for tz='{}': {}", tz, e.getMessage());
             return BotConstants.TIMEZONE_DISPLAY_NAMES.getOrDefault(tz, tz);

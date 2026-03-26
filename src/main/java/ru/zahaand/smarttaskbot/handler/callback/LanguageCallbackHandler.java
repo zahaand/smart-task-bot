@@ -18,7 +18,8 @@ import ru.zahaand.smarttaskbot.service.UserStateService;
  * Handles {@code lang:EN} and {@code lang:RU} inline keyboard callbacks (registration step 1).
  * Persists the chosen language, transitions state to AWAITING_TIMEZONE, and sends the timezone keyboard.
  * <p>
- * Обрабатывает выбор языка на шаге 1 регистрации.
+ * Обрабатывает колбэки {@code lang:EN} и {@code lang:RU} (шаг 1 регистрации — выбор языка).
+ * Сохраняет выбранный язык, переводит состояние в AWAITING_TIMEZONE и отправляет клавиатуру часовых поясов.
  */
 @Slf4j
 @Component
@@ -34,7 +35,8 @@ public class LanguageCallbackHandler {
      * Routes a {@code lang:EN} or {@code lang:RU} callback: persists the language choice,
      * advances state to AWAITING_TIMEZONE, and presents the timezone keyboard.
      * <p>
-     * Обрабатывает выбор языка: сохраняет язык, переводит в AWAITING_TIMEZONE, показывает клавиатуру.
+     * Маршрутизирует колбэк {@code lang:EN} или {@code lang:RU}: сохраняет выбор языка,
+     * переводит состояние в AWAITING_TIMEZONE и отображает клавиатуру выбора часового пояса.
      */
     public void handle(Update update) {
         final CallbackQuery cq = update.getCallbackQuery();

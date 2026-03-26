@@ -85,7 +85,9 @@ public class CalendarCallbackHandler {
                 .viewingMonth(target.getMonthValue())
                 .build();
         userStateService.updateContext(userId, updated);
-        notificationService.editCalendar(chatId, messageId, target.getYear(), target.getMonthValue());
+        final User calendarUser = findUserSafely(userId);
+        notificationService.editCalendar(chatId, messageId, target.getYear(), target.getMonthValue(),
+                calendarUser != null ? calendarUser.getLanguage() : null);
         notificationService.answerCallbackQuery(callbackQueryId);
     }
 

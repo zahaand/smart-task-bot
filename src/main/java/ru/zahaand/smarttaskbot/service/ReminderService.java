@@ -20,6 +20,7 @@ import java.util.List;
  * Reminder text is resolved in the task owner's language via {@link MessageService}.
  * <p>
  * Планировщик опроса просроченных напоминаний; доставляет их через {@link NotificationService}.
+ * Запускается каждые 60 секунд (fixedDelay — следующий опрос начинается после завершения предыдущего).
  * Текст напоминания разрешается на языке владельца задачи через {@link MessageService}.
  * <p>
  * <p>Lifecycle per task:
@@ -32,6 +33,17 @@ import java.util.List;
  *       {@code status = ACTIVE}</li>
  *   <li>On retry success → {@code reminderProcessed = true}</li>
  *   <li>On retry failure → log WARN + {@code reminderProcessed = true} (discard, per FR-009)</li>
+ * </ol>
+ * <p>Жизненный цикл задачи:
+ * <ol>
+ *   <li>Первая доставка: {@code reminderTime ≤ now}, {@code reminderProcessed = false},
+ *       {@code reminderRetryAt IS NULL}, {@code status = ACTIVE}</li>
+ *   <li>Успех → {@code reminderProcessed = true}</li>
+ *   <li>Ошибка → {@code reminderRetryAt = now + 60s}</li>
+ *   <li>Повтор: {@code reminderRetryAt ≤ now}, {@code reminderProcessed = false},
+ *       {@code status = ACTIVE}</li>
+ *   <li>Успех повтора → {@code reminderProcessed = true}</li>
+ *   <li>Ошибка повтора → log WARN + {@code reminderProcessed = true} (отброс, согласно FR-009)</li>
  * </ol>
  */
 @Slf4j

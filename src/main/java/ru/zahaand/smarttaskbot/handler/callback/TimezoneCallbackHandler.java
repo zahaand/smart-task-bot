@@ -19,7 +19,9 @@ import ru.zahaand.smarttaskbot.service.UserStateService;
  * Handles {@code tz:*} inline keyboard callbacks (registration step 2 — timezone selection).
  * User row already exists from /start; this handler only sets the timezone and transitions to IDLE.
  * <p>
- * Обрабатывает выбор часового пояса (шаг 2 регистрации).
+ * Обрабатывает колбэки {@code tz:*} (шаг 2 регистрации — выбор часового пояса).
+ * Строка пользователя уже существует после {@code /start}; обработчик только устанавливает
+ * часовой пояс и переводит состояние диалога в IDLE.
  */
 @Slf4j
 @Component

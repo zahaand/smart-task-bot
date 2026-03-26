@@ -89,7 +89,7 @@ class DeleteAllCompletedCallbackHandlerTest {
             handler.handle(update);
 
             verify(notificationService).answerCallbackQuery(CB_ID);
-            verify(notificationService).sendDeleteAllConfirmation(eq(CHAT_ID), contains("3"));
+            verify(notificationService).sendDeleteAllConfirmation(eq(CHAT_ID), contains("3"), isNull());
             verify(notificationService, never()).sendMessage(any(), any());
         }
     }
@@ -108,7 +108,7 @@ class DeleteAllCompletedCallbackHandlerTest {
 
             verify(notificationService).answerCallbackQuery(CB_ID);
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("No completed"));
-            verify(notificationService, never()).sendDeleteAllConfirmation(any(), any());
+            verify(notificationService, never()).sendDeleteAllConfirmation(any(), any(), any());
         }
     }
 
@@ -128,7 +128,7 @@ class DeleteAllCompletedCallbackHandlerTest {
             verify(notificationService).answerCallbackQuery(CB_ID);
             verify(taskService).deleteAllCompleted(USER_ID);
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("deleted"));
-            verify(notificationService).editTaskList(CHAT_ID, MSG_ID, List.of(), TaskStatus.COMPLETED);
+            verify(notificationService).editTaskList(eq(CHAT_ID), eq(MSG_ID), eq(List.of()), eq(TaskStatus.COMPLETED), isNull());
         }
     }
 
@@ -146,7 +146,7 @@ class DeleteAllCompletedCallbackHandlerTest {
 
             verify(notificationService).answerCallbackQuery(CB_ID);
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("cancelled"));
-            verify(notificationService).editTaskList(CHAT_ID, MSG_ID, List.of(), TaskStatus.COMPLETED);
+            verify(notificationService).editTaskList(eq(CHAT_ID), eq(MSG_ID), eq(List.of()), eq(TaskStatus.COMPLETED), isNull());
             verify(taskService, never()).deleteAllCompleted(any());
         }
     }

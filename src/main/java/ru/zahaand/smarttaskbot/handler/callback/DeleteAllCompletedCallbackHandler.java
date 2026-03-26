@@ -25,6 +25,13 @@ import java.util.List;
  * otherwise sends a confirmation prompt with Yes/Cancel buttons.
  * DELETE_ALL_CONFIRM — bulk-deletes all COMPLETED tasks for the user and re-renders the Completed tab.
  * DELETE_ALL_CANCEL  — sends OPERATION_CANCELLED and re-renders the Completed tab unchanged.
+ * <p>
+ * Обрабатывает колбэки DELETE_ALL_REQUEST, DELETE_ALL_CONFIRM и DELETE_ALL_CANCEL.
+ * <p>
+ * DELETE_ALL_REQUEST — подсчитывает выполненные задачи; при 0 отправляет NO_COMPLETED_TASKS;
+ * иначе — отправляет запрос подтверждения с кнопками «Да» и «Отмена».
+ * DELETE_ALL_CONFIRM — массово удаляет все задачи со статусом COMPLETED и перерисовывает вкладку «Выполненные».
+ * DELETE_ALL_CANCEL  — отправляет OPERATION_CANCELLED и перерисовывает вкладку «Выполненные» без изменений.
  */
 @Slf4j
 @Component
@@ -67,26 +74,26 @@ public class DeleteAllCompletedCallbackHandler {
         } else {
             final String text = messageService.get(MessageKey.DELETE_CONFIRM_ALL, resolveLanguage(userId))
                     .formatted(count);
-            notificationService.sendDeleteAllConfirmation(chatId, text);
+            notificationService.sendDeleteAllConfirmation(chatId, text, resolveLanguage(userId));
         }
     }
 
     private void handleConfirm(String cbId, Long userId, Long chatId, Integer msgId) {
         notificationService.answerCallbackQuery(cbId);
+        final Language language = resolveLanguage(userId);
         final int deleted = taskService.deleteAllCompleted(userId);
         log.info("DeleteAllCompleted: {} tasks deleted for userId={}", deleted, userId);
-        notificationService.sendMessage(chatId,
-                messageService.get(MessageKey.ALL_COMPLETED_DELETED, resolveLanguage(userId)));
+        notificationService.sendMessage(chatId, messageService.get(MessageKey.ALL_COMPLETED_DELETED, language));
         final List<TaskDto> remaining = taskService.getCompletedTasks(userId);
-        notificationService.editTaskList(chatId, msgId, remaining, TaskStatus.COMPLETED);
+        notificationService.editTaskList(chatId, msgId, remaining, TaskStatus.COMPLETED, language);
     }
 
     private void handleCancel(String cbId, Long userId, Long chatId, Integer msgId) {
         notificationService.answerCallbackQuery(cbId);
-        notificationService.sendMessage(chatId,
-                messageService.get(MessageKey.OPERATION_CANCELLED, resolveLanguage(userId)));
+        final Language language = resolveLanguage(userId);
+        notificationService.sendMessage(chatId, messageService.get(MessageKey.OPERATION_CANCELLED, language));
         final List<TaskDto> tasks = taskService.getCompletedTasks(userId);
-        notificationService.editTaskList(chatId, msgId, tasks, TaskStatus.COMPLETED);
+        notificationService.editTaskList(chatId, msgId, tasks, TaskStatus.COMPLETED, language);
     }
 
     private Language resolveLanguage(Long userId) {

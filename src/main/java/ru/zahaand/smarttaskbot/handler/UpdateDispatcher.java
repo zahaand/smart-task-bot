@@ -25,7 +25,7 @@ import ru.zahaand.smarttaskbot.service.UserStateService;
  * Delegates immediately to the appropriate handler — no business logic here.
  * <p>
  * Центральный маршрутизатор входящих обновлений Telegram.
- * Немедленно делегирует нужному обработчику — бизнес-логика отсутствует.
+ * Немедленно делегирует нужному обработчику — никакой бизнес-логики здесь нет.
  * <p>
  * routeMessage() step order:
  * 1. resetIfStale
@@ -38,6 +38,18 @@ import ru.zahaand.smarttaskbot.service.UserStateService;
  * 8. button handlers (NewTaskButtonHandler, TaskListButtonHandler)
  * 9. command switch (legacy commands, backward compat)
  * 10. default → UnknownInputHandler
+ * <p>
+ * Порядок шагов routeMessage():
+ * 1. resetIfStale
+ * 2. чтение состояния
+ * 3. isCommand? → /cancel прерывает не-IDLE; остальные команды обходят обработчики состояний
+ * 4. isPersistentMenuButton? → отменить активный поток, затем направить к обработчику кнопки
+ * 5. CREATING_TASK → TaskCreationTextHandler
+ * 6. ENTERING_REMINDER_TIME → ReminderTimeTextHandler
+ * 7. CONFIRMING_DELETE / SELECTING_REMINDER_DATE → «Используйте кнопки выше.»
+ * 8. обработчики кнопок (NewTaskButtonHandler, TaskListButtonHandler)
+ * 9. переключатель команд (legacy-команды, обратная совместимость)
+ * 10. по умолчанию → UnknownInputHandler
  */
 @Slf4j
 @Component

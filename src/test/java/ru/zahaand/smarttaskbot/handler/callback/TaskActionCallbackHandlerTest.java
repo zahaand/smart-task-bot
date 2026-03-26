@@ -89,7 +89,7 @@ class TaskActionCallbackHandlerTest {
 
             verify(taskService).completeTask(USER_ID, TASK_ID);
             verify(notificationService).answerCallbackQuery(CB_ID);
-            verify(notificationService).editTaskList(CHAT_ID, MSG_ID, List.of(), TaskStatus.ACTIVE);
+            verify(notificationService).editTaskList(eq(CHAT_ID), eq(MSG_ID), eq(List.of()), eq(TaskStatus.ACTIVE), isNull());
         }
     }
 
@@ -112,7 +112,7 @@ class TaskActionCallbackHandlerTest {
             assertThat(ctxCaptor.getValue().getViewingMonth()).isNotNull();
 
             verify(notificationService).answerCallbackQuery(CB_ID);
-            verify(notificationService).sendCalendar(eq(CHAT_ID), anyInt(), anyInt());
+            verify(notificationService).sendCalendar(eq(CHAT_ID), anyInt(), anyInt(), isNull());
         }
     }
 
@@ -134,7 +134,7 @@ class TaskActionCallbackHandlerTest {
             assertThat(ctxCaptor.getValue().getTaskId()).isEqualTo(TASK_ID);
 
             verify(notificationService).answerCallbackQuery(CB_ID);
-            verify(notificationService).sendDeleteConfirmation(CHAT_ID, TASK_ID, "Buy milk");
+            verify(notificationService).sendDeleteConfirmation(eq(CHAT_ID), eq(TASK_ID), eq("Buy milk"), isNull());
         }
 
         @Test
@@ -148,7 +148,7 @@ class TaskActionCallbackHandlerTest {
 
             verify(notificationService).answerCallbackQuery(CB_ID);
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("Something went wrong"));
-            verify(notificationService, never()).sendDeleteConfirmation(any(), any(), any());
+            verify(notificationService, never()).sendDeleteConfirmation(any(), any(), any(), any());
         }
     }
 }

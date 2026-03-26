@@ -19,7 +19,12 @@ import ru.zahaand.smarttaskbot.service.UserService;
  *   <li>Mid-registration user (row exists, incomplete) → RegistrationGuard re-prompts</li>
  * </ol>
  * <p>
- * Обрабатывает команду /start с тремя ветками маршрутизации.
+ * Обрабатывает команду {@code /start} с тремя ветками маршрутизации:
+ * <ol>
+ *   <li>Зарегистрированный пользователь → ALREADY_REGISTERED + постоянное меню на языке пользователя</li>
+ *   <li>Новый пользователь (нет строки в БД) → createPartialUser + клавиатура выбора языка</li>
+ *   <li>Пользователь в процессе регистрации (строка есть, незавершена) → RegistrationGuard повторно запрашивает шаг</li>
+ * </ol>
  */
 @Slf4j
 @Component

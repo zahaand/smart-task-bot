@@ -15,8 +15,8 @@ public enum MessageKey {
     // ── Registration ─────────────────────────────────────────────────────────
 
     WELCOME_BILINGUAL(
-            "Welcome to Smart Task Bot! 🤖\n\nChoose your language:\n\nДобро пожаловать в Smart Task Bot! 🤖\n\nВыберите язык:",
-            "Welcome to Smart Task Bot! 🤖\n\nChoose your language:\n\nДобро пожаловать в Smart Task Bot! 🤖\n\nВыберите язык:"
+            "Welcome to Smart Task Bot! 🤖\nChoose your language:\n\nДобро пожаловать в Smart Task Bot! 🤖\nВыберите язык:",
+            "Welcome to Smart Task Bot! 🤖\nChoose your language:\n\nДобро пожаловать в Smart Task Bot! 🤖\nВыберите язык:"
     ),
     SELECT_TIMEZONE(
             "Please select your timezone:",
@@ -56,10 +56,6 @@ public enum MessageKey {
 
     // ── Task operations ───────────────────────────────────────────────────────
 
-    DELETE_CONFIRM_SINGLE(
-            "Delete this task? This cannot be undone.",
-            "Удалить задачу? Это нельзя отменить."
-    ),
     DELETE_CONFIRM_ALL(
             "Delete all %d completed tasks? This cannot be undone.",
             "Удалить %d выполненных задач? Это нельзя отменить."
@@ -102,6 +98,14 @@ public enum MessageKey {
 
     // ── Button labels ─────────────────────────────────────────────────────────
 
+    BTN_LANG_EN(
+            "🇬🇧 English",
+            "🇬🇧 English"
+    ),
+    BTN_LANG_RU(
+            "🇷🇺 Русский",
+            "🇷🇺 Русский"
+    ),
     BTN_NEW_TASK(
             "📝 New Task",
             "📝 Новая задача"
@@ -114,9 +118,37 @@ public enum MessageKey {
             "✅ Yes, delete all",
             "✅ Да, удалить всё"
     ),
+    BTN_YES_DELETE(
+            "✅ Yes, delete",
+            "✅ Да, удалить"
+    ),
     BTN_CANCEL(
             "❌ Cancel",
             "❌ Отмена"
+    ),
+    BTN_REMIND(
+            "⏰ Remind",
+            "⏰ Напомнить"
+    ),
+    BTN_COMPLETE(
+            "✅ Complete",
+            "✅ Выполнено"
+    ),
+    BTN_DELETE(
+            "🗑 Delete",
+            "🗑 Удалить"
+    ),
+    BTN_DELETE_ALL(
+            "🗑 Delete All",
+            "🗑 Удалить все"
+    ),
+    TAB_ACTIVE(
+            "Active",
+            "Активные"
+    ),
+    TAB_COMPLETED(
+            "Completed",
+            "Выполненные"
     ),
 
     // ── Task operations (extended) ────────────────────────────────────────────
@@ -136,6 +168,26 @@ public enum MessageKey {
     TASKS_ACTIVE_HEADER(
             "Your active tasks",
             "Ваши активные задачи"
+    ),
+    TASKS_ACTIVE_LIST_HEADER(
+            "📋 Active tasks",
+            "📋 Активные задачи"
+    ),
+    TASKS_COMPLETED_HEADER(
+            "✅ Completed tasks",
+            "✅ Выполненные задачи"
+    ),
+    TASKS_EMPTY_ACTIVE(
+            "📋 No active tasks yet. Tap \"📝 New Task\" to create one.",
+            "📋 Активных задач пока нет. Нажми \"📝 Новая задача\" чтобы создать."
+    ),
+    TASKS_EMPTY_COMPLETED(
+            "✅ No completed tasks yet.",
+            "✅ Выполненных задач пока нет."
+    ),
+    TASKS_TRUNCATED(
+            "Showing first %d tasks…",
+            "Показаны первые %d задач…"
     ),
 
     // ── Errors & help ─────────────────────────────────────────────────────────
@@ -181,6 +233,11 @@ public enum MessageKey {
     TWELVE_OCLOCK_HINT(
             "For 12 o'clock use the 24-hour format: 00:00 (midnight) or 12:00 (noon).",
             "Для 12 часов используйте 24-часовой формат: 00:00 (полночь) или 12:00 (полдень)."
+    ),
+
+    TASK_DELETE_CONFIRM(
+            "🗑 Delete task #%d: %s? This cannot be undone.",
+            "🗑 Удалить задачу #%d: %s? Это действие нельзя отменить."
     ),
 
     // ── Reminder notifications ────────────────────────────────────────────────

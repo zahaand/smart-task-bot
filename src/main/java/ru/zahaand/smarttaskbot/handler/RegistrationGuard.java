@@ -10,15 +10,22 @@ import ru.zahaand.smarttaskbot.service.UserService;
 
 /**
  * Guards all bot commands that require a fully registered user.
- * Three-state routing:
+ * Four-state routing:
  * <ol>
  *   <li>No User row → sendLanguageKeyboard (restart onboarding)</li>
  *   <li>Language IS NULL → sendLanguageKeyboard (step 1 pending)</li>
  *   <li>Timezone IS NULL → sendTimezoneKeyboard in user's language (step 2 pending)</li>
  *   <li>Fully registered → run the command action</li>
  * </ol>
- *
+ * <p>
  * Охраняет все команды, требующие полной регистрации пользователя.
+ * Четыре ветки маршрутизации:
+ * <ol>
+ *   <li>Нет строки пользователя → sendLanguageKeyboard (перезапуск регистрации)</li>
+ *   <li>Язык не задан → sendLanguageKeyboard (шаг 1 ожидает)</li>
+ *   <li>Часовой пояс не задан → sendTimezoneKeyboard на языке пользователя (шаг 2 ожидает)</li>
+ *   <li>Полностью зарегистрирован → выполнить действие команды</li>
+ * </ol>
  */
 @Slf4j
 @Component

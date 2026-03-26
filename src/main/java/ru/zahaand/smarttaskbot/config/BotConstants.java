@@ -55,8 +55,7 @@ public final class BotConstants {
 
     /**
      * Short English city codes for each IANA timezone in {@link #TIMEZONE_ROWS}.
-     * Always displayed in English regardless of the user's language (FR-011).
-     * Used inside timezone button labels as: "HH:mm CODES" (e.g. "10:00 MSK, SPB").
+     * Used inside timezone button labels when the user's language is EN (e.g. "10:00 MSK, SPB").
      */
     public static final Map<String, String> TIMEZONE_CITY_CODES = Map.of(
             "Europe/Kaliningrad", "KGD",
@@ -64,6 +63,18 @@ public final class BotConstants {
             "Asia/Yekaterinburg", "YEK",
             "Asia/Novosibirsk",   "NOV, OMS",
             "Asia/Vladivostok",   "VLA, KHA"
+    );
+
+    /**
+     * Short Russian city codes for each IANA timezone in {@link #TIMEZONE_ROWS}.
+     * Used inside timezone button labels when the user's language is RU (e.g. "10:00 МСК, СПБ").
+     */
+    public static final Map<String, String> TIMEZONE_CITY_CODES_RU = Map.of(
+            "Europe/Kaliningrad", "КГД",
+            "Europe/Moscow",      "МСК, СПБ",
+            "Asia/Yekaterinburg", "ЕКБ",
+            "Asia/Novosibirsk",   "НСК, ОМС",
+            "Asia/Vladivostok",   "ВЛВ, ХБР"
     );
 
     /**

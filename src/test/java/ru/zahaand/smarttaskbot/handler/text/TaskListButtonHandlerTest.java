@@ -10,9 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
+import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
+import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.util.List;
 
@@ -25,6 +28,8 @@ class TaskListButtonHandlerTest {
     TaskService taskService;
     @Mock
     NotificationService notificationService;
+    @Mock
+    UserService userService;
     @InjectMocks
     TaskListButtonHandler handler;
 
@@ -50,11 +55,14 @@ class TaskListButtonHandlerTest {
     @DisplayName("fetches active tasks and sends task list")
     void fetchesActiveTasksAndSendsList() {
         List<TaskDto> tasks = List.of(new TaskDto(1L, "Buy milk", null));
+        User user = mock(User.class);
+        when(user.getLanguage()).thenReturn(Language.EN);
+        when(userService.findById(USER_ID)).thenReturn(user);
         when(taskService.getActiveTasks(USER_ID)).thenReturn(tasks);
 
         handler.handle(update);
 
         verify(taskService).getActiveTasks(USER_ID);
-        verify(notificationService).sendTaskList(CHAT_ID, tasks, TaskStatus.ACTIVE);
+        verify(notificationService).sendTaskList(CHAT_ID, tasks, TaskStatus.ACTIVE, Language.EN);
     }
 }
