@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
@@ -54,16 +54,16 @@ public class CalendarCallbackHandler {
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_CAL_NAV)) {
+        if (data.startsWith(BotConstantsUtils.CB_CAL_NAV)) {
             handleNav(cq.getId(), userId, chatId, messageId, data);
-        } else if (data.startsWith(BotConstants.CB_CAL_DATE)) {
+        } else if (data.startsWith(BotConstantsUtils.CB_CAL_DATE)) {
             handleDate(cq.getId(), userId, chatId, data);
         }
     }
 
     private void handleNav(String callbackQueryId, Long userId, Long chatId,
                            Integer messageId, String data) {
-        final int delta = Integer.parseInt(data.substring(BotConstants.CB_CAL_NAV.length()));
+        final int delta = Integer.parseInt(data.substring(BotConstantsUtils.CB_CAL_NAV.length()));
         final ConversationContext ctx = userStateService.getContext(userId).orElse(null);
 
         if (ctx == null || ctx.getViewingYear() == null || ctx.getViewingMonth() == null) {
@@ -92,7 +92,7 @@ public class CalendarCallbackHandler {
     }
 
     private void handleDate(String callbackQueryId, Long userId, Long chatId, String data) {
-        final String dateStr = data.substring(BotConstants.CB_CAL_DATE.length());
+        final String dateStr = data.substring(BotConstantsUtils.CB_CAL_DATE.length());
         final ConversationContext ctx = userStateService.getContext(userId).orElse(null);
 
         if (ctx == null || ctx.getTaskId() == null) {

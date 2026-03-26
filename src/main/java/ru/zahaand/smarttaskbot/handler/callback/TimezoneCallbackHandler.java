@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -16,12 +16,13 @@ import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
 /**
- * Handles {@code tz:*} inline keyboard callbacks (registration step 2 — timezone selection).
- * User row already exists from /start; this handler only sets the timezone and transitions to IDLE.
+ * Handles {@code tz:*} inline keyboard callbacks for timezone selection.
+ * Used in two contexts: registration step 2 (new user) and Settings → Change Timezone (existing user).
+ * Context is detected by checking whether the user is already registered before updating.
  * <p>
- * Обрабатывает колбэки {@code tz:*} (шаг 2 регистрации — выбор часового пояса).
- * Строка пользователя уже существует после {@code /start}; обработчик только устанавливает
- * часовой пояс и переводит состояние диалога в IDLE.
+ * Обрабатывает колбэки {@code tz:*} для выбора часового пояса.
+ * Используется в двух контекстах: шаг 2 регистрации (новый пользователь) и Настройки → Изменить
+ * часовой пояс (зарегистрированный пользователь). Контекст определяется до обновления данных.
  */
 @Slf4j
 @Component
@@ -44,26 +45,35 @@ public class TimezoneCallbackHandler {
         final Long telegramUserId = callbackQuery.getFrom().getId();
         final String data = callbackQuery.getData();
 
-        if (data == null || !data.startsWith(BotConstants.TZ_CALLBACK_PREFIX)) {
+        if (data == null || !data.startsWith(BotConstantsUtils.CB_TZ)) {
             sendError(chatId, telegramUserId);
             return;
         }
 
-        final String timezone = data.substring(BotConstants.TZ_CALLBACK_PREFIX.length());
+        final String timezone = data.substring(BotConstantsUtils.CB_TZ.length());
 
-        if (!BotConstants.VALID_TIMEZONES.contains(timezone)) {
+        if (!BotConstantsUtils.VALID_TIMEZONES.contains(timezone)) {
             sendError(chatId, telegramUserId);
             return;
         }
+
+        // Detect context before updating: a registered user already has a timezone set.
+        final boolean isSettingsContext = userService.isRegistered(telegramUserId);
 
         userService.updateTimezone(telegramUserId, timezone);
         userStateService.setState(telegramUserId, ConversationState.IDLE);
 
         final User user = userService.findById(telegramUserId);
-        final String confirmText = messageService.get(MessageKey.TIMEZONE_CONFIRMED, user)
-                .formatted(timezone);
-        notificationService.sendPersistentMenu(chatId, confirmText, user.getLanguage());
-        log.info("Timezone set: userId={}, timezone={}", telegramUserId, timezone);
+        if (isSettingsContext) {
+            final String confirmText = messageService.get(MessageKey.SETTINGS_TIMEZONE_CHANGED, user)
+                    .formatted(timezone);
+            notificationService.sendPersistentMenu(chatId, confirmText, user.getLanguage());
+        } else {
+            final String confirmText = messageService.get(MessageKey.TIMEZONE_CONFIRMED, user)
+                    .formatted(timezone);
+            notificationService.sendPersistentMenu(chatId, confirmText, user.getLanguage());
+        }
+        log.info("Timezone set: userId={}, timezone={}, settingsContext={}", telegramUserId, timezone, isSettingsContext);
     }
 
     private void sendError(Long chatId, Long userId) {

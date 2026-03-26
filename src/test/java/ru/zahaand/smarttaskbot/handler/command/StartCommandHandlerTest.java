@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.handler.RegistrationGuard;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.User;
@@ -29,9 +28,6 @@ class StartCommandHandlerTest {
 
     @Mock
     private NotificationService notificationService;
-
-    @Mock
-    private RegistrationGuard registrationGuard;
 
     @Mock
     private MessageService messageService;
@@ -62,24 +58,24 @@ class StartCommandHandlerTest {
     @Nested
     class Handle {
 
-        @DisplayName("creates partial user and sends language keyboard for new user")
+        @DisplayName("creates partial user and sends language keyboard when user does not exist in DB")
         @Test
-        void createsPartialUserAndSendsLanguageKeyboard_forNewUser() {
-            when(userService.isRegistered(USER_ID)).thenReturn(false);
+        void createsPartialUserAndSendsLanguageKeyboard_whenUserNotInDb() {
             when(userService.userExists(USER_ID)).thenReturn(false);
 
             handler.handle(update);
 
             verify(userService).createPartialUser(USER_ID, USERNAME);
             verify(notificationService).sendLanguageKeyboard(CHAT_ID);
-            verify(registrationGuard, never()).checkAndRoute(any(), any());
+            verify(userService, never()).isRegistered(any());
         }
 
-        @DisplayName("sends ALREADY_REGISTERED in user language and persistent menu for returning user")
+        @DisplayName("sends ALREADY_REGISTERED and persistent menu for fully registered user")
         @Test
         void sendsAlreadyRegisteredAndPersistentMenu_forReturningUser() {
             final User user = new User();
             user.setLanguage(Language.RU);
+            when(userService.userExists(USER_ID)).thenReturn(true);
             when(userService.isRegistered(USER_ID)).thenReturn(true);
             when(userService.findById(USER_ID)).thenReturn(user);
             when(messageService.get(MessageKey.ALREADY_REGISTERED, user))
@@ -91,17 +87,36 @@ class StartCommandHandlerTest {
             verify(userService, never()).createPartialUser(any(), any());
         }
 
-        @DisplayName("delegates to RegistrationGuard for mid-registration user")
+        @DisplayName("re-prompts language keyboard for mid-registration user with language pending")
         @Test
-        void delegatesToRegistrationGuard_forMidRegistrationUser() {
+        void sendsLanguageKeyboard_forLanguagePendingUser() {
+            final User user = new User();
+            user.setLanguage(null);
+            when(userService.userExists(USER_ID))
+                    .thenReturn(true);
             when(userService.isRegistered(USER_ID)).thenReturn(false);
-            when(userService.userExists(USER_ID)).thenReturn(true);
+            when(userService.findById(USER_ID)).thenReturn(user);
 
             handler.handle(update);
 
-            verify(registrationGuard).checkAndRoute(eq(update), any());
+            verify(notificationService).sendLanguageKeyboard(CHAT_ID);
             verify(userService, never()).createPartialUser(any(), any());
-            verify(notificationService, never()).sendLanguageKeyboard(any());
+        }
+
+        @DisplayName("re-prompts timezone keyboard for mid-registration user with timezone pending")
+        @Test
+        void sendsTimezoneKeyboard_forTimezonePendingUser() {
+            final User user = new User();
+            user.setLanguage(Language.EN);
+            user.setTimezone(null);
+            when(userService.userExists(USER_ID)).thenReturn(true);
+            when(userService.isRegistered(USER_ID)).thenReturn(false);
+            when(userService.findById(USER_ID)).thenReturn(user);
+
+            handler.handle(update);
+
+            verify(notificationService).sendTimezoneKeyboard(CHAT_ID, Language.EN);
+            verify(userService, never()).createPartialUser(any(), any());
         }
     }
 }

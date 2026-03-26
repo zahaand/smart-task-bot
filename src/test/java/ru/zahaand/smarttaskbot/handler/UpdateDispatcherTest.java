@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.handler.callback.*;
 import ru.zahaand.smarttaskbot.handler.command.*;
 import ru.zahaand.smarttaskbot.handler.text.NewTaskButtonHandler;
@@ -48,6 +48,8 @@ class UpdateDispatcherTest {
 
     @Mock
     TimezoneCallbackHandler timezoneCallbackHandler;
+    @Mock
+    SettingsCallbackHandler settingsCallbackHandler;
     @Mock
     TaskActionCallbackHandler taskActionCallbackHandler;
     @Mock
@@ -129,7 +131,7 @@ class UpdateDispatcherTest {
         @Test
         @DisplayName("CAL_DATE: callback routes to CalendarCallbackHandler")
         void calDateRoutesToCalendarHandler() {
-            Update update = callbackUpdate(BotConstants.CB_CAL_DATE + "2026-06-01");
+            Update update = callbackUpdate(BotConstantsUtils.CB_CAL_DATE + "2026-06-01");
             dispatcher.dispatch(update);
             verify(calendarCallbackHandler).handle(update);
         }
@@ -137,7 +139,7 @@ class UpdateDispatcherTest {
         @Test
         @DisplayName("CAL_NAV: callback routes to CalendarCallbackHandler")
         void calNavRoutesToCalendarHandler() {
-            Update update = callbackUpdate(BotConstants.CB_CAL_NAV + "+1");
+            Update update = callbackUpdate(BotConstantsUtils.CB_CAL_NAV + "+1");
             dispatcher.dispatch(update);
             verify(calendarCallbackHandler).handle(update);
         }
@@ -145,7 +147,7 @@ class UpdateDispatcherTest {
         @Test
         @DisplayName("TASKS_TAB: callback routes to TaskListTabCallbackHandler")
         void tasksTabRoutesToTabHandler() {
-            Update update = callbackUpdate(BotConstants.CB_TASKS_TAB + "ACTIVE");
+            Update update = callbackUpdate(BotConstantsUtils.CB_TASKS_TAB + "ACTIVE");
             dispatcher.dispatch(update);
             verify(taskListTabCallbackHandler).handle(update);
         }
@@ -153,7 +155,7 @@ class UpdateDispatcherTest {
         @Test
         @DisplayName("NO_OP callback is answered silently — no other handler called")
         void noOpAnsweredSilently() {
-            Update update = callbackUpdate(BotConstants.CB_NO_OP);
+            Update update = callbackUpdate(BotConstantsUtils.CB_NO_OP);
             dispatcher.dispatch(update);
             verify(notificationService).answerCallbackQuery("cbId");
             verifyNoInteractions(calendarCallbackHandler, taskListTabCallbackHandler,
@@ -164,7 +166,7 @@ class UpdateDispatcherTest {
         @Test
         @DisplayName("CONFIRM_DELETE: callback routes to DeleteConfirmCallbackHandler")
         void confirmDeleteRoutesToDeleteConfirmHandler() {
-            Update update = callbackUpdate(BotConstants.CB_CONFIRM_DELETE + "7");
+            Update update = callbackUpdate(BotConstantsUtils.CB_CONFIRM_DELETE + "7");
             dispatcher.dispatch(update);
             verify(deleteConfirmCallbackHandler).handle(update);
         }
@@ -172,7 +174,7 @@ class UpdateDispatcherTest {
         @Test
         @DisplayName("CONFIRM_CANCEL callback routes to DeleteConfirmCallbackHandler")
         void confirmCancelRoutesToDeleteConfirmHandler() {
-            Update update = callbackUpdate(BotConstants.CB_CONFIRM_CANCEL);
+            Update update = callbackUpdate(BotConstantsUtils.CB_CONFIRM_CANCEL);
             dispatcher.dispatch(update);
             verify(deleteConfirmCallbackHandler).handle(update);
         }
@@ -278,6 +280,17 @@ class UpdateDispatcherTest {
             dispatcher.dispatch(update);
 
             verify(reminderTimeTextHandler).handle(update);
+        }
+
+        @Test
+        @DisplayName("BTN_START in IDLE state routes to StartCommandHandler")
+        void startButtonInIdleRoutesToStartCommandHandler() {
+            when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
+            Update update = messageUpdate(MessageKey.BTN_START.get(ru.zahaand.smarttaskbot.model.Language.EN));
+
+            dispatcher.dispatch(update);
+
+            verify(startCommandHandler).handle(update);
         }
     }
 }

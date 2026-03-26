@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
@@ -46,9 +46,9 @@ public class DeleteConfirmCallbackHandler {
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_CONFIRM_DELETE)) {
+        if (data.startsWith(BotConstantsUtils.CB_CONFIRM_DELETE)) {
             handleConfirmDelete(cq.getId(), userId, chatId, data);
-        } else if (data.equals(BotConstants.CB_CONFIRM_CANCEL)) {
+        } else if (data.equals(BotConstantsUtils.CB_CONFIRM_CANCEL)) {
             handleConfirmCancel(cq.getId(), userId, chatId);
         }
     }

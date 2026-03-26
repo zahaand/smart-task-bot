@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
@@ -79,7 +79,7 @@ class TaskActionCallbackHandlerTest {
         @DisplayName("marks task complete and refreshes active task list in place")
         @Test
         void completesTaskAndRefreshesList() {
-            when(cq.getData()).thenReturn(BotConstants.CB_TASK_DONE + TASK_ID);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_TASK_DONE + TASK_ID);
             when(taskService.completeTask(USER_ID, TASK_ID)).thenReturn(new TaskDto(TASK_ID, "Buy milk", null));
             when(taskService.getActiveTasks(USER_ID)).thenReturn(List.of());
 
@@ -97,7 +97,7 @@ class TaskActionCallbackHandlerTest {
         @DisplayName("sets state to SELECTING_REMINDER_DATE with taskId in context and sends calendar")
         @Test
         void setsStateAndSendsCalendar() {
-            when(cq.getData()).thenReturn(BotConstants.CB_TASK_REMIND + TASK_ID);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_TASK_REMIND + TASK_ID);
 
             handler.handle(update);
 
@@ -118,7 +118,7 @@ class TaskActionCallbackHandlerTest {
         @DisplayName("sets state to CONFIRMING_DELETE with taskId in context and sends confirmation")
         @Test
         void setsStateAndSendsConfirmation() {
-            when(cq.getData()).thenReturn(BotConstants.CB_TASK_DELETE + TASK_ID);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_TASK_DELETE + TASK_ID);
             when(taskService.getTaskText(USER_ID, TASK_ID)).thenReturn("Buy milk");
 
             handler.handle(update);
@@ -135,7 +135,7 @@ class TaskActionCallbackHandlerTest {
         @DisplayName("sends error message when task no longer exists")
         @Test
         void sendsErrorWhenTaskGone() {
-            when(cq.getData()).thenReturn(BotConstants.CB_TASK_DELETE + TASK_ID);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_TASK_DELETE + TASK_ID);
             when(taskService.getTaskText(USER_ID, TASK_ID))
                     .thenThrow(new NoSuchElementException("Task #7 not found."));
 

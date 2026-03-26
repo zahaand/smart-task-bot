@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -63,7 +63,7 @@ class TaskListKeyboardBuilderTest {
             // row 0 = text row
             List<InlineKeyboardButton> textRow = rows.get(0);
             assertThat(textRow).hasSize(1);
-            assertThat(textRow.get(0).getCallbackData()).isEqualTo(BotConstants.CB_NO_OP);
+            assertThat(textRow.get(0).getCallbackData()).isEqualTo(BotConstantsUtils.CB_NO_OP);
             assertThat(textRow.get(0).getText()).contains("#3").contains("Task 3");
         }
 
@@ -83,7 +83,7 @@ class TaskListKeyboardBuilderTest {
             TaskDto task = activeTask(5L);
             List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
             assertThat(actionRow.get(0).getCallbackData())
-                    .isEqualTo(BotConstants.CB_TASK_REMIND + "5");
+                    .isEqualTo(BotConstantsUtils.CB_TASK_REMIND + "5");
         }
 
         @DisplayName("Complete button has TASK_DONE:<id> callback")
@@ -92,7 +92,7 @@ class TaskListKeyboardBuilderTest {
             TaskDto task = activeTask(5L);
             List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
             assertThat(actionRow.get(1).getCallbackData())
-                    .isEqualTo(BotConstants.CB_TASK_DONE + "5");
+                    .isEqualTo(BotConstantsUtils.CB_TASK_DONE + "5");
         }
 
         @DisplayName("Delete button has TASK_DELETE:<id> callback")
@@ -101,7 +101,7 @@ class TaskListKeyboardBuilderTest {
             TaskDto task = activeTask(5L);
             List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
             assertThat(actionRow.get(2).getCallbackData())
-                    .isEqualTo(BotConstants.CB_TASK_DELETE + "5");
+                    .isEqualTo(BotConstantsUtils.CB_TASK_DELETE + "5");
         }
     }
 
@@ -124,7 +124,7 @@ class TaskListKeyboardBuilderTest {
             TaskDto task = completedTask(9L);
             List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.COMPLETED).get(1);
             assertThat(actionRow.get(0).getCallbackData())
-                    .isEqualTo(BotConstants.CB_TASK_DELETE + "9");
+                    .isEqualTo(BotConstantsUtils.CB_TASK_DELETE + "9");
         }
     }
 
@@ -162,8 +162,8 @@ class TaskListKeyboardBuilderTest {
         void tabCallbacks() {
             List<List<InlineKeyboardButton>> r = rows(List.of(), TaskStatus.ACTIVE);
             List<InlineKeyboardButton> tabRow = r.get(r.size() - 1);
-            assertThat(tabRow.get(0).getCallbackData()).isEqualTo(BotConstants.CB_TASKS_TAB + "ACTIVE");
-            assertThat(tabRow.get(1).getCallbackData()).isEqualTo(BotConstants.CB_TASKS_TAB + "COMPLETED");
+            assertThat(tabRow.get(0).getCallbackData()).isEqualTo(BotConstantsUtils.CB_TASKS_TAB + "ACTIVE");
+            assertThat(tabRow.get(1).getCallbackData()).isEqualTo(BotConstantsUtils.CB_TASKS_TAB + "COMPLETED");
         }
     }
 

@@ -161,4 +161,20 @@ public class UserService {
     public boolean userExists(Long telegramUserId) {
         return userRepository.existsById(telegramUserId);
     }
+
+    // ── Account deletion ──────────────────────────────────────────────────────
+
+    /**
+     * Deletes the user record. CASCADE constraints in migrations 004 and 006 ensure
+     * that all associated user_states and tasks rows are also deleted automatically.
+     * No setState() call must follow this method — the user_states row no longer exists.
+     * <p>
+     * Удаляет запись пользователя. Каскадные ограничения в миграциях 004 и 006 гарантируют
+     * автоматическое удаление всех связанных строк user_states и tasks.
+     */
+    @Transactional
+    public void deleteUser(Long telegramUserId) {
+        userRepository.deleteById(telegramUserId);
+        log.info("Account deleted: userId={}", telegramUserId);
+    }
 }

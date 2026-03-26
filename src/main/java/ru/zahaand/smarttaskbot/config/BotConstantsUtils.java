@@ -1,5 +1,7 @@
 package ru.zahaand.smarttaskbot.config;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,29 +11,29 @@ import java.util.Set;
  * Single source of truth — both keyboard construction and callback validation
  * reference this class to stay in sync.
  */
-public final class BotConstants {
+@UtilityClass
+public class BotConstantsUtils {
 
     // ── Callback prefixes ────────────────────────────────────────────────────
 
-    /** Language selection (new-user registration step 1). */
-    public static final String CB_LANG    = "lang:";
+    /**
+     * Language selection (new-user registration step 1).
+     */
+    public static final String CB_LANG = "lang:";
     public static final String CB_LANG_EN = "lang:EN";
     public static final String CB_LANG_RU = "lang:RU";
 
-    /** Delete All Completed tasks — three-step confirmation flow. */
+    /**
+     * Delete All Completed tasks — three-step confirmation flow.
+     */
     public static final String CB_DELETE_ALL_REQUEST = "DELETE_ALL:request";
     public static final String CB_DELETE_ALL_CONFIRM = "DELETE_ALL:confirm";
-    public static final String CB_DELETE_ALL_CANCEL  = "DELETE_ALL:cancel";
+    public static final String CB_DELETE_ALL_CANCEL = "DELETE_ALL:cancel";
 
     /**
      * Timezone selection (legacy — used by TimezoneCallbackHandler).
      */
     public static final String CB_TZ = "tz:";
-
-    /**
-     * @deprecated Use {@link #CB_TZ}. Kept for backward-compat with existing code.
-     */
-    public static final String TZ_CALLBACK_PREFIX = CB_TZ;
 
     public static final String CB_TASK_REMIND = "TASK_REMIND:";
     public static final String CB_TASK_DONE = "TASK_DONE:";
@@ -42,6 +44,22 @@ public final class BotConstants {
     public static final String CB_CONFIRM_CANCEL = "CONFIRM_CANCEL";
     public static final String CB_TASKS_TAB = "TASKS_TAB:";
     public static final String CB_NO_OP = "NO_OP";
+
+    // ── Settings callbacks ────────────────────────────────────────────────────
+
+    public static final String CB_SETTINGS_MENU = "SETTINGS_MENU";
+    /**
+     * Triggers display of the language-selection keyboard (two-step: request → select).
+     */
+    public static final String CB_SETTINGS_LANG_REQUEST = "SETTINGS_LANG_REQUEST";
+    /**
+     * Prefix for the actual language selection: {@code SETTINGS_LANG:EN} / {@code SETTINGS_LANG:RU}.
+     */
+    public static final String CB_SETTINGS_LANG = "SETTINGS_LANG:";
+    public static final String CB_SETTINGS_TZ_REQUEST = "SETTINGS_TZ_REQUEST";
+    public static final String CB_SETTINGS_DEL_REQ = "SETTINGS_DELETE_REQUEST";
+    public static final String CB_SETTINGS_DEL_CFM = "SETTINGS_DELETE_CONFIRM";
+    public static final String CB_SETTINGS_DEL_CNC = "SETTINGS_DELETE_CANCEL";
 
     /**
      * Predefined timezone options displayed as inline keyboard rows (FR-018).
@@ -59,10 +77,10 @@ public final class BotConstants {
      */
     public static final Map<String, String> TIMEZONE_CITY_CODES = Map.of(
             "Europe/Kaliningrad", "KGD",
-            "Europe/Moscow",      "MSK, SPB",
+            "Europe/Moscow", "MSK, SPB",
             "Asia/Yekaterinburg", "YEK",
-            "Asia/Novosibirsk",   "NOV, OMS",
-            "Asia/Vladivostok",   "VLA, KHA"
+            "Asia/Novosibirsk", "NOV, OMS",
+            "Asia/Vladivostok", "VLA, KHA"
     );
 
     /**
@@ -71,10 +89,10 @@ public final class BotConstants {
      */
     public static final Map<String, String> TIMEZONE_CITY_CODES_RU = Map.of(
             "Europe/Kaliningrad", "КГД",
-            "Europe/Moscow",      "МСК, СПБ",
+            "Europe/Moscow", "МСК, СПБ",
             "Asia/Yekaterinburg", "ЕКБ",
-            "Asia/Novosibirsk",   "НСК, ОМС",
-            "Asia/Vladivostok",   "ВЛВ, ХБР"
+            "Asia/Novosibirsk", "НСК, ОМС",
+            "Asia/Vladivostok", "ВЛВ, ХБР"
     );
 
     /**
@@ -83,10 +101,10 @@ public final class BotConstants {
      */
     public static final Map<String, String> TIMEZONE_DISPLAY_NAMES = Map.of(
             "Europe/Kaliningrad", "Kaliningrad",
-            "Europe/Moscow",      "Moscow, SPb",
+            "Europe/Moscow", "Moscow, SPb",
             "Asia/Yekaterinburg", "Yekaterinburg",
-            "Asia/Novosibirsk",   "Novosibirsk",
-            "Asia/Vladivostok",   "Vladivostok"
+            "Asia/Novosibirsk", "Novosibirsk",
+            "Asia/Vladivostok", "Vladivostok"
     );
 
     /**
@@ -101,7 +119,4 @@ public final class BotConstants {
             "Asia/Vladivostok"
     );
 
-    private BotConstants() {
-        // utility class — no instances
-    }
 }

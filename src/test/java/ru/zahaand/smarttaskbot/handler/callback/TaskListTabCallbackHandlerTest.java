@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
@@ -75,7 +75,7 @@ class TaskListTabCallbackHandlerTest {
         @DisplayName("ACTIVE tab: fetches active tasks and edits task list")
         @Test
         void activeTabEditsWithActiveTasks() {
-            String callbackData = BotConstants.CB_TASKS_TAB + "ACTIVE";
+            String callbackData = BotConstantsUtils.CB_TASKS_TAB + "ACTIVE";
             List<TaskDto> tasks = List.of(new TaskDto(1L, "Buy milk", null));
             User user = mock(User.class);
             when(user.getLanguage()).thenReturn(Language.EN);
@@ -93,7 +93,7 @@ class TaskListTabCallbackHandlerTest {
         @DisplayName("COMPLETED tab: fetches completed tasks and edits task list")
         @Test
         void completedTabEditsWithCompletedTasks() {
-            String callbackData = BotConstants.CB_TASKS_TAB + "COMPLETED";
+            String callbackData = BotConstantsUtils.CB_TASKS_TAB + "COMPLETED";
             List<TaskDto> tasks = List.of();
             User user = mock(User.class);
             when(user.getLanguage()).thenReturn(Language.EN);
@@ -110,7 +110,7 @@ class TaskListTabCallbackHandlerTest {
         @DisplayName("already-active tab: answers query silently without editing")
         @Test
         void alreadyActiveTabIsNoOp() {
-            String callbackData = BotConstants.CB_TASKS_TAB + "ACTIVE";
+            String callbackData = BotConstantsUtils.CB_TASKS_TAB + "ACTIVE";
             // ✓ in label → handler treats this as the already-active tab
             Update update = buildUpdate(callbackData, markupWithButton(callbackData, "✓ Active"));
 

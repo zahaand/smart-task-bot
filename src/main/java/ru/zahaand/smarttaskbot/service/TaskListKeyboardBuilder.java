@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -67,7 +67,7 @@ public class TaskListKeyboardBuilder {
         if (task.getReminderTime() != null) {
             label += " [⏰ " + task.getReminderTime() + "]";
         }
-        return List.of(button(label, BotConstants.CB_NO_OP));
+        return List.of(button(label, BotConstantsUtils.CB_NO_OP));
     }
 
     private List<InlineKeyboardButton> buildTaskActionRow(TaskDto task, TaskStatus activeTab, Language language) {
@@ -75,16 +75,16 @@ public class TaskListKeyboardBuilder {
         final String id = task.getId().toString();
 
         if (activeTab == TaskStatus.ACTIVE) {
-            row.add(button(messageService.get(MessageKey.BTN_REMIND, language), BotConstants.CB_TASK_REMIND + id));
-            row.add(button(messageService.get(MessageKey.BTN_COMPLETE, language), BotConstants.CB_TASK_DONE + id));
+            row.add(button(messageService.get(MessageKey.BTN_REMIND, language), BotConstantsUtils.CB_TASK_REMIND + id));
+            row.add(button(messageService.get(MessageKey.BTN_COMPLETE, language), BotConstantsUtils.CB_TASK_DONE + id));
         }
-        row.add(button(messageService.get(MessageKey.BTN_DELETE, language), BotConstants.CB_TASK_DELETE + id));
+        row.add(button(messageService.get(MessageKey.BTN_DELETE, language), BotConstantsUtils.CB_TASK_DELETE + id));
 
         return row;
     }
 
     private List<InlineKeyboardButton> buildDeleteAllRow(Language language) {
-        return List.of(button(messageService.get(MessageKey.BTN_DELETE_ALL, language), BotConstants.CB_DELETE_ALL_REQUEST));
+        return List.of(button(messageService.get(MessageKey.BTN_DELETE_ALL, language), BotConstantsUtils.CB_DELETE_ALL_REQUEST));
     }
 
     private List<InlineKeyboardButton> buildTabRow(TaskStatus activeTab, Language language) {
@@ -94,8 +94,8 @@ public class TaskListKeyboardBuilder {
         final String completedLabel = completedBase + (activeTab == TaskStatus.COMPLETED ? " ✓" : "");
 
         return List.of(
-                button(activeLabel, BotConstants.CB_TASKS_TAB + "ACTIVE"),
-                button(completedLabel, BotConstants.CB_TASKS_TAB + "COMPLETED")
+                button(activeLabel, BotConstantsUtils.CB_TASKS_TAB + "ACTIVE"),
+                button(completedLabel, BotConstantsUtils.CB_TASKS_TAB + "COMPLETED")
         );
     }
 

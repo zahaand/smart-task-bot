@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
@@ -84,7 +84,7 @@ class CalendarCallbackHandlerTest {
         @Test
         void resetsWhenNotInSelectingState() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
-            when(cq.getData()).thenReturn(BotConstants.CB_CAL_DATE + "2026-06-01");
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CAL_DATE + "2026-06-01");
 
             handler.handle(update);
 
@@ -118,7 +118,7 @@ class CalendarCallbackHandlerTest {
                     .viewingMonth(next.getMonthValue())
                     .build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
-            when(cq.getData()).thenReturn(BotConstants.CB_CAL_NAV + "+1");
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CAL_NAV + "+1");
 
             handler.handle(update);
 
@@ -136,7 +136,7 @@ class CalendarCallbackHandlerTest {
                     .viewingMonth(next.getMonthValue())
                     .build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
-            when(cq.getData()).thenReturn(BotConstants.CB_CAL_NAV + "-1");
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CAL_NAV + "-1");
 
             handler.handle(update);
 
@@ -153,7 +153,7 @@ class CalendarCallbackHandlerTest {
                     .viewingMonth(current.getMonthValue())
                     .build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
-            when(cq.getData()).thenReturn(BotConstants.CB_CAL_NAV + "-1");
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CAL_NAV + "-1");
 
             handler.handle(update);
 
@@ -177,7 +177,7 @@ class CalendarCallbackHandlerTest {
         void transitionsState() {
             ConversationContext ctx = ConversationContext.builder().taskId(3L).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
-            when(cq.getData()).thenReturn(BotConstants.CB_CAL_DATE + "2026-06-15");
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CAL_DATE + "2026-06-15");
 
             handler.handle(update);
 
@@ -193,7 +193,7 @@ class CalendarCallbackHandlerTest {
         void sendsTimePrompt() {
             ConversationContext ctx = ConversationContext.builder().taskId(3L).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
-            when(cq.getData()).thenReturn(BotConstants.CB_CAL_DATE + "2026-06-15");
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CAL_DATE + "2026-06-15");
 
             handler.handle(update);
 

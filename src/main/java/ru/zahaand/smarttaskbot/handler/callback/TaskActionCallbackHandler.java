@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.*;
@@ -39,17 +39,17 @@ public class TaskActionCallbackHandler {
         final Integer messageId = cq.getMessage().getMessageId();
         final String data = cq.getData();
 
-        if (data.startsWith(BotConstants.CB_TASK_REMIND)) {
+        if (data.startsWith(BotConstantsUtils.CB_TASK_REMIND)) {
             handleTaskRemind(cq.getId(), userId, chatId, data);
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_TASK_DONE)) {
+        if (data.startsWith(BotConstantsUtils.CB_TASK_DONE)) {
             handleTaskDone(cq.getId(), userId, chatId, messageId, data);
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_TASK_DELETE)) {
+        if (data.startsWith(BotConstantsUtils.CB_TASK_DELETE)) {
             handleTaskDelete(cq.getId(), userId, chatId, data);
             return;
         }
@@ -59,7 +59,7 @@ public class TaskActionCallbackHandler {
     }
 
     private void handleTaskRemind(String callbackQueryId, Long userId, Long chatId, String data) {
-        final Long taskId = Long.parseLong(data.substring(BotConstants.CB_TASK_REMIND.length()));
+        final Long taskId = Long.parseLong(data.substring(BotConstantsUtils.CB_TASK_REMIND.length()));
         notificationService.answerCallbackQuery(callbackQueryId);
 
         final LocalDate today = LocalDate.now();
@@ -73,7 +73,7 @@ public class TaskActionCallbackHandler {
     }
 
     private void handleTaskDelete(String callbackQueryId, Long userId, Long chatId, String data) {
-        final Long taskId = Long.parseLong(data.substring(BotConstants.CB_TASK_DELETE.length()));
+        final Long taskId = Long.parseLong(data.substring(BotConstantsUtils.CB_TASK_DELETE.length()));
         notificationService.answerCallbackQuery(callbackQueryId);
 
         final String taskText;
@@ -102,7 +102,7 @@ public class TaskActionCallbackHandler {
 
     private void handleTaskDone(String callbackQueryId, Long userId, Long chatId,
                                 Integer messageId, String data) {
-        final Long taskId = Long.parseLong(data.substring(BotConstants.CB_TASK_DONE.length()));
+        final Long taskId = Long.parseLong(data.substring(BotConstantsUtils.CB_TASK_DONE.length()));
         taskService.completeTask(userId, taskId);
         notificationService.answerCallbackQuery(callbackQueryId);
 

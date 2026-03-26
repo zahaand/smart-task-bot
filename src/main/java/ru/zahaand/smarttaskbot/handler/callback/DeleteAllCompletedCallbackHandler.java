@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -56,11 +56,11 @@ public class DeleteAllCompletedCallbackHandler {
         final String data = cq.getData();
         final String cbId = cq.getId();
 
-        if (BotConstants.CB_DELETE_ALL_REQUEST.equals(data)) {
+        if (BotConstantsUtils.CB_DELETE_ALL_REQUEST.equals(data)) {
             handleRequest(cbId, userId, chatId);
-        } else if (BotConstants.CB_DELETE_ALL_CONFIRM.equals(data)) {
+        } else if (BotConstantsUtils.CB_DELETE_ALL_CONFIRM.equals(data)) {
             handleConfirm(cbId, userId, chatId, msgId);
-        } else if (BotConstants.CB_DELETE_ALL_CANCEL.equals(data)) {
+        } else if (BotConstantsUtils.CB_DELETE_ALL_CANCEL.equals(data)) {
             handleCancel(cbId, userId, chatId, msgId);
         }
     }

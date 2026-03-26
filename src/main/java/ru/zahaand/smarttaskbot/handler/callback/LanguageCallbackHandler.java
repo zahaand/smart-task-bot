@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -46,7 +46,7 @@ public class LanguageCallbackHandler {
 
         notificationService.answerCallbackQuery(cq.getId());
 
-        final String langCode = data.substring(BotConstants.CB_LANG.length());
+        final String langCode = data.substring(BotConstantsUtils.CB_LANG.length());
         final Language language;
 
         try {

@@ -57,7 +57,8 @@ class NotificationServiceTest {
         @DisplayName("empty ACTIVE list sends empty-state message")
         @Test
         void emptyActiveListSendsEmptyMessage() throws TelegramApiException {
-            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
+            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any()))
+                    .thenReturn(new InlineKeyboardMarkup());
 
             service.sendTaskList(CHAT_ID, List.of(), TaskStatus.ACTIVE, null);
 
@@ -69,7 +70,8 @@ class NotificationServiceTest {
         @DisplayName("empty COMPLETED list sends empty-state message")
         @Test
         void emptyCompletedListSendsEmptyMessage() throws TelegramApiException {
-            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
+            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any()))
+                    .thenReturn(new InlineKeyboardMarkup());
 
             service.sendTaskList(CHAT_ID, List.of(), TaskStatus.COMPLETED, null);
 
@@ -82,7 +84,8 @@ class NotificationServiceTest {
         @Test
         void nonEmptyActiveListSendsHeader() throws TelegramApiException {
             List<TaskDto> tasks = List.of(new TaskDto(1L, "Buy milk", null));
-            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
+            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any()))
+                    .thenReturn(new InlineKeyboardMarkup());
 
             service.sendTaskList(CHAT_ID, tasks, TaskStatus.ACTIVE, null);
 
@@ -98,7 +101,8 @@ class NotificationServiceTest {
             for (int i = 1; i <= 21; i++) {
                 tasks.add(new TaskDto((long) i, "Task " + i, null));
             }
-            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
+            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any()))
+                    .thenReturn(new InlineKeyboardMarkup());
 
             service.sendTaskList(CHAT_ID, tasks, TaskStatus.ACTIVE, null);
 
@@ -117,7 +121,8 @@ class NotificationServiceTest {
         @DisplayName("sends message with localized 'Choose reminder date:' text")
         @Test
         void sendsChooseReminderDateText() throws TelegramApiException {
-            when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt())).thenReturn(new InlineKeyboardMarkup());
+            when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt()))
+                    .thenReturn(new InlineKeyboardMarkup());
 
             service.sendCalendar(CHAT_ID, 2026, 6, null);
 
@@ -135,7 +140,8 @@ class NotificationServiceTest {
         @DisplayName("sends EditMessageText with correct chatId and messageId")
         @Test
         void sendsEditWithCorrectIds() throws TelegramApiException {
-            when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt())).thenReturn(new InlineKeyboardMarkup());
+            when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt()))
+                    .thenReturn(new InlineKeyboardMarkup());
 
             service.editCalendar(CHAT_ID, MESSAGE_ID, 2026, 6, null);
 
@@ -203,6 +209,52 @@ class NotificationServiceTest {
             InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
             String yesLabel = markup.getKeyboard().get(0).get(0).getText();
             assertThat(yesLabel).contains("Да, удалить");
+        }
+    }
+
+    // ── sendSettingsMenu ───────────────────────────────────────────────────────
+
+    @Nested
+    class SendSettingsMenu {
+
+        @DisplayName("sends message with three inline rows (one button each)")
+        @Test
+        void sendsThreeButtonRows() throws TelegramApiException {
+            service.sendSettingsMenu(CHAT_ID, Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
+            assertThat(markup.getKeyboard()).hasSize(3);
+        }
+
+        @DisplayName("message text is the Settings title key value")
+        @Test
+        void messageTextIsSettingsTitle() throws TelegramApiException {
+            service.sendSettingsMenu(CHAT_ID, Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            assertThat(captor.getValue().getText()).isEqualTo(MessageKey.SETTINGS_TITLE.get(Language.EN));
+        }
+    }
+
+    // ── sendPersistentMenu keyboard shape ────────────────────────────────────
+
+    @Nested
+    class SendPersistentMenu {
+
+        @DisplayName("persistent menu keyboard has 2 rows after Settings button addition")
+        @Test
+        void keyboardHasTwoRows() throws TelegramApiException {
+            service.sendPersistentMenu(CHAT_ID, "Ready", Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup markup =
+                    (org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup)
+                            captor.getValue().getReplyMarkup();
+            assertThat(markup.getKeyboard()).hasSize(2);
         }
     }
 }

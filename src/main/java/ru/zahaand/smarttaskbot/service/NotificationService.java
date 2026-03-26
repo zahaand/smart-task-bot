@@ -8,12 +8,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.*;
 
@@ -71,16 +72,26 @@ public class NotificationService {
      * Отправляет двуязычное приветствие с кнопками выбора языка.
      */
     public void sendLanguageKeyboard(Long chatId) {
+        // Remove any existing reply keyboard (e.g. the Start button shown after account deletion).
+        // This is a no-op if no reply keyboard is active.
+        final SendMessage removeKeyboard = new SendMessage(chatId.toString(), " ");
+        removeKeyboard.setReplyMarkup(new ReplyKeyboardRemove(true));
+        try {
+            sender.execute(removeKeyboard);
+        } catch (TelegramApiException e) {
+            log.warn("Failed to remove reply keyboard for chatId={}: {}", chatId, e.getMessage());
+        }
+
         final String text = messageService.get(MessageKey.WELCOME_BILINGUAL, Language.EN);
         final SendMessage message = new SendMessage(chatId.toString(), text);
 
         final InlineKeyboardButton enBtn = new InlineKeyboardButton(
                 messageService.get(MessageKey.BTN_LANG_EN, Language.EN));
-        enBtn.setCallbackData(BotConstants.CB_LANG_EN);
+        enBtn.setCallbackData(BotConstantsUtils.CB_LANG_EN);
 
         final InlineKeyboardButton ruBtn = new InlineKeyboardButton(
                 messageService.get(MessageKey.BTN_LANG_RU, Language.EN));
-        ruBtn.setCallbackData(BotConstants.CB_LANG_RU);
+        ruBtn.setCallbackData(BotConstantsUtils.CB_LANG_RU);
 
         final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(List.of(List.of(enBtn, ruBtn)));
@@ -245,11 +256,11 @@ public class NotificationService {
 
         final InlineKeyboardButton yesBtn = new InlineKeyboardButton(
                 messageService.get(MessageKey.BTN_YES_DELETE, language));
-        yesBtn.setCallbackData(BotConstants.CB_CONFIRM_DELETE + taskId);
+        yesBtn.setCallbackData(BotConstantsUtils.CB_CONFIRM_DELETE + taskId);
 
         final InlineKeyboardButton cancelBtn = new InlineKeyboardButton(
                 messageService.get(MessageKey.BTN_CANCEL, language));
-        cancelBtn.setCallbackData(BotConstants.CB_CONFIRM_CANCEL);
+        cancelBtn.setCallbackData(BotConstantsUtils.CB_CONFIRM_CANCEL);
 
         final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(List.of(List.of(yesBtn, cancelBtn)));
@@ -274,11 +285,11 @@ public class NotificationService {
     public void sendDeleteAllConfirmation(Long chatId, String text, Language language) {
         final InlineKeyboardButton yesBtn = new InlineKeyboardButton(
                 messageService.get(MessageKey.BTN_YES_DELETE_ALL, language));
-        yesBtn.setCallbackData(BotConstants.CB_DELETE_ALL_CONFIRM);
+        yesBtn.setCallbackData(BotConstantsUtils.CB_DELETE_ALL_CONFIRM);
 
         final InlineKeyboardButton cancelBtn = new InlineKeyboardButton(
                 messageService.get(MessageKey.BTN_CANCEL, language));
-        cancelBtn.setCallbackData(BotConstants.CB_DELETE_ALL_CANCEL);
+        cancelBtn.setCallbackData(BotConstantsUtils.CB_DELETE_ALL_CANCEL);
 
         final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(List.of(List.of(yesBtn, cancelBtn)));
@@ -335,13 +346,137 @@ public class NotificationService {
         return text;
     }
 
+    /**
+     * Sends the Settings inline menu with four option buttons.
+     */
+    public void sendSettingsMenu(Long chatId, Language language) {
+        final String text = messageService.get(MessageKey.SETTINGS_TITLE, language);
+
+        final InlineKeyboardButton langBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_CHANGE_LANGUAGE, language));
+        langBtn.setCallbackData(BotConstantsUtils.CB_SETTINGS_LANG_REQUEST);
+
+        final InlineKeyboardButton tzBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_CHANGE_TIMEZONE, language));
+        tzBtn.setCallbackData(BotConstantsUtils.CB_SETTINGS_TZ_REQUEST);
+
+        final InlineKeyboardButton deleteBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_DELETE_ACCOUNT, language));
+        deleteBtn.setCallbackData(BotConstantsUtils.CB_SETTINGS_DEL_REQ);
+
+        final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(List.of(
+                List.of(langBtn),
+                List.of(tzBtn),
+                List.of(deleteBtn)
+        ));
+
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(markup);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send settings menu to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Sends the language-selection keyboard for the settings change-language flow.
+     * Displays EN / RU buttons with {@code CB_SETTINGS_LANG:XX} callbacks.
+     */
+    public void sendSettingsLanguageKeyboard(Long chatId, Language language) {
+        final String text = messageService.get(MessageKey.BTN_CHANGE_LANGUAGE, language);
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+
+        final InlineKeyboardButton enBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_LANG_EN, Language.EN));
+        enBtn.setCallbackData(BotConstantsUtils.CB_SETTINGS_LANG + "EN");
+
+        final InlineKeyboardButton ruBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_LANG_RU, Language.EN));
+        ruBtn.setCallbackData(BotConstantsUtils.CB_SETTINGS_LANG + "RU");
+
+        final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(List.of(List.of(enBtn, ruBtn)));
+        message.setReplyMarkup(markup);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send settings language keyboard to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Sends the account-deleted farewell: removes the persistent keyboard,
+     * then shows a /start button so the user can register again.
+     */
+    public void sendAccountDeleted(Long chatId, Language language) {
+        // Farewell text removes the persistent menu keyboard.
+        final SendMessage farewell = new SendMessage(
+                chatId.toString(),
+                messageService.get(MessageKey.SETTINGS_ACCOUNT_DELETED, language));
+        farewell.setReplyMarkup(new ReplyKeyboardRemove(true));
+
+        // Prompt the user to restart with a single Start reply button.
+        final KeyboardRow startRow = new KeyboardRow();
+        startRow.add(new KeyboardButton(messageService.get(MessageKey.BTN_START, language)));
+
+        final ReplyKeyboardMarkup startKeyboard = new ReplyKeyboardMarkup();
+        startKeyboard.setKeyboard(List.of(startRow));
+        startKeyboard.setResizeKeyboard(true);
+
+        final SendMessage startPrompt = new SendMessage(
+                chatId.toString(),
+                messageService.get(MessageKey.START_AFTER_DELETE_PROMPT, language));
+        startPrompt.setReplyMarkup(startKeyboard);
+
+        try {
+            sender.execute(farewell);
+            sender.execute(startPrompt);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send account deleted message to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Sends the account-deletion confirmation prompt with Confirm and Cancel inline buttons.
+     */
+    public void sendAccountDeleteConfirmation(Long chatId, Language language) {
+        final String text = messageService.get(MessageKey.SETTINGS_DELETE_CONFIRM_PROMPT, language);
+
+        final InlineKeyboardButton confirmBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_YES_DELETE, language));
+        confirmBtn.setCallbackData(BotConstantsUtils.CB_SETTINGS_DEL_CFM);
+
+        final InlineKeyboardButton cancelBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_CANCEL, language));
+        cancelBtn.setCallbackData(BotConstantsUtils.CB_SETTINGS_DEL_CNC);
+
+        final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(List.of(List.of(confirmBtn, cancelBtn)));
+
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(markup);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send delete confirmation to chatId={}: {}", chatId, e.getMessage(), e);
+        }
+    }
+
     private ReplyKeyboardMarkup buildPersistentMenuKeyboard(Language language) {
-        final KeyboardRow row = new KeyboardRow();
-        row.add(new KeyboardButton(messageService.get(MessageKey.BTN_NEW_TASK, language)));
-        row.add(new KeyboardButton(messageService.get(MessageKey.BTN_MY_TASKS, language)));
+        final KeyboardRow taskRow = new KeyboardRow();
+        taskRow.add(new KeyboardButton(messageService.get(MessageKey.BTN_NEW_TASK, language)));
+        taskRow.add(new KeyboardButton(messageService.get(MessageKey.BTN_MY_TASKS, language)));
+
+        final KeyboardRow settingsRow = new KeyboardRow();
+        settingsRow.add(new KeyboardButton(messageService.get(MessageKey.BTN_SETTINGS, language)));
 
         final ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
-        markup.setKeyboard(List.of(row));
+        markup.setKeyboard(List.of(taskRow, settingsRow));
         markup.setResizeKeyboard(true);
         markup.setIsPersistent(true);
 
@@ -351,12 +486,12 @@ public class NotificationService {
     private InlineKeyboardMarkup buildTimezoneKeyboard(Language language) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
-        for (List<String> rowTimezones : BotConstants.TIMEZONE_ROWS) {
+        for (List<String> rowTimezones : BotConstantsUtils.TIMEZONE_ROWS) {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
             for (String tz : rowTimezones) {
                 final InlineKeyboardButton keyboardButton = new InlineKeyboardButton(buildTimezoneButtonLabel(tz, language));
-                keyboardButton.setCallbackData(BotConstants.TZ_CALLBACK_PREFIX + tz);
+                keyboardButton.setCallbackData(BotConstantsUtils.CB_TZ + tz);
                 row.add(keyboardButton);
             }
 
@@ -372,7 +507,7 @@ public class NotificationService {
     /**
      * Computes a timezone button label as {@code "HH:mm CITY_CODES"} in the user's language
      * (e.g. {@code "10:00 MSK, SPB"} for EN or {@code "10:00 МСК, СПБ"} for RU).
-     * Falls back to {@link BotConstants#TIMEZONE_DISPLAY_NAMES} when the zone rules cannot be loaded.
+     * Falls back to {@link BotConstantsUtils#TIMEZONE_DISPLAY_NAMES} when the zone rules cannot be loaded.
      * <p>
      * Вычисляет метку кнопки пояса «ЧЧ:мм КОД_ГОРОДА» на языке пользователя.
      * При ошибке загрузки правил зоны возвращает отображаемое имя из {@link BotConstants#TIMEZONE_DISPLAY_NAMES}.
@@ -381,12 +516,12 @@ public class NotificationService {
         try {
             final String currentTime = ZonedDateTime.now(ZoneId.of(tz)).format(TZ_TIME_FORMATTER);
             final java.util.Map<String, String> codes = language == Language.RU
-                    ? BotConstants.TIMEZONE_CITY_CODES_RU
-                    : BotConstants.TIMEZONE_CITY_CODES;
+                    ? BotConstantsUtils.TIMEZONE_CITY_CODES_RU
+                    : BotConstantsUtils.TIMEZONE_CITY_CODES;
             return currentTime + " " + codes.get(tz);
         } catch (java.time.zone.ZoneRulesException e) {
             log.warn("ZoneRulesException for tz='{}': {}", tz, e.getMessage());
-            return BotConstants.TIMEZONE_DISPLAY_NAMES.getOrDefault(tz, tz);
+            return BotConstantsUtils.TIMEZONE_DISPLAY_NAMES.getOrDefault(tz, tz);
         }
     }
 }

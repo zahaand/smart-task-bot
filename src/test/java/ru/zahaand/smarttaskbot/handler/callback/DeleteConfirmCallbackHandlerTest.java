@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
@@ -85,7 +85,7 @@ class DeleteConfirmCallbackHandlerTest {
         @DisplayName("answers and resets to IDLE when state ≠ CONFIRMING_DELETE")
         void resetsWhenNotInConfirmingState() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
-            when(cq.getData()).thenReturn(BotConstants.CB_CONFIRM_DELETE + TASK_ID);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_DELETE + TASK_ID);
 
             handler.handle(update);
 
@@ -113,7 +113,7 @@ class DeleteConfirmCallbackHandlerTest {
             ConversationContext ctx = ConversationContext.builder().taskId(TASK_ID).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
             when(taskService.deleteTask(USER_ID, TASK_ID)).thenReturn(1);
-            when(cq.getData()).thenReturn(BotConstants.CB_CONFIRM_DELETE + TASK_ID);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_DELETE + TASK_ID);
 
             handler.handle(update);
 
@@ -129,7 +129,7 @@ class DeleteConfirmCallbackHandlerTest {
             ConversationContext ctx = ConversationContext.builder().taskId(TASK_ID).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
             when(taskService.deleteTask(USER_ID, TASK_ID)).thenReturn(0);
-            when(cq.getData()).thenReturn(BotConstants.CB_CONFIRM_DELETE + TASK_ID);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_DELETE + TASK_ID);
 
             handler.handle(update);
 
@@ -141,7 +141,7 @@ class DeleteConfirmCallbackHandlerTest {
         @DisplayName("resets to IDLE and sends expiry message when context is missing")
         void handlesNullContext() {
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.empty());
-            when(cq.getData()).thenReturn(BotConstants.CB_CONFIRM_DELETE + TASK_ID);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_DELETE + TASK_ID);
 
             handler.handle(update);
 
@@ -164,7 +164,7 @@ class DeleteConfirmCallbackHandlerTest {
         @Test
         @DisplayName("sends \"Deletion cancelled.\", resets to IDLE, no deletion")
         void cancelsDeletionAndResets() {
-            when(cq.getData()).thenReturn(BotConstants.CB_CONFIRM_CANCEL);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_CANCEL);
 
             handler.handle(update);
 

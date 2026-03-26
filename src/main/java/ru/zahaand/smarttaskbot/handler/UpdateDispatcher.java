@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.handler.callback.*;
 import ru.zahaand.smarttaskbot.handler.command.*;
 import ru.zahaand.smarttaskbot.handler.text.NewTaskButtonHandler;
@@ -65,6 +65,7 @@ public class UpdateDispatcher {
     // Callback handlers
     private final LanguageCallbackHandler languageCallbackHandler;
     private final TimezoneCallbackHandler timezoneCallbackHandler;
+    private final SettingsCallbackHandler settingsCallbackHandler;
     private final TaskActionCallbackHandler taskActionCallbackHandler;
     private final TaskListTabCallbackHandler taskListTabCallbackHandler;
     private final CalendarCallbackHandler calendarCallbackHandler;
@@ -115,49 +116,60 @@ public class UpdateDispatcher {
         }
 
         // NO_OP: silent answer, no further action
-        if (data.equals(BotConstants.CB_NO_OP)) {
+        if (data.equals(BotConstantsUtils.CB_NO_OP)) {
             notificationService.answerCallbackQuery(callbackQueryId);
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_LANG)) {
+        if (data.startsWith(BotConstantsUtils.CB_LANG)) {
             languageCallbackHandler.handle(update);
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_TZ)) {
+        if (data.startsWith(BotConstantsUtils.CB_TZ)) {
             timezoneCallbackHandler.handle(update);
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_TASK_REMIND)
-                || data.startsWith(BotConstants.CB_TASK_DONE)
-                || data.startsWith(BotConstants.CB_TASK_DELETE)) {
+        if (data.startsWith(BotConstantsUtils.CB_TASK_REMIND)
+                || data.startsWith(BotConstantsUtils.CB_TASK_DONE)
+                || data.startsWith(BotConstantsUtils.CB_TASK_DELETE)) {
             taskActionCallbackHandler.handle(update);
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_CAL_DATE)
-                || data.startsWith(BotConstants.CB_CAL_NAV)) {
+        if (data.startsWith(BotConstantsUtils.CB_CAL_DATE)
+                || data.startsWith(BotConstantsUtils.CB_CAL_NAV)) {
             calendarCallbackHandler.handle(update);
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_CONFIRM_DELETE)
-                || data.equals(BotConstants.CB_CONFIRM_CANCEL)) {
+        if (data.startsWith(BotConstantsUtils.CB_CONFIRM_DELETE)
+                || data.equals(BotConstantsUtils.CB_CONFIRM_CANCEL)) {
             deleteConfirmCallbackHandler.handle(update);
             return;
         }
 
-        if (data.equals(BotConstants.CB_DELETE_ALL_REQUEST)
-                || data.equals(BotConstants.CB_DELETE_ALL_CONFIRM)
-                || data.equals(BotConstants.CB_DELETE_ALL_CANCEL)) {
+        if (data.equals(BotConstantsUtils.CB_DELETE_ALL_REQUEST)
+                || data.equals(BotConstantsUtils.CB_DELETE_ALL_CONFIRM)
+                || data.equals(BotConstantsUtils.CB_DELETE_ALL_CANCEL)) {
             deleteAllCompletedCallbackHandler.handle(update);
             return;
         }
 
-        if (data.startsWith(BotConstants.CB_TASKS_TAB)) {
+        if (data.startsWith(BotConstantsUtils.CB_TASKS_TAB)) {
             taskListTabCallbackHandler.handle(update);
+            return;
+        }
+
+        if (data.equals(BotConstantsUtils.CB_SETTINGS_MENU)
+                || data.equals(BotConstantsUtils.CB_SETTINGS_LANG_REQUEST)
+                || data.startsWith(BotConstantsUtils.CB_SETTINGS_LANG)
+                || data.equals(BotConstantsUtils.CB_SETTINGS_TZ_REQUEST)
+                || data.equals(BotConstantsUtils.CB_SETTINGS_DEL_REQ)
+                || data.equals(BotConstantsUtils.CB_SETTINGS_DEL_CFM)
+                || data.equals(BotConstantsUtils.CB_SETTINGS_DEL_CNC)) {
+            settingsCallbackHandler.handle(update);
             return;
         }
 
@@ -213,7 +225,8 @@ public class UpdateDispatcher {
 
         // Step 7: button-only states — reject free text
         if (state == ConversationState.CONFIRMING_DELETE
-                || state == ConversationState.SELECTING_REMINDER_DATE) {
+                || state == ConversationState.SELECTING_REMINDER_DATE
+                || state == ConversationState.CONFIRMING_DELETE_ACCOUNT) {
             final User buttonUser = findUserSafely(userId);
             notificationService.sendMessage(chatId, messageService.get(MessageKey.USE_BUTTONS, buttonUser != null ? buttonUser.getLanguage() : null));
             return;
@@ -259,6 +272,28 @@ public class UpdateDispatcher {
             return;
         }
 
+        if (MessageKey.BTN_SETTINGS.get(Language.EN).equals(text)
+                || MessageKey.BTN_SETTINGS.get(Language.RU).equals(text)) {
+            // State already reset by the caller (step 4) before this method is reached.
+            final Long userId = update.getMessage().getFrom().getId();
+            final Long chatId = update.getMessage().getChatId();
+            final Language language;
+            try {
+                language = userService.findById(userId).getLanguage();
+            } catch (Exception e) {
+                log.warn("Settings button: user not found userId={}", userId);
+                return;
+            }
+            notificationService.sendSettingsMenu(chatId, language);
+            return;
+        }
+
+        if (MessageKey.BTN_START.get(Language.EN).equals(text)) {
+            // Start button shown after account deletion — re-run the /start onboarding flow.
+            startCommandHandler.handle(update);
+            return;
+        }
+
         log.warn("Unhandled persistent menu button: '{}'", text);
     }
 
@@ -266,7 +301,10 @@ public class UpdateDispatcher {
         return MessageKey.BTN_NEW_TASK.get(Language.EN).equals(text)
                 || MessageKey.BTN_NEW_TASK.get(Language.RU).equals(text)
                 || MessageKey.BTN_MY_TASKS.get(Language.EN).equals(text)
-                || MessageKey.BTN_MY_TASKS.get(Language.RU).equals(text);
+                || MessageKey.BTN_MY_TASKS.get(Language.RU).equals(text)
+                || MessageKey.BTN_SETTINGS.get(Language.EN).equals(text)
+                || MessageKey.BTN_SETTINGS.get(Language.RU).equals(text)
+                || MessageKey.BTN_START.get(Language.EN).equals(text);
     }
 
     private User findUserSafely(Long userId) {

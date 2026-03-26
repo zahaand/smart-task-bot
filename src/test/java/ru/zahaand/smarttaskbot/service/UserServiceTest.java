@@ -126,4 +126,25 @@ class UserServiceTest {
                     .isInstanceOf(IllegalStateException.class);
         }
     }
+
+    @Nested
+    class DeleteUser {
+
+        @Test
+        @DisplayName("calls deleteById with the given userId")
+        void callsDeleteById() {
+            userService.deleteUser(USER_ID);
+
+            verify(userRepository).deleteById(USER_ID);
+        }
+
+        @Test
+        @DisplayName("does not throw when user does not exist")
+        void doesNotThrowWhenAbsent() {
+            doNothing().when(userRepository).deleteById(USER_ID);
+
+            org.junit.jupiter.api.Assertions.assertDoesNotThrow(
+                    () -> userService.deleteUser(USER_ID));
+        }
+    }
 }

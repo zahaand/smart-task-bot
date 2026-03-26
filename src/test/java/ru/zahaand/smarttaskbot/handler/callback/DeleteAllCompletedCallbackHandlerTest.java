@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
@@ -82,7 +82,7 @@ class DeleteAllCompletedCallbackHandlerTest {
         @DisplayName("answers callback and sends confirmation with formatted count")
         @Test
         void sendsConfirmationWithCount() {
-            when(cq.getData()).thenReturn(BotConstants.CB_DELETE_ALL_REQUEST);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_DELETE_ALL_REQUEST);
             when(taskService.countCompleted(USER_ID)).thenReturn(3L);
 
             handler.handle(update);
@@ -99,7 +99,7 @@ class DeleteAllCompletedCallbackHandlerTest {
         @DisplayName("answers callback and sends NO_COMPLETED_TASKS, no confirmation prompt")
         @Test
         void sendsNoCompletedTasksMessage() {
-            when(cq.getData()).thenReturn(BotConstants.CB_DELETE_ALL_REQUEST);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_DELETE_ALL_REQUEST);
             when(taskService.countCompleted(USER_ID)).thenReturn(0L);
 
             handler.handle(update);
@@ -116,7 +116,7 @@ class DeleteAllCompletedCallbackHandlerTest {
         @DisplayName("deletes all, sends ALL_COMPLETED_DELETED, and re-renders completed tab")
         @Test
         void deletesAllAndReRenders() {
-            when(cq.getData()).thenReturn(BotConstants.CB_DELETE_ALL_CONFIRM);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_DELETE_ALL_CONFIRM);
             when(taskService.deleteAllCompleted(USER_ID)).thenReturn(3);
             when(taskService.getCompletedTasks(USER_ID)).thenReturn(List.of());
 
@@ -135,7 +135,7 @@ class DeleteAllCompletedCallbackHandlerTest {
         @DisplayName("sends OPERATION_CANCELLED, re-renders completed tab, no deletion")
         @Test
         void cancelsAndReRenders() {
-            when(cq.getData()).thenReturn(BotConstants.CB_DELETE_ALL_CANCEL);
+            when(cq.getData()).thenReturn(BotConstantsUtils.CB_DELETE_ALL_CANCEL);
             when(taskService.getCompletedTasks(USER_ID)).thenReturn(List.of());
 
             handler.handle(update);

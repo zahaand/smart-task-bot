@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -50,7 +50,7 @@ class CalendarKeyboardBuilderTest {
             List<InlineKeyboardButton> header = markup.getKeyboard().get(0);
 
             assertThat(header).hasSize(1);
-            assertThat(header.get(0).getCallbackData()).isEqualTo(BotConstants.CB_NO_OP);
+            assertThat(header.get(0).getCallbackData()).isEqualTo(BotConstantsUtils.CB_NO_OP);
             assertThat(header.get(0).getText()).contains("January").contains("2024");
         }
     }
@@ -66,7 +66,7 @@ class CalendarKeyboardBuilderTest {
             List<InlineKeyboardButton> row = markup.getKeyboard().get(1);
 
             assertThat(row).hasSize(7);
-            row.forEach(btn -> assertThat(btn.getCallbackData()).isEqualTo(BotConstants.CB_NO_OP));
+            row.forEach(btn -> assertThat(btn.getCallbackData()).isEqualTo(BotConstantsUtils.CB_NO_OP));
         }
     }
 
@@ -85,12 +85,12 @@ class CalendarKeyboardBuilderTest {
                     .filter(btn -> !"".equals(btn.getText().trim()) && !" ".equals(btn.getText()))
                     .forEach(btn -> {
                         if (btn.getText().equals("·")) {
-                            assertThat(btn.getCallbackData()).isEqualTo(BotConstants.CB_NO_OP);
+                            assertThat(btn.getCallbackData()).isEqualTo(BotConstantsUtils.CB_NO_OP);
                         }
                     });
 
             long calDateCount = cells.stream()
-                    .filter(btn -> btn.getCallbackData().startsWith(BotConstants.CB_CAL_DATE))
+                    .filter(btn -> btn.getCallbackData().startsWith(BotConstantsUtils.CB_CAL_DATE))
                     .count();
             assertThat(calDateCount).isZero();
         }
@@ -109,7 +109,7 @@ class CalendarKeyboardBuilderTest {
             List<InlineKeyboardButton> cells = dayCells(markup);
 
             long calDateCount = cells.stream()
-                    .filter(btn -> btn.getCallbackData().startsWith(BotConstants.CB_CAL_DATE))
+                    .filter(btn -> btn.getCallbackData().startsWith(BotConstantsUtils.CB_CAL_DATE))
                     .count();
             // January has 31 days, all in the future
             assertThat(calDateCount).isEqualTo(31);
@@ -124,9 +124,9 @@ class CalendarKeyboardBuilderTest {
             List<InlineKeyboardButton> cells = dayCells(markup);
 
             cells.stream()
-                    .filter(btn -> btn.getCallbackData().startsWith(BotConstants.CB_CAL_DATE))
+                    .filter(btn -> btn.getCallbackData().startsWith(BotConstantsUtils.CB_CAL_DATE))
                     .forEach(btn -> {
-                        String datePart = btn.getCallbackData().substring(BotConstants.CB_CAL_DATE.length());
+                        String datePart = btn.getCallbackData().substring(BotConstantsUtils.CB_CAL_DATE.length());
                         // Should parse without exception
                         LocalDate parsed = LocalDate.parse(datePart);
                         assertThat(parsed.getYear()).isEqualTo(nextYear.getYear());
@@ -147,7 +147,7 @@ class CalendarKeyboardBuilderTest {
             InlineKeyboardButton prev = navRow(markup).get(0);
 
             assertThat(prev.getText()).isEqualTo("←");
-            assertThat(prev.getCallbackData()).isEqualTo(BotConstants.CB_NO_OP);
+            assertThat(prev.getCallbackData()).isEqualTo(BotConstantsUtils.CB_NO_OP);
         }
 
         @Test
@@ -159,7 +159,7 @@ class CalendarKeyboardBuilderTest {
             InlineKeyboardButton prev = navRow(markup).get(0);
 
             assertThat(prev.getText()).isEqualTo("←");
-            assertThat(prev.getCallbackData()).isEqualTo(BotConstants.CB_CAL_NAV + "-1");
+            assertThat(prev.getCallbackData()).isEqualTo(BotConstantsUtils.CB_CAL_NAV + "-1");
         }
 
         @Test
@@ -170,9 +170,9 @@ class CalendarKeyboardBuilderTest {
                     LocalDate.now().getYear(), LocalDate.now().getMonthValue());
 
             assertThat(navRow(pastMarkup).get(1).getCallbackData())
-                    .isEqualTo(BotConstants.CB_CAL_NAV + "+1");
+                    .isEqualTo(BotConstantsUtils.CB_CAL_NAV + "+1");
             assertThat(navRow(currentMarkup).get(1).getCallbackData())
-                    .isEqualTo(BotConstants.CB_CAL_NAV + "+1");
+                    .isEqualTo(BotConstantsUtils.CB_CAL_NAV + "+1");
         }
 
         @Test

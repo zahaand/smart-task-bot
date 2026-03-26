@@ -3,7 +3,7 @@ package ru.zahaand.smarttaskbot.service;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import ru.zahaand.smarttaskbot.config.BotConstants;
+import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -76,7 +76,7 @@ public class CalendarKeyboardBuilder {
             if (date.isBefore(today)) {
                 week.add(noop("·"));
             } else {
-                final String callback = BotConstants.CB_CAL_DATE + date.format(ISO_DATE_FMT);
+                final String callback = BotConstantsUtils.CB_CAL_DATE + date.format(ISO_DATE_FMT);
                 week.add(button(String.valueOf(day), callback));
             }
 
@@ -101,9 +101,9 @@ public class CalendarKeyboardBuilder {
         final YearMonth current = YearMonth.from(today);
         // "←" is a no-op when already on the current month — can't go further back
         final InlineKeyboardButton prev = ym.isAfter(current)
-                ? button("←", BotConstants.CB_CAL_NAV + "-1")
+                ? button("←", BotConstantsUtils.CB_CAL_NAV + "-1")
                 : noop("←");
-        final InlineKeyboardButton next = button("→", BotConstants.CB_CAL_NAV + "+1");
+        final InlineKeyboardButton next = button("→", BotConstantsUtils.CB_CAL_NAV + "+1");
         return List.of(prev, next);
     }
 
@@ -116,6 +116,6 @@ public class CalendarKeyboardBuilder {
     }
 
     private InlineKeyboardButton noop(String text) {
-        return button(text, BotConstants.CB_NO_OP);
+        return button(text, BotConstantsUtils.CB_NO_OP);
     }
 }

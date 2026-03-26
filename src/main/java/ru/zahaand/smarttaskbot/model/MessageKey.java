@@ -240,6 +240,65 @@ public enum MessageKey {
             "🗑 Удалить задачу #%d: %s? Это действие нельзя отменить."
     ),
 
+    // ── Settings ──────────────────────────────────────────────────────────────
+
+    BTN_SETTINGS(
+            "⚙️ Settings",
+            "⚙️ Настройки"
+    ),
+    SETTINGS_TITLE(
+            "⚙️ Settings",
+            "⚙️ Настройки"
+    ),
+    BTN_CHANGE_LANGUAGE(
+            "🌐 Change Language",
+            "🌐 Изменить язык"
+    ),
+    BTN_CHANGE_TIMEZONE(
+            "🕐 Change Timezone",
+            "🕐 Изменить часовой пояс"
+    ),
+    BTN_DELETE_ACCOUNT(
+            "🗑 Delete Account",
+            "🗑 Удалить аккаунт"
+    ),
+    SETTINGS_LANGUAGE_CHANGED(
+            "Language changed to English ✓",
+            "Язык изменён на русский ✓"
+    ),
+    SETTINGS_TIMEZONE_CHANGED(
+            "Timezone changed to %s ✓",
+            "Часовой пояс изменён на %s ✓"
+    ),
+    SETTINGS_DELETE_CONFIRM_PROMPT(
+            "⚠️ Are you sure you want to delete your account? All tasks and reminders will be permanently deleted.",
+            "⚠️ Вы уверены, что хотите удалить аккаунт? Все задачи и напоминания будут безвозвратно удалены."
+    ),
+    SETTINGS_ACCOUNT_DELETED(
+            "Your account has been deleted. Goodbye! 👋",
+            "Ваш аккаунт удалён. До свидания! 👋"
+    ),
+    SETTINGS_DELETE_CANCELLED(
+            "Account deletion cancelled.",
+            "Удаление аккаунта отменено."
+    ),
+
+    BTN_START(
+            "🚀 Start",
+            "🚀 Start"
+    ),
+    START_AFTER_DELETE_PROMPT(
+            "Tap Start to begin again.",
+            "Нажми Start чтобы начать снова."
+    ),
+
+    // ── Task creation with actions ────────────────────────────────────────────
+
+    TASK_CREATED_WITH_ACTIONS(
+            "Task #%d created: %s ✓",
+            "Задача #%d создана: %s ✓"
+    ),
+
     // ── Reminder notifications ────────────────────────────────────────────────
 
     REMINDER_NOTIFICATION(

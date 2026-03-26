@@ -18,26 +18,26 @@
 
 **⚠️ CRITICAL**: All user story phases block on Phase A completion.
 
-- [ ] T001 [P] Add `CONFIRMING_DELETE_ACCOUNT` to `ConversationState` enum —
+- [x] T001 [P] Add `CONFIRMING_DELETE_ACCOUNT` to `ConversationState` enum —
   `src/main/java/ru/zahaand/smarttaskbot/model/ConversationState.java`
-- [ ] T002 [P] Add 13 new `MessageKey` constants with EN + RU strings: `BTN_SETTINGS`, `SETTINGS_TITLE`,
+- [x] T002 [P] Add 13 new `MessageKey` constants with EN + RU strings: `BTN_SETTINGS`, `SETTINGS_TITLE`,
   `BTN_CHANGE_LANGUAGE`, `BTN_CHANGE_TIMEZONE`, `BTN_RESET_STATE`, `BTN_DELETE_ACCOUNT`, `SETTINGS_LANGUAGE_CHANGED`,
   `SETTINGS_TIMEZONE_CHANGED` (`%s`), `SETTINGS_STATE_RESET`, `SETTINGS_DELETE_CONFIRM_PROMPT`,
   `SETTINGS_ACCOUNT_DELETED`, `SETTINGS_DELETE_CANCELLED`, `TASK_CREATED_WITH_ACTIONS` (`%d`, `%s`) —
   `src/main/java/ru/zahaand/smarttaskbot/model/MessageKey.java`
-- [ ] T003 [P] Add 7 `CB_SETTINGS_*` constants to `BotConstants` (`CB_SETTINGS_MENU`, `CB_SETTINGS_LANG`,
+- [x] T003 [P] Add 7 `CB_SETTINGS_*` constants to `BotConstants` (`CB_SETTINGS_MENU`, `CB_SETTINGS_LANG`,
   `CB_SETTINGS_TZ_REQUEST`, `CB_SETTINGS_RESET`, `CB_SETTINGS_DEL_REQ`, `CB_SETTINGS_DEL_CFM`, `CB_SETTINGS_DEL_CNC`);
   add `@UtilityClass`; remove explicit `private BotConstants()` constructor; delete `@Deprecated TZ_CALLBACK_PREFIX`
   field — `src/main/java/ru/zahaand/smarttaskbot/config/BotConstants.java`
-- [ ] T004 Update `TimezoneCallbackHandler`: (1) replace `BotConstants.TZ_CALLBACK_PREFIX` → `BotConstants.CB_TZ` in
+- [x] T004 Update `TimezoneCallbackHandler`: (1) replace `BotConstants.TZ_CALLBACK_PREFIX` → `BotConstants.CB_TZ` in
   `startsWith` check; (2) add context-aware branch after `UserService.updateTimezone()` — if user was already
   registered (timezone non-null before update) send `SETTINGS_TIMEZONE_CHANGED.formatted(tz)` + persistent menu + set
   IDLE, otherwise continue existing registration flow —
   `src/main/java/ru/zahaand/smarttaskbot/handler/callback/TimezoneCallbackHandler.java`
-- [ ] T005 [P] Add `deleteUser(Long telegramUserId)` to `UserService`: `@Transactional`, call
+- [x] T005 [P] Add `deleteUser(Long telegramUserId)` to `UserService`: `@Transactional`, call
   `userRepository.deleteById(telegramUserId)`, log INFO on success —
   `src/main/java/ru/zahaand/smarttaskbot/service/UserService.java`
-- [ ] T006 [P] Write `UserServiceTest` `@Nested` class for `deleteUser()`: test success path (verify `deleteById` called
+- [x] T006 [P] Write `UserServiceTest` `@Nested` class for `deleteUser()`: test success path (verify `deleteById` called
   with correct id) and missing-user path (verify no exception propagates to handler layer) —
   `src/test/java/ru/zahaand/smarttaskbot/service/UserServiceTest.java`
 
@@ -53,7 +53,7 @@ state, or delete their account — all actions work end-to-end.
 **Independent Test** (from spec.md): Open Settings, tap each of the four inline buttons, verify the appropriate response
 is received in the user's language — independently of US2–US4.
 
-- [ ] T007 [US1] Create `SettingsCallbackHandler` with all 7 handler methods: `handleMenu()` (send 4-button inline
+- [x] T007 [US1] Create `SettingsCallbackHandler` with all 7 handler methods: `handleMenu()` (send 4-button inline
   keyboard), `handleLanguageChange()` (set IDLE, call `UserService.updateLanguage()`, send `SETTINGS_LANGUAGE_CHANGED` +
   persistent menu), `handleTimezoneRequest()` (set `AWAITING_TIMEZONE`, call
   `notificationService.sendTimezoneKeyboard(chatId, language)`), `handleReset()` (set IDLE, send
@@ -63,26 +63,26 @@ is received in the user's language — independently of US2–US4.
   `handleDeleteCancel()` (set IDLE, send `SETTINGS_DELETE_CANCELLED` + persistent menu); use `@RequiredArgsConstructor`;
   declare fields in Constitution VIII order —
   `src/main/java/ru/zahaand/smarttaskbot/handler/callback/SettingsCallbackHandler.java`
-- [ ] T008 [P] [US1] Update `NotificationService`: (1) add `sendSettingsMenu(Long chatId, Language language)` — sends
+- [x] T008 [P] [US1] Update `NotificationService`: (1) add `sendSettingsMenu(Long chatId, Language language)` — sends
   settings message with 4 inline option buttons (`CB_SETTINGS_LANG:EN`, `CB_SETTINGS_LANG:RU`, `CB_SETTINGS_TZ_REQUEST`,
   `CB_SETTINGS_RESET`, `CB_SETTINGS_DEL_REQ`); (2) update `sendPersistentMenu()` to add 3rd keyboard row with
   `BTN_SETTINGS` button — `src/main/java/ru/zahaand/smarttaskbot/service/NotificationService.java`
-- [ ] T009 [US1] Update `UpdateDispatcher`: (1) wire `SettingsCallbackHandler` via constructor injection; (2) add
+- [x] T009 [US1] Update `UpdateDispatcher`: (1) wire `SettingsCallbackHandler` via constructor injection; (2) add
   `CB_SETTINGS_*` routing block in `routeCallback()` before "Unrecognised callback" fallback (use `equals` for all
   except `CB_SETTINGS_LANG` which uses `startsWith`); (3) update `isPersistentMenuButton()` to recognise `BTN_SETTINGS`
   EN + RU; (4) update `routeMenuButton()` — reset state to IDLE before calling
   `notificationService.sendSettingsMenu()`; (5) add `CONFIRMING_DELETE_ACCOUNT` to the free-text rejection guard in
   `routeMessage()` alongside existing blocked states —
   `src/main/java/ru/zahaand/smarttaskbot/handler/UpdateDispatcher.java`
-- [ ] T010 [P] [US1] Write `SettingsCallbackHandlerTest` with `@ExtendWith(MockitoExtension.class)`; one `@Nested` class
+- [x] T010 [P] [US1] Write `SettingsCallbackHandlerTest` with `@ExtendWith(MockitoExtension.class)`; one `@Nested` class
   per method under test (7 total); cover: happy path for each method, stale-state guard (callback arrives while user is
   `CREATING_TASK`), `handleTimezoneRequest()` sets `AWAITING_TIMEZONE` + calls sendTimezoneKeyboard,
   `handleDeleteConfirm()` does NOT call `userStateService.setState()` after deletion; `@DisplayName` on every test
   method as first annotation — `src/test/java/ru/zahaand/smarttaskbot/handler/callback/SettingsCallbackHandlerTest.java`
-- [ ] T011 [P] [US1] Update `NotificationServiceTest`: add `@Nested` for `sendSettingsMenu()` (verify message sent with
+- [x] T011 [P] [US1] Update `NotificationServiceTest`: add `@Nested` for `sendSettingsMenu()` (verify message sent with
   correct inline keyboard); update any existing persistent-menu test that asserts 2-row keyboard shape → assert 3 rows —
   `src/test/java/ru/zahaand/smarttaskbot/service/NotificationServiceTest.java`
-- [ ] T012 [P] [US1] Update `TimezoneCallbackHandlerTest`: add `@Nested` for settings-context scenario — user already
+- [x] T012 [P] [US1] Update `TimezoneCallbackHandlerTest`: add `@Nested` for settings-context scenario — user already
   registered (timezone non-null before update), verify `SETTINGS_TIMEZONE_CHANGED` sent and state set to IDLE; verify
   registration flow (timezone was null) still sends standard persistent menu —
   `src/test/java/ru/zahaand/smarttaskbot/handler/callback/TimezoneCallbackHandlerTest.java`
