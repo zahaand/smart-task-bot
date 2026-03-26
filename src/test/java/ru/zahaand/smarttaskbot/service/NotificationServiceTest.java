@@ -22,7 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,8 +34,6 @@ class NotificationServiceTest {
     @Mock
     TaskListKeyboardBuilder taskListKeyboardBuilder;
     @Mock
-    CalendarKeyboardBuilder calendarKeyboardBuilder;
-    @Mock
     MessageService messageService;
 
     NotificationService service;
@@ -44,7 +43,7 @@ class NotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new NotificationService(sender, taskListKeyboardBuilder, calendarKeyboardBuilder, messageService);
+        service = new NotificationService(sender, taskListKeyboardBuilder, messageService);
         lenient().when(messageService.get(any(MessageKey.class), nullable(Language.class)))
                 .thenAnswer(inv -> ((MessageKey) inv.getArgument(0)).get(inv.getArgument(1)));
     }
@@ -121,9 +120,6 @@ class NotificationServiceTest {
         @DisplayName("sends message with localized 'Choose reminder date:' text")
         @Test
         void sendsChooseReminderDateText() throws TelegramApiException {
-            when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt()))
-                    .thenReturn(new InlineKeyboardMarkup());
-
             service.sendCalendar(CHAT_ID, 2026, 6, null);
 
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
@@ -140,9 +136,6 @@ class NotificationServiceTest {
         @DisplayName("sends EditMessageText with correct chatId and messageId")
         @Test
         void sendsEditWithCorrectIds() throws TelegramApiException {
-            when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt()))
-                    .thenReturn(new InlineKeyboardMarkup());
-
             service.editCalendar(CHAT_ID, MESSAGE_ID, 2026, 6, null);
 
             ArgumentCaptor<EditMessageText> captor = ArgumentCaptor.forClass(EditMessageText.class);
@@ -236,6 +229,48 @@ class NotificationServiceTest {
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());
             assertThat(captor.getValue().getText()).isEqualTo(MessageKey.SETTINGS_TITLE.get(Language.EN));
+        }
+    }
+
+    // ── sendTaskCreatedWithActions ────────────────────────────────────────────
+
+    @Nested
+    class SendTaskCreatedWithActions {
+
+        @DisplayName("message text contains formatted task ID and task text")
+        @Test
+        void messageTextContainsTaskIdAndText() throws TelegramApiException {
+            service.sendTaskCreatedWithActions(CHAT_ID, 5L, "Buy groceries", Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            assertThat(captor.getValue().getText()).contains("5").contains("Buy groceries");
+        }
+
+        @DisplayName("inline keyboard contains three action buttons (Remind, Complete, Delete)")
+        @Test
+        void keyboardContainsThreeActionButtons() throws TelegramApiException {
+            service.sendTaskCreatedWithActions(CHAT_ID, 5L, "Buy groceries", Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
+            assertThat(markup.getKeyboard()).hasSize(1);
+            assertThat(markup.getKeyboard().get(0)).hasSize(3);
+        }
+
+        @DisplayName("action button callbacks contain correct task ID")
+        @Test
+        void buttonCallbacksContainTaskId() throws TelegramApiException {
+            service.sendTaskCreatedWithActions(CHAT_ID, 7L, "Test task", Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
+            var buttons = markup.getKeyboard().get(0);
+            assertThat(buttons.get(0).getCallbackData()).startsWith("TASK_REMIND:").endsWith("7");
+            assertThat(buttons.get(1).getCallbackData()).startsWith("TASK_DONE:").endsWith("7");
+            assertThat(buttons.get(2).getCallbackData()).startsWith("TASK_DELETE:").endsWith("7");
         }
     }
 

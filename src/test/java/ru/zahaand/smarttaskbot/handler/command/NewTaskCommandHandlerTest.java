@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.MessageService;
@@ -60,7 +61,9 @@ class NewTaskCommandHandlerTest {
         when(message.getFrom()).thenReturn(from);
         when(from.getId()).thenReturn(USER_ID);
 
-        lenient().when(userService.findById(USER_ID)).thenReturn(new User());
+        User user = new User();
+        user.setLanguage(Language.EN);
+        lenient().when(userService.findById(USER_ID)).thenReturn(user);
         lenient().when(messageService.get(any(MessageKey.class), any(User.class))).thenReturn("Task created ✓");
     }
 
@@ -76,7 +79,7 @@ class NewTaskCommandHandlerTest {
 
             handler.handle(update);
 
-            verify(notificationService).sendMessage(eq(CHAT_ID), contains("Buy milk"));
+            verify(notificationService).sendTaskCreatedWithActions(CHAT_ID, 7L, "Buy milk", Language.EN);
         }
 
         @ParameterizedTest

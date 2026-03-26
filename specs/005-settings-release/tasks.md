@@ -100,18 +100,18 @@ allowing immediate action on the newly created task.
 **Independent Test** (from spec.md): Create a task via `/newtask` or the New Task button. Confirm the creation message
 includes three inline buttons and each performs the correct action on the new task.
 
-- [ ] T013 [P] [US2] Add `sendTaskCreatedWithActions(Long chatId, Long taskId, String taskText, Language language)` to
+- [x] T013 [P] [US2] Add `sendTaskCreatedWithActions(Long chatId, Long taskId, String taskText, Language language)` to
   `NotificationService`: send confirmation message with `TASK_CREATED_WITH_ACTIONS.formatted(taskId, taskText)` and
   inline keyboard containing `CB_TASK_REMIND`, `CB_TASK_DONE`, `CB_TASK_DELETE` buttons in user's language —
   `src/main/java/ru/zahaand/smarttaskbot/service/NotificationService.java`
-- [ ] T014 [US2] Update `TaskCreationTextHandler`: remove `notificationService.sendMessage(...)` call for task creation
+- [x] T014 [US2] Update `TaskCreationTextHandler`: remove `notificationService.sendMessage(...)` call for task creation
   success; replace with
   `notificationService.sendTaskCreatedWithActions(chatId, created.getId(), created.getText(), user.getLanguage())` —
   `src/main/java/ru/zahaand/smarttaskbot/handler/text/TaskCreationTextHandler.java`
-- [ ] T015 [P] [US2] Update `NotificationServiceTest`: add `@Nested` for `sendTaskCreatedWithActions()` — verify correct
+- [x] T015 [P] [US2] Update `NotificationServiceTest`: add `@Nested` for `sendTaskCreatedWithActions()` — verify correct
   message text with formatted task ID + text, verify inline keyboard contains all three action buttons —
   `src/test/java/ru/zahaand/smarttaskbot/service/NotificationServiceTest.java`
-- [ ] T016 [US2] Write or update `TaskCreationTextHandlerTest`: verify `sendTaskCreatedWithActions()` is called with
+- [x] T016 [US2] Write or update `TaskCreationTextHandlerTest`: verify `sendTaskCreatedWithActions()` is called with
   correct arguments on success; verify plain `sendMessage()` is no longer called for task creation —
   `src/test/java/ru/zahaand/smarttaskbot/handler/text/TaskCreationTextHandlerTest.java`
 
@@ -129,43 +129,43 @@ cleaned up, commons-lang3 explicit, StringUtils/CollectionUtils used throughout.
 without `Dto` suffix, no static-only class without `@UtilityClass`, no `<!-- -->` in Liquibase XMLs, `commons-lang3` in
 `pom.xml`.
 
-- [ ] T017 [P] [US3] Confirm `CreateTaskRequest` has zero references outside its own file (run
+- [x] T017 [P] [US3] Confirm `CreateTaskRequest` has zero references outside its own file (run
   `grep -r "CreateTaskRequest" src/`); then delete the file —
   `src/main/java/ru/zahaand/smarttaskbot/dto/CreateTaskRequest.java`
-- [ ] T018 [P] [US3] Create `CalendarKeyboardBuilderUtils`: copy `CalendarKeyboardBuilder` content, add `@UtilityClass`,
+- [x] T018 [P] [US3] Create `CalendarKeyboardBuilderUtils`: copy `CalendarKeyboardBuilder` content, add `@UtilityClass`,
   make all existing methods `static`, remove `@Component` annotation, remove explicit constructor —
   `src/main/java/ru/zahaand/smarttaskbot/service/CalendarKeyboardBuilderUtils.java`
-- [ ] T019 [US3] Update `NotificationService`: remove `CalendarKeyboardBuilder calendarKeyboardBuilder` field and
+- [x] T019 [US3] Update `NotificationService`: remove `CalendarKeyboardBuilder calendarKeyboardBuilder` field and
   constructor parameter; replace all `calendarKeyboardBuilder.buildCalendar()` and
   `calendarKeyboardBuilder.buildHeaderRow()` etc. with static `CalendarKeyboardBuilderUtils.*` calls; delete original
   `CalendarKeyboardBuilder.java` — `src/main/java/ru/zahaand/smarttaskbot/service/NotificationService.java` and
   `src/main/java/ru/zahaand/smarttaskbot/service/CalendarKeyboardBuilder.java`
-- [ ] T020 [P] [US3] Update `NotificationServiceTest`: remove `@Mock CalendarKeyboardBuilder calendarKeyboardBuilder`;
+- [x] T020 [P] [US3] Update `NotificationServiceTest`: remove `@Mock CalendarKeyboardBuilder calendarKeyboardBuilder`;
   remove it from the `NotificationService` constructor call in `@BeforeEach`; fix any compilation errors from the
   removed parameter — `src/test/java/ru/zahaand/smarttaskbot/service/NotificationServiceTest.java`
-- [ ] T021 [P] [US3] Create `TimeParserUtils`: copy `TimeParserService` content, add `@UtilityClass`, make all methods
+- [x] T021 [P] [US3] Create `TimeParserUtils`: copy `TimeParserService` content, add `@UtilityClass`, make all methods
   `static` (`parse()`, `isTwelveOClockAmbiguous()`, `tryParse()`, `validTime()`), remove `@Service`, remove `@Slf4j` (
   add explicit `private static final Logger log = LoggerFactory.getLogger(TimeParserUtils.class)` only if `log` is used
   in the catch block — Constitution VII) — `src/main/java/ru/zahaand/smarttaskbot/service/TimeParserUtils.java`
-- [ ] T022 [US3] Update `ReminderTimeTextHandler`: remove `TimeParserService timeParserService` field and constructor
+- [x] T022 [US3] Update `ReminderTimeTextHandler`: remove `TimeParserService timeParserService` field and constructor
   injection; replace with static calls `TimeParserUtils.parse(input)` and
   `TimeParserUtils.isTwelveOClockAmbiguous(input)`; delete original `TimeParserService.java` —
   `src/main/java/ru/zahaand/smarttaskbot/handler/text/ReminderTimeTextHandler.java` and
   `src/main/java/ru/zahaand/smarttaskbot/service/TimeParserService.java`
-- [ ] T023 [P] [US3] Rename `TimeParserServiceTest` → `TimeParserUtilsTest`: update class name, update all
+- [x] T023 [P] [US3] Rename `TimeParserServiceTest` → `TimeParserUtilsTest`: update class name, update all
   `TimeParserService` references to `TimeParserUtils`, remove Spring bean wiring (call static methods directly with
   `@ExtendWith(MockitoExtension.class)`) — `src/test/java/ru/zahaand/smarttaskbot/service/TimeParserUtilsTest.java`
-- [ ] T024 [P] [US3] Add `commons-lang3` as an explicit top-level dependency in `pom.xml` with no `<version>` tag (
+- [x] T024 [P] [US3] Add `commons-lang3` as an explicit top-level dependency in `pom.xml` with no `<version>` tag (
   version managed by Spring Boot 3.5.11 BOM — 3.17.0) — `pom.xml`
-- [ ] T025 [US3] Replace manual string null/blank checks with `StringUtils` equivalents across: `TimeParserUtils.java` (
+- [x] T025 [US3] Replace manual string null/blank checks with `StringUtils` equivalents across: `TimeParserUtils.java` (
   `StringUtils.isBlank(input)`, 2×), `TaskService.java` (`StringUtils.isBlank(text)` +
   `StringUtils.length(text) > 500`), `TaskCreationTextHandler.java` (`StringUtils.isBlank(text)`),
   `UpdateDispatcher.java` (`StringUtils.startsWith(text, "/")` + `StringUtils.defaultString(text)`),
   `UserStateService.java` (`StringUtils.isNotBlank(json)`) — multiple files
-- [ ] T026 [P] [US3] Audit collection null/empty checks in all service and handler classes: grep for `.isEmpty()` and
+- [x] T026 [P] [US3] Audit collection null/empty checks in all service and handler classes: grep for `.isEmpty()` and
   `== null` on List/Collection/Map types; replace with `CollectionUtils.isEmpty()` from `commons-lang3` where
   applicable — multiple files
-- [ ] T027 [US3] Run `mvn test`; confirm all tests pass with zero failures and zero skips; fix any regressions before
+- [x] T027 [US3] Run `mvn test`; confirm all tests pass with zero failures and zero skips; fix any regressions before
   proceeding
 
 **Checkpoint**: Zero Constitution v1.4.0 violations. Run `mvn test` green, grep confirms no deprecated code, no manual

@@ -12,9 +12,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TimeParserServiceTest {
-
-    private final TimeParserService parser = new TimeParserService();
+class TimeParserUtilsTest {
 
     record Case(String input, Optional<LocalTime> expected) {
         @Override
@@ -63,15 +61,15 @@ class TimeParserServiceTest {
     class ValidInputs {
 
         @ParameterizedTest(name = "{0}")
-        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserServiceTest#validCases")
+        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserUtilsTest#validCases")
         void parsesValidInput(Case c) {
-            assertThat(parser.parse(c.input())).isEqualTo(c.expected());
+            assertThat(TimeParserUtils.parse(c.input())).isEqualTo(c.expected());
         }
 
         @Test
         @DisplayName("trims leading/trailing whitespace before matching")
         void trimsWhitespace() {
-            assertThat(parser.parse("  14:30  ")).isEqualTo(Optional.of(LocalTime.of(14, 30)));
+            assertThat(TimeParserUtils.parse("  14:30  ")).isEqualTo(Optional.of(LocalTime.of(14, 30)));
         }
     }
 
@@ -80,9 +78,9 @@ class TimeParserServiceTest {
     class SpaceSeparated {
 
         @ParameterizedTest(name = "{0}")
-        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserServiceTest#spaceSeparatedCases")
+        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserUtilsTest#spaceSeparatedCases")
         void parsesSpaceSeparatedInput(Case c) {
-            assertThat(parser.parse(c.input())).isEqualTo(c.expected());
+            assertThat(TimeParserUtils.parse(c.input())).isEqualTo(c.expected());
         }
     }
 
@@ -91,9 +89,9 @@ class TimeParserServiceTest {
     class HyphenSeparated {
 
         @ParameterizedTest(name = "{0}")
-        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserServiceTest#hyphenSeparatedCases")
+        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserUtilsTest#hyphenSeparatedCases")
         void parsesHyphenSeparatedInput(Case c) {
-            assertThat(parser.parse(c.input())).isEqualTo(c.expected());
+            assertThat(TimeParserUtils.parse(c.input())).isEqualTo(c.expected());
         }
     }
 
@@ -102,21 +100,21 @@ class TimeParserServiceTest {
     class RejectedInputs {
 
         @ParameterizedTest(name = "\"{0}\" → empty")
-        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserServiceTest#rejectedInputs")
+        @MethodSource("ru.zahaand.smarttaskbot.service.TimeParserUtilsTest#rejectedInputs")
         void rejectsInput(String input) {
-            assertThat(parser.parse(input)).isEmpty();
+            assertThat(TimeParserUtils.parse(input)).isEmpty();
         }
 
         @Test
         @DisplayName("null → empty, no exception")
         void returnsEmptyForNull() {
-            assertThat(parser.parse(null)).isEmpty();
+            assertThat(TimeParserUtils.parse(null)).isEmpty();
         }
 
         @Test
         @DisplayName("blank string → empty, no exception")
         void returnsEmptyForBlank() {
-            assertThat(parser.parse("   ")).isEmpty();
+            assertThat(TimeParserUtils.parse("   ")).isEmpty();
         }
     }
 
@@ -127,37 +125,37 @@ class TimeParserServiceTest {
         @Test
         @DisplayName("true for \"12 утра\"")
         void trueFor12Utra() {
-            assertThat(parser.isTwelveOClockAmbiguous("12 утра")).isTrue();
+            assertThat(TimeParserUtils.isTwelveOClockAmbiguous("12 утра")).isTrue();
         }
 
         @Test
         @DisplayName("true for \"12 вечера\"")
         void trueFor12Vechera() {
-            assertThat(parser.isTwelveOClockAmbiguous("12 вечера")).isTrue();
+            assertThat(TimeParserUtils.isTwelveOClockAmbiguous("12 вечера")).isTrue();
         }
 
         @Test
         @DisplayName("case-insensitive: \"12 УТРА\" → true")
         void caseInsensitive() {
-            assertThat(parser.isTwelveOClockAmbiguous("12 УТРА")).isTrue();
+            assertThat(TimeParserUtils.isTwelveOClockAmbiguous("12 УТРА")).isTrue();
         }
 
         @Test
         @DisplayName("false for non-ambiguous input \"9 утра\"")
         void falseForNonAmbiguous() {
-            assertThat(parser.isTwelveOClockAmbiguous("9 утра")).isFalse();
+            assertThat(TimeParserUtils.isTwelveOClockAmbiguous("9 утра")).isFalse();
         }
 
         @Test
         @DisplayName("false for null")
         void falseForNull() {
-            assertThat(parser.isTwelveOClockAmbiguous(null)).isFalse();
+            assertThat(TimeParserUtils.isTwelveOClockAmbiguous(null)).isFalse();
         }
 
         @Test
         @DisplayName("false for blank")
         void falseForBlank() {
-            assertThat(parser.isTwelveOClockAmbiguous("  ")).isFalse();
+            assertThat(TimeParserUtils.isTwelveOClockAmbiguous("  ")).isFalse();
         }
     }
 }

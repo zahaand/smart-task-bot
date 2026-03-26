@@ -1,6 +1,7 @@
 package ru.zahaand.smarttaskbot.handler.text;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
@@ -28,15 +29,13 @@ public class TaskCreationTextHandler {
         final String text = update.getMessage().getText().trim();
         final User user = userService.findById(userId);
 
-        if (text.isBlank()) {
+        if (StringUtils.isBlank(text)) {
             notificationService.sendMessage(chatId, messageService.get(MessageKey.TASK_TEXT_EMPTY, user));
             return;
         }
 
         final TaskDto created = taskService.createTask(userId, text);
-        notificationService.sendMessage(chatId,
-                "✅ " + messageService.get(MessageKey.TASK_CREATED, user)
-                        + " #" + created.getId() + ": " + created.getText());
+        notificationService.sendTaskCreatedWithActions(chatId, created.getId(), created.getText(), user.getLanguage());
         userStateService.setState(userId, ConversationState.IDLE);
     }
 }

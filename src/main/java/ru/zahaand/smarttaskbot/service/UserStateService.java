@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ru.zahaand.smarttaskbot.dto.ConversationContext;
 import ru.zahaand.smarttaskbot.model.ConversationState;
@@ -57,7 +58,7 @@ public class UserStateService {
     public Optional<ConversationContext> getContext(Long userId) {
         return userStateRepository.findById(userId)
                 .map(UserState::getContext)
-                .filter(json -> json != null && !json.isBlank())
+                .filter(StringUtils::isNotBlank)
                 .flatMap(json -> {
                     try {
                         return Optional.of(objectMapper.readValue(json, ConversationContext.class));

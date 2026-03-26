@@ -1,7 +1,9 @@
 package ru.zahaand.smarttaskbot.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalTime;
 import java.util.Optional;
@@ -13,9 +15,10 @@ import java.util.regex.Pattern;
  * Supports 24-hour notation and Russian AM/PM suffixes ("утра" = AM, "вечера" = PM).
  * Never throws — all parse failures return {@link Optional#empty()}.
  */
-@Slf4j
-@Service
-public class TimeParserService {
+@UtilityClass
+public class TimeParserUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(TimeParserUtils.class);
 
     // HH:mm or H:mm  (24-hour, colon-separated)
     private static final Pattern P_HH_MM = Pattern.compile(
@@ -51,8 +54,8 @@ public class TimeParserService {
      * @param input raw user text (may be null or blank)
      * @return parsed time, or empty if the input matches no supported format or is rejected
      */
-    public Optional<LocalTime> parse(String input) {
-        if (input == null || input.isBlank()) {
+    public static Optional<LocalTime> parse(String input) {
+        if (StringUtils.isBlank(input)) {
             return Optional.empty();
         }
 
@@ -69,10 +72,9 @@ public class TimeParserService {
     /**
      * Returns {@code true} when the input is exactly "12 утра" or "12 вечера"
      * (the ambiguous 12-o'clock case, requiring a specific format hint).
-     * These two strings are user-typed input patterns, not bot output.
      */
-    public boolean isTwelveOClockAmbiguous(String input) {
-        if (input == null || input.isBlank()) {
+    public static boolean isTwelveOClockAmbiguous(String input) {
+        if (StringUtils.isBlank(input)) {
             return false;
         }
         final String normalized = input.trim().toLowerCase();
@@ -81,10 +83,9 @@ public class TimeParserService {
 
     // ── private helpers ───────────────────────────────────────────────────────
 
-    private Optional<LocalTime> tryParse(String input) {
+    private static Optional<LocalTime> tryParse(String input) {
         Matcher m;
 
-        // 1. HH:mm / H:mm  (must be tried before the утра/вечера patterns that also contain ":")
         m = P_HH_MM.matcher(input);
         if (m.matches()) {
             final int hour = Integer.parseInt(m.group(1));
@@ -92,7 +93,6 @@ public class TimeParserService {
             return validTime(hour, minute);
         }
 
-        // 1b. HH mm / H mm  (space-separated 24-hour)
         m = P_HH_SPACE_MM.matcher(input);
         if (m.matches()) {
             final int hour = Integer.parseInt(m.group(1));
@@ -100,7 +100,6 @@ public class TimeParserService {
             return validTime(hour, minute);
         }
 
-        // 1c. HH-mm / H-mm  (hyphen-separated 24-hour)
         m = P_HH_HYPHEN_MM.matcher(input);
         if (m.matches()) {
             final int hour = Integer.parseInt(m.group(1));
@@ -108,7 +107,6 @@ public class TimeParserService {
             return validTime(hour, minute);
         }
 
-        // 2. N:mm утра
         m = P_NMM_UTRA.matcher(input);
         if (m.matches()) {
             final int n = Integer.parseInt(m.group(1));
@@ -117,7 +115,6 @@ public class TimeParserService {
             return validTime(n, minute);
         }
 
-        // 3. N:mm вечера
         m = P_NMM_VECHERA.matcher(input);
         if (m.matches()) {
             final int n = Integer.parseInt(m.group(1));
@@ -126,7 +123,6 @@ public class TimeParserService {
             return validTime(n + 12, minute);
         }
 
-        // 4. N утра  (reject 12 explicitly — ambiguous)
         m = P_N_UTRA.matcher(input);
         if (m.matches()) {
             final int n = Integer.parseInt(m.group(1));
@@ -134,7 +130,6 @@ public class TimeParserService {
             return validTime(n, 0);
         }
 
-        // 5. N вечера  (reject 12 explicitly — ambiguous)
         m = P_N_VECHERA.matcher(input);
         if (m.matches()) {
             final int n = Integer.parseInt(m.group(1));
@@ -145,7 +140,7 @@ public class TimeParserService {
         return Optional.empty();
     }
 
-    private Optional<LocalTime> validTime(int hour, int minute) {
+    private static Optional<LocalTime> validTime(int hour, int minute) {
         if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
             return Optional.empty();
         }

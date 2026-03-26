@@ -28,8 +28,6 @@ import static org.mockito.Mockito.*;
 class ReminderTimeTextHandlerTest {
 
     @Mock
-    TimeParserService timeParserService;
-    @Mock
     TaskService taskService;
     @Mock
     UserStateService userStateService;
@@ -83,7 +81,6 @@ class ReminderTimeTextHandlerTest {
         @DisplayName("creates reminder, sends confirmation, and transitions to IDLE")
         void createsReminderAndConfirms() {
             when(message.getText()).thenReturn("14:30");
-            when(timeParserService.parse("14:30")).thenReturn(Optional.of(LocalTime.of(14, 30)));
             ConversationContext ctx = ConversationContext.builder()
                     .taskId(TASK_ID).date(DATE_STR).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
@@ -106,8 +103,6 @@ class ReminderTimeTextHandlerTest {
         @DisplayName("sends 24-hour format hint and stays in ENTERING_REMINDER_TIME")
         void sends12OClockHint() {
             when(message.getText()).thenReturn("12 вечера");
-            when(timeParserService.parse("12 вечера")).thenReturn(Optional.empty());
-            when(timeParserService.isTwelveOClockAmbiguous("12 вечера")).thenReturn(true);
 
             handler.handle(update);
 
@@ -125,8 +120,6 @@ class ReminderTimeTextHandlerTest {
         @DisplayName("sends generic format hint and stays in ENTERING_REMINDER_TIME")
         void sendsGenericHint() {
             when(message.getText()).thenReturn("abc");
-            when(timeParserService.parse("abc")).thenReturn(Optional.empty());
-            when(timeParserService.isTwelveOClockAmbiguous("abc")).thenReturn(false);
 
             handler.handle(update);
 
@@ -144,7 +137,6 @@ class ReminderTimeTextHandlerTest {
         @DisplayName("sends expiry message and resets to IDLE when context is empty")
         void handlesExpiredSession() {
             when(message.getText()).thenReturn("14:30");
-            when(timeParserService.parse("14:30")).thenReturn(Optional.of(LocalTime.of(14, 30)));
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.empty());
 
             handler.handle(update);

@@ -38,7 +38,6 @@ public class NotificationService {
 
     private final AbsSender sender;
     private final TaskListKeyboardBuilder taskListKeyboardBuilder;
-    private final CalendarKeyboardBuilder calendarKeyboardBuilder;
     private final MessageService messageService;
 
     private static final DateTimeFormatter TZ_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -47,11 +46,9 @@ public class NotificationService {
 
     public NotificationService(@Lazy AbsSender sender,
                                TaskListKeyboardBuilder taskListKeyboardBuilder,
-                               CalendarKeyboardBuilder calendarKeyboardBuilder,
                                MessageService messageService) {
         this.sender = sender;
         this.taskListKeyboardBuilder = taskListKeyboardBuilder;
-        this.calendarKeyboardBuilder = calendarKeyboardBuilder;
         this.messageService = messageService;
     }
 
@@ -214,7 +211,7 @@ public class NotificationService {
      * Sends a new inline calendar message for the given month.
      */
     public void sendCalendar(Long chatId, int year, int month, Language language) {
-        final InlineKeyboardMarkup keyboard = calendarKeyboardBuilder.buildCalendar(year, month);
+        final InlineKeyboardMarkup keyboard = CalendarKeyboardBuilderUtils.buildCalendar(year, month);
         final String text = messageService.get(MessageKey.CHOOSE_REMINDER_DATE, language);
         final SendMessage message = new SendMessage(chatId.toString(), text);
         message.setReplyMarkup(keyboard);
@@ -231,7 +228,7 @@ public class NotificationService {
      * Falls back to sending a new message via {@link #safeEdit} if the edit fails.
      */
     public void editCalendar(Long chatId, Integer messageId, int year, int month, Language language) {
-        final InlineKeyboardMarkup keyboard = calendarKeyboardBuilder.buildCalendar(year, month);
+        final InlineKeyboardMarkup keyboard = CalendarKeyboardBuilderUtils.buildCalendar(year, month);
         final String text = messageService.get(MessageKey.CHOOSE_REMINDER_DATE, language);
 
         final EditMessageText edit = new EditMessageText();
@@ -322,6 +319,38 @@ public class NotificationService {
                 log.error("Fallback sendMessage also failed for chatId={}: {}",
                         fallback.getChatId(), fallbackEx.getMessage(), fallbackEx);
             }
+        }
+    }
+
+    /**
+     * Sends a task-created confirmation with Remind / Complete / Delete inline action buttons.
+     */
+    public void sendTaskCreatedWithActions(Long chatId, Long taskId, String taskText, Language language) {
+        final String text = messageService.get(MessageKey.TASK_CREATED_WITH_ACTIONS, language)
+                .formatted(taskId, taskText);
+
+        final InlineKeyboardButton remindBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_REMIND, language));
+        remindBtn.setCallbackData(BotConstantsUtils.CB_TASK_REMIND + taskId);
+
+        final InlineKeyboardButton doneBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_COMPLETE, language));
+        doneBtn.setCallbackData(BotConstantsUtils.CB_TASK_DONE + taskId);
+
+        final InlineKeyboardButton deleteBtn = new InlineKeyboardButton(
+                messageService.get(MessageKey.BTN_DELETE, language));
+        deleteBtn.setCallbackData(BotConstantsUtils.CB_TASK_DELETE + taskId);
+
+        final InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(List.of(List.of(remindBtn, doneBtn, deleteBtn)));
+
+        final SendMessage message = new SendMessage(chatId.toString(), text);
+        message.setReplyMarkup(markup);
+
+        try {
+            sender.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send task created with actions to chatId={}: {}", chatId, e.getMessage(), e);
         }
     }
 
@@ -510,7 +539,7 @@ public class NotificationService {
      * Falls back to {@link BotConstantsUtils#TIMEZONE_DISPLAY_NAMES} when the zone rules cannot be loaded.
      * <p>
      * Вычисляет метку кнопки пояса «ЧЧ:мм КОД_ГОРОДА» на языке пользователя.
-     * При ошибке загрузки правил зоны возвращает отображаемое имя из {@link BotConstants#TIMEZONE_DISPLAY_NAMES}.
+     * При ошибке загрузки правил зоны возвращает отображаемое имя из {@link BotConstantsUtils#TIMEZONE_DISPLAY_NAMES}.
      */
     private String buildTimezoneButtonLabel(String tz, Language language) {
         try {

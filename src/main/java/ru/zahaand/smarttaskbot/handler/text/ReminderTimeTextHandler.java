@@ -24,7 +24,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ReminderTimeTextHandler {
 
-    private final TimeParserService timeParserService;
     private final TaskService taskService;
     private final UserStateService userStateService;
     private final NotificationService notificationService;
@@ -39,7 +38,7 @@ public class ReminderTimeTextHandler {
 
         final User user = userService.findById(userId);
 
-        final Optional<LocalTime> parsed = timeParserService.parse(text);
+        final Optional<LocalTime> parsed = TimeParserUtils.parse(text);
 
         if (parsed.isEmpty()) {
             sendHint(chatId, text, user);
@@ -65,7 +64,7 @@ public class ReminderTimeTextHandler {
     }
 
     private void sendHint(Long chatId, String input, User user) {
-        if (timeParserService.isTwelveOClockAmbiguous(input)) {
+        if (TimeParserUtils.isTwelveOClockAmbiguous(input)) {
             notificationService.sendMessage(chatId,
                     messageService.get(MessageKey.TWELVE_OCLOCK_HINT, user));
         } else {

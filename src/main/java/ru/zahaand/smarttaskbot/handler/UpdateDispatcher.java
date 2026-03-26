@@ -2,6 +2,7 @@ package ru.zahaand.smarttaskbot.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
@@ -316,7 +317,7 @@ public class UpdateDispatcher {
     }
 
     private boolean isCommand(String text) {
-        return text != null && text.startsWith("/");
+        return StringUtils.startsWith(text, "/");
     }
 
     private String extractCommand(String text) {

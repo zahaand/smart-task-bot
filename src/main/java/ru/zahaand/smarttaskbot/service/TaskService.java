@@ -3,6 +3,7 @@ package ru.zahaand.smarttaskbot.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.Task;
@@ -45,12 +46,12 @@ public class TaskService {
      */
     public TaskDto createTask(Long telegramUserId, String text) {
 
-        if (text == null || text.isBlank()) {
+        if (StringUtils.isBlank(text)) {
             log.warn("Blank task text from userId={}", telegramUserId);
             throw new IllegalArgumentException("Please provide task text.\nUsage: /newtask <your task>");
         }
 
-        if (text.length() > 500) {
+        if (StringUtils.length(text) > 500) {
             log.warn("Task text too long ({} chars) from userId={}", text.length(), telegramUserId);
             throw new IllegalArgumentException("Task text is too long (max 500 characters).");
         }
@@ -150,7 +151,7 @@ public class TaskService {
      * @param telegramUserId owner of the task
      * @param taskId         ID of the task to remind
      * @param date           date chosen from the inline calendar
-     * @param time           time entered as free text and parsed by {@link TimeParserService}
+     * @param time           time entered as free text and parsed by {@link TimeParserUtils}
      * @return {@link TaskDto} with the formatted reminder time for the confirmation reply
      * @throws NoSuchElementException   if the task does not exist or belongs to another user
      * @throws IllegalArgumentException if the task is already COMPLETED

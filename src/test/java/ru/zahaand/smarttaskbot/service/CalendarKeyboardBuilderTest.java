@@ -15,8 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CalendarKeyboardBuilderTest {
 
-    private final CalendarKeyboardBuilder builder = new CalendarKeyboardBuilder();
-
     // January 2024 is definitively in the past — all day cells must be "·" (NO_OP)
     private static final int PAST_YEAR = 2024;
     private static final int PAST_MONTH = 1;
@@ -46,7 +44,7 @@ class CalendarKeyboardBuilderTest {
         @Test
         @DisplayName("first row is a single non-interactive button with NO_OP callback")
         void headerIsNoop() {
-            InlineKeyboardMarkup markup = builder.buildCalendar(PAST_YEAR, PAST_MONTH);
+            InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             List<InlineKeyboardButton> header = markup.getKeyboard().get(0);
 
             assertThat(header).hasSize(1);
@@ -62,7 +60,7 @@ class CalendarKeyboardBuilderTest {
         @Test
         @DisplayName("second row has 7 non-interactive day labels")
         void dayOfWeekRowHasSevenNoopButtons() {
-            InlineKeyboardMarkup markup = builder.buildCalendar(PAST_YEAR, PAST_MONTH);
+            InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             List<InlineKeyboardButton> row = markup.getKeyboard().get(1);
 
             assertThat(row).hasSize(7);
@@ -77,7 +75,7 @@ class CalendarKeyboardBuilderTest {
         @Test
         @DisplayName("all day cells in a past month use NO_OP callback (shown as ·)")
         void allPastDayCellsAreNoop() {
-            InlineKeyboardMarkup markup = builder.buildCalendar(PAST_YEAR, PAST_MONTH);
+            InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             List<InlineKeyboardButton> cells = dayCells(markup);
 
             // Non-padding cells (not " ") should all be "·" with NO_OP
@@ -105,7 +103,7 @@ class CalendarKeyboardBuilderTest {
         void futureDayCellsHaveCalDateCallbacks() {
             LocalDate today = LocalDate.now();
             YearMonth nextYear = YearMonth.of(today.getYear() + 1, 1);
-            InlineKeyboardMarkup markup = builder.buildCalendar(nextYear.getYear(), nextYear.getMonthValue());
+            InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(nextYear.getYear(), nextYear.getMonthValue());
             List<InlineKeyboardButton> cells = dayCells(markup);
 
             long calDateCount = cells.stream()
@@ -120,7 +118,7 @@ class CalendarKeyboardBuilderTest {
         void calDateCallbackIsValidIsoDate() {
             LocalDate today = LocalDate.now();
             YearMonth nextYear = YearMonth.of(today.getYear() + 1, 1);
-            InlineKeyboardMarkup markup = builder.buildCalendar(nextYear.getYear(), nextYear.getMonthValue());
+            InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(nextYear.getYear(), nextYear.getMonthValue());
             List<InlineKeyboardButton> cells = dayCells(markup);
 
             cells.stream()
@@ -143,7 +141,7 @@ class CalendarKeyboardBuilderTest {
         @DisplayName("← is NO_OP when showing the current month (can't go further back)")
         void prevIsNoopForCurrentMonth() {
             LocalDate today = LocalDate.now();
-            InlineKeyboardMarkup markup = builder.buildCalendar(today.getYear(), today.getMonthValue());
+            InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(today.getYear(), today.getMonthValue());
             InlineKeyboardButton prev = navRow(markup).get(0);
 
             assertThat(prev.getText()).isEqualTo("←");
@@ -155,7 +153,7 @@ class CalendarKeyboardBuilderTest {
         void prevHasNavCallbackForFutureMonth() {
             LocalDate today = LocalDate.now();
             YearMonth nextMonth = YearMonth.from(today).plusMonths(1);
-            InlineKeyboardMarkup markup = builder.buildCalendar(nextMonth.getYear(), nextMonth.getMonthValue());
+            InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(nextMonth.getYear(), nextMonth.getMonthValue());
             InlineKeyboardButton prev = navRow(markup).get(0);
 
             assertThat(prev.getText()).isEqualTo("←");
@@ -165,8 +163,8 @@ class CalendarKeyboardBuilderTest {
         @Test
         @DisplayName("→ always carries CAL_NAV:+1")
         void nextAlwaysHasNavCallback() {
-            InlineKeyboardMarkup pastMarkup = builder.buildCalendar(PAST_YEAR, PAST_MONTH);
-            InlineKeyboardMarkup currentMarkup = builder.buildCalendar(
+            InlineKeyboardMarkup pastMarkup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
+            InlineKeyboardMarkup currentMarkup = CalendarKeyboardBuilderUtils.buildCalendar(
                     LocalDate.now().getYear(), LocalDate.now().getMonthValue());
 
             assertThat(navRow(pastMarkup).get(1).getCallbackData())
@@ -178,7 +176,7 @@ class CalendarKeyboardBuilderTest {
         @Test
         @DisplayName("nav row has exactly 2 buttons (← and →)")
         void navRowHasTwoButtons() {
-            InlineKeyboardMarkup markup = builder.buildCalendar(PAST_YEAR, PAST_MONTH);
+            InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             assertThat(navRow(markup)).hasSize(2);
         }
     }

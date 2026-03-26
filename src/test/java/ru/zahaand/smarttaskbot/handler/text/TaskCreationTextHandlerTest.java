@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
+import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.*;
@@ -53,8 +54,10 @@ class TaskCreationTextHandlerTest {
         when(message.getFrom()).thenReturn(from);
         when(from.getId()).thenReturn(USER_ID);
 
-        when(userService.findById(USER_ID)).thenReturn(new User());
-        when(messageService.get(any(MessageKey.class), any(User.class))).thenAnswer(inv -> {
+        User user = new User();
+        user.setLanguage(Language.EN);
+        when(userService.findById(USER_ID)).thenReturn(user);
+        lenient().when(messageService.get(any(MessageKey.class), any(User.class))).thenAnswer(inv -> {
             MessageKey key = inv.getArgument(0);
             return switch (key) {
                 case TASK_TEXT_EMPTY -> "Task text cannot be empty.";
@@ -86,7 +89,7 @@ class TaskCreationTextHandlerTest {
     class ValidInput {
 
         @Test
-        @DisplayName("creates task, sends confirmation with id, and transitions to IDLE")
+        @DisplayName("creates task, sends confirmation with action buttons, and transitions to IDLE")
         void createsTaskAndConfirms() {
             when(message.getText()).thenReturn("Buy milk");
             when(taskService.createTask(USER_ID, "Buy milk"))
@@ -95,7 +98,8 @@ class TaskCreationTextHandlerTest {
             handler.handle(update);
 
             verify(taskService).createTask(USER_ID, "Buy milk");
-            verify(notificationService).sendMessage(eq(CHAT_ID), contains("#3"));
+            verify(notificationService).sendTaskCreatedWithActions(CHAT_ID, 3L, "Buy milk", Language.EN);
+            verify(notificationService, never()).sendMessage(eq(CHAT_ID), contains("#3"));
             verify(userStateService).setState(USER_ID, ConversationState.IDLE);
         }
 
