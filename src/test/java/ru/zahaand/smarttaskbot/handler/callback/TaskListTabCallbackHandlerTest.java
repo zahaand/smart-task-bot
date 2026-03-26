@@ -70,11 +70,10 @@ class TaskListTabCallbackHandlerTest {
     }
 
     @Nested
-    @DisplayName("Tab switching")
     class TabSwitching {
 
-        @Test
         @DisplayName("ACTIVE tab: fetches active tasks and edits task list")
+        @Test
         void activeTabEditsWithActiveTasks() {
             String callbackData = BotConstants.CB_TASKS_TAB + "ACTIVE";
             List<TaskDto> tasks = List.of(new TaskDto(1L, "Buy milk", null));
@@ -91,8 +90,8 @@ class TaskListTabCallbackHandlerTest {
             verify(notificationService).editTaskList(CHAT_ID, MESSAGE_ID, tasks, TaskStatus.ACTIVE, Language.EN);
         }
 
-        @Test
         @DisplayName("COMPLETED tab: fetches completed tasks and edits task list")
+        @Test
         void completedTabEditsWithCompletedTasks() {
             String callbackData = BotConstants.CB_TASKS_TAB + "COMPLETED";
             List<TaskDto> tasks = List.of();
@@ -108,8 +107,8 @@ class TaskListTabCallbackHandlerTest {
             verify(notificationService).editTaskList(CHAT_ID, MESSAGE_ID, tasks, TaskStatus.COMPLETED, Language.EN);
         }
 
-        @Test
         @DisplayName("already-active tab: answers query silently without editing")
+        @Test
         void alreadyActiveTabIsNoOp() {
             String callbackData = BotConstants.CB_TASKS_TAB + "ACTIVE";
             // ✓ in label → handler treats this as the already-active tab

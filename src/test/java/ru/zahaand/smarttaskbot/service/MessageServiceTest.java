@@ -93,6 +93,38 @@ class MessageServiceTest {
             assertThat(service.get(MessageKey.DELETE_CONFIRM_ALL, Language.EN)).contains("%d");
             assertThat(service.get(MessageKey.DELETE_CONFIRM_ALL, Language.RU)).contains("%d");
         }
+
+        @DisplayName("TASK_DELETE_CONFIRM contains %d and %s placeholders in both languages")
+        @Test
+        void taskDeleteConfirm_containsIdAndTextPlaceholders() {
+            assertThat(service.get(MessageKey.TASK_DELETE_CONFIRM, Language.EN)).contains("%d").contains("%s");
+            assertThat(service.get(MessageKey.TASK_DELETE_CONFIRM, Language.RU)).contains("%d").contains("%s");
+        }
+
+        @DisplayName("TASKS_TRUNCATED contains %d placeholder in both languages")
+        @Test
+        void tasksTruncated_containsCountPlaceholder() {
+            assertThat(service.get(MessageKey.TASKS_TRUNCATED, Language.EN)).contains("%d");
+            assertThat(service.get(MessageKey.TASKS_TRUNCATED, Language.RU)).contains("%d");
+        }
+
+        @DisplayName("BTN_LANG_EN and BTN_LANG_RU are identical in both languages (bilingual by design)")
+        @Test
+        void langButtons_areSameInBothLanguages() {
+            assertThat(service.get(MessageKey.BTN_LANG_EN, Language.EN))
+                    .isEqualTo(service.get(MessageKey.BTN_LANG_EN, Language.RU));
+            assertThat(service.get(MessageKey.BTN_LANG_RU, Language.EN))
+                    .isEqualTo(service.get(MessageKey.BTN_LANG_RU, Language.RU));
+        }
+
+        @DisplayName("TASKS_EMPTY_ACTIVE and TASKS_EMPTY_COMPLETED differ between EN and RU")
+        @Test
+        void emptyStateMessages_differBetweenLanguages() {
+            assertThat(service.get(MessageKey.TASKS_EMPTY_ACTIVE, Language.EN))
+                    .isNotEqualTo(service.get(MessageKey.TASKS_EMPTY_ACTIVE, Language.RU));
+            assertThat(service.get(MessageKey.TASKS_EMPTY_COMPLETED, Language.EN))
+                    .isNotEqualTo(service.get(MessageKey.TASKS_EMPTY_COMPLETED, Language.RU));
+        }
     }
 
     @Nested

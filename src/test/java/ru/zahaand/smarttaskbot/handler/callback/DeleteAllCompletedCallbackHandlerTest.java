@@ -77,11 +77,10 @@ class DeleteAllCompletedCallbackHandlerTest {
     }
 
     @Nested
-    @DisplayName("CB_DELETE_ALL_REQUEST — N > 0 tasks")
     class RequestWithTasks {
 
-        @Test
         @DisplayName("answers callback and sends confirmation with formatted count")
+        @Test
         void sendsConfirmationWithCount() {
             when(cq.getData()).thenReturn(BotConstants.CB_DELETE_ALL_REQUEST);
             when(taskService.countCompleted(USER_ID)).thenReturn(3L);
@@ -95,11 +94,10 @@ class DeleteAllCompletedCallbackHandlerTest {
     }
 
     @Nested
-    @DisplayName("CB_DELETE_ALL_REQUEST — 0 tasks")
     class RequestWithNoTasks {
 
-        @Test
         @DisplayName("answers callback and sends NO_COMPLETED_TASKS, no confirmation prompt")
+        @Test
         void sendsNoCompletedTasksMessage() {
             when(cq.getData()).thenReturn(BotConstants.CB_DELETE_ALL_REQUEST);
             when(taskService.countCompleted(USER_ID)).thenReturn(0L);
@@ -113,11 +111,10 @@ class DeleteAllCompletedCallbackHandlerTest {
     }
 
     @Nested
-    @DisplayName("CB_DELETE_ALL_CONFIRM")
     class Confirm {
 
-        @Test
         @DisplayName("deletes all, sends ALL_COMPLETED_DELETED, and re-renders completed tab")
+        @Test
         void deletesAllAndReRenders() {
             when(cq.getData()).thenReturn(BotConstants.CB_DELETE_ALL_CONFIRM);
             when(taskService.deleteAllCompleted(USER_ID)).thenReturn(3);
@@ -133,11 +130,10 @@ class DeleteAllCompletedCallbackHandlerTest {
     }
 
     @Nested
-    @DisplayName("CB_DELETE_ALL_CANCEL")
     class Cancel {
 
-        @Test
         @DisplayName("sends OPERATION_CANCELLED, re-renders completed tab, no deletion")
+        @Test
         void cancelsAndReRenders() {
             when(cq.getData()).thenReturn(BotConstants.CB_DELETE_ALL_CANCEL);
             when(taskService.getCompletedTasks(USER_ID)).thenReturn(List.of());

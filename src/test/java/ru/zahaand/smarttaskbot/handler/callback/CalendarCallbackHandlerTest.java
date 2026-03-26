@@ -78,11 +78,10 @@ class CalendarCallbackHandlerTest {
     // ── stale state guard ─────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("Stale state guard")
     class StaleStateGuard {
 
-        @Test
         @DisplayName("answers query and resets to IDLE when state ≠ SELECTING_REMINDER_DATE")
+        @Test
         void resetsWhenNotInSelectingState() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
             when(cq.getData()).thenReturn(BotConstants.CB_CAL_DATE + "2026-06-01");
@@ -99,7 +98,6 @@ class CalendarCallbackHandlerTest {
     // ── CAL_NAV ───────────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("CAL_NAV handling")
     class CalNav {
 
         private final LocalDate today = LocalDate.now();
@@ -111,8 +109,8 @@ class CalendarCallbackHandlerTest {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.SELECTING_REMINDER_DATE);
         }
 
-        @Test
         @DisplayName("CAL_NAV:+1 from a future month navigates forward and calls editCalendar")
+        @Test
         void navigatesForward() {
             ConversationContext ctx = ConversationContext.builder()
                     .taskId(7L)
@@ -129,8 +127,8 @@ class CalendarCallbackHandlerTest {
             verify(notificationService).answerCallbackQuery(CB_ID);
         }
 
-        @Test
         @DisplayName("CAL_NAV:-1 from a future month navigates back one month")
+        @Test
         void navigatesBack() {
             ConversationContext ctx = ConversationContext.builder()
                     .taskId(7L)
@@ -146,8 +144,8 @@ class CalendarCallbackHandlerTest {
             verify(notificationService).answerCallbackQuery(CB_ID);
         }
 
-        @Test
         @DisplayName("CAL_NAV:-1 from the current month answers silently (server-side guard)")
+        @Test
         void doesNotNavigateBeforeCurrentMonth() {
             ConversationContext ctx = ConversationContext.builder()
                     .taskId(7L)
@@ -167,7 +165,6 @@ class CalendarCallbackHandlerTest {
     // ── CAL_DATE ──────────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("CAL_DATE handling")
     class CalDate {
 
         @BeforeEach
@@ -175,8 +172,8 @@ class CalendarCallbackHandlerTest {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.SELECTING_REMINDER_DATE);
         }
 
-        @Test
         @DisplayName("transitions to ENTERING_REMINDER_TIME with date stored in context")
+        @Test
         void transitionsState() {
             ConversationContext ctx = ConversationContext.builder().taskId(3L).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
@@ -191,8 +188,8 @@ class CalendarCallbackHandlerTest {
             assertThat(ctxCaptor.getValue().getTaskId()).isEqualTo(3L);
         }
 
-        @Test
         @DisplayName("sends time-entry prompt message")
+        @Test
         void sendsTimePrompt() {
             ConversationContext ctx = ConversationContext.builder().taskId(3L).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));

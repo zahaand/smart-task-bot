@@ -74,15 +74,13 @@ class TaskActionCallbackHandlerTest {
     }
 
     @Nested
-    @DisplayName("TASK_DONE")
     class TaskDone {
 
-        @Test
         @DisplayName("marks task complete and refreshes active task list in place")
+        @Test
         void completesTaskAndRefreshesList() {
             when(cq.getData()).thenReturn(BotConstants.CB_TASK_DONE + TASK_ID);
-            when(taskService.completeTask(USER_ID, TASK_ID))
-                    .thenReturn(new TaskDto(TASK_ID, "Buy milk", null));
+            when(taskService.completeTask(USER_ID, TASK_ID)).thenReturn(new TaskDto(TASK_ID, "Buy milk", null));
             when(taskService.getActiveTasks(USER_ID)).thenReturn(List.of());
 
             handler.handle(update);
@@ -94,19 +92,17 @@ class TaskActionCallbackHandlerTest {
     }
 
     @Nested
-    @DisplayName("TASK_REMIND")
     class TaskRemind {
 
-        @Test
         @DisplayName("sets state to SELECTING_REMINDER_DATE with taskId in context and sends calendar")
+        @Test
         void setsStateAndSendsCalendar() {
             when(cq.getData()).thenReturn(BotConstants.CB_TASK_REMIND + TASK_ID);
 
             handler.handle(update);
 
             ArgumentCaptor<ConversationContext> ctxCaptor = ArgumentCaptor.forClass(ConversationContext.class);
-            verify(userStateService).setStateWithContext(
-                    eq(USER_ID), eq(ConversationState.SELECTING_REMINDER_DATE), ctxCaptor.capture());
+            verify(userStateService).setStateWithContext(eq(USER_ID), eq(ConversationState.SELECTING_REMINDER_DATE), ctxCaptor.capture());
             assertThat(ctxCaptor.getValue().getTaskId()).isEqualTo(TASK_ID);
             assertThat(ctxCaptor.getValue().getViewingYear()).isNotNull();
             assertThat(ctxCaptor.getValue().getViewingMonth()).isNotNull();
@@ -117,11 +113,10 @@ class TaskActionCallbackHandlerTest {
     }
 
     @Nested
-    @DisplayName("TASK_DELETE")
     class TaskDelete {
 
-        @Test
         @DisplayName("sets state to CONFIRMING_DELETE with taskId in context and sends confirmation")
+        @Test
         void setsStateAndSendsConfirmation() {
             when(cq.getData()).thenReturn(BotConstants.CB_TASK_DELETE + TASK_ID);
             when(taskService.getTaskText(USER_ID, TASK_ID)).thenReturn("Buy milk");
@@ -137,8 +132,8 @@ class TaskActionCallbackHandlerTest {
             verify(notificationService).sendDeleteConfirmation(eq(CHAT_ID), eq(TASK_ID), eq("Buy milk"), isNull());
         }
 
-        @Test
         @DisplayName("sends error message when task no longer exists")
+        @Test
         void sendsErrorWhenTaskGone() {
             when(cq.getData()).thenReturn(BotConstants.CB_TASK_DELETE + TASK_ID);
             when(taskService.getTaskText(USER_ID, TASK_ID))

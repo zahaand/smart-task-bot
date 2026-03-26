@@ -51,8 +51,8 @@ class TaskListButtonHandlerTest {
         when(from.getId()).thenReturn(USER_ID);
     }
 
-    @Test
     @DisplayName("fetches active tasks and sends task list")
+    @Test
     void fetchesActiveTasksAndSendsList() {
         List<TaskDto> tasks = List.of(new TaskDto(1L, "Buy milk", null));
         User user = mock(User.class);

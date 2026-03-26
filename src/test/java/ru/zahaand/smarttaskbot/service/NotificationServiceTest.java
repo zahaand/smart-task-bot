@@ -52,11 +52,10 @@ class NotificationServiceTest {
     // ── sendTaskList ───────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("sendTaskList()")
     class SendTaskList {
 
-        @Test
         @DisplayName("empty ACTIVE list sends empty-state message")
+        @Test
         void emptyActiveListSendsEmptyMessage() throws TelegramApiException {
             when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
 
@@ -67,8 +66,20 @@ class NotificationServiceTest {
             assertThat(captor.getValue().getText()).contains("No active tasks yet");
         }
 
+        @DisplayName("empty COMPLETED list sends empty-state message")
         @Test
+        void emptyCompletedListSendsEmptyMessage() throws TelegramApiException {
+            when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
+
+            service.sendTaskList(CHAT_ID, List.of(), TaskStatus.COMPLETED, null);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            assertThat(captor.getValue().getText()).contains("No completed tasks yet");
+        }
+
         @DisplayName("non-empty ACTIVE list sends header with count")
+        @Test
         void nonEmptyActiveListSendsHeader() throws TelegramApiException {
             List<TaskDto> tasks = List.of(new TaskDto(1L, "Buy milk", null));
             when(taskListKeyboardBuilder.buildKeyboard(any(), any(), any())).thenReturn(new InlineKeyboardMarkup());
@@ -80,8 +91,8 @@ class NotificationServiceTest {
             assertThat(captor.getValue().getText()).contains("Active tasks").contains("1");
         }
 
-        @Test
         @DisplayName("21-task list is truncated to 20 with overflow note")
+        @Test
         void twentyOneTasksTruncatedToTwenty() throws TelegramApiException {
             List<TaskDto> tasks = new ArrayList<>();
             for (int i = 1; i <= 21; i++) {
@@ -101,11 +112,10 @@ class NotificationServiceTest {
     // ── sendCalendar ───────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("sendCalendar()")
     class SendCalendar {
 
-        @Test
         @DisplayName("sends message with localized 'Choose reminder date:' text")
+        @Test
         void sendsChooseReminderDateText() throws TelegramApiException {
             when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt())).thenReturn(new InlineKeyboardMarkup());
 
@@ -120,11 +130,10 @@ class NotificationServiceTest {
     // ── editCalendar ───────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("editCalendar()")
     class EditCalendar {
 
-        @Test
         @DisplayName("sends EditMessageText with correct chatId and messageId")
+        @Test
         void sendsEditWithCorrectIds() throws TelegramApiException {
             when(calendarKeyboardBuilder.buildCalendar(anyInt(), anyInt())).thenReturn(new InlineKeyboardMarkup());
 
@@ -140,11 +149,10 @@ class NotificationServiceTest {
     // ── sendDeleteConfirmation ─────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("sendDeleteConfirmation()")
     class SendDeleteConfirmation {
 
-        @Test
         @DisplayName("message text contains 'Delete task'")
+        @Test
         void messageTextContainsDeleteTask() throws TelegramApiException {
             service.sendDeleteConfirmation(CHAT_ID, 5L, "Buy groceries", null);
 
@@ -153,8 +161,8 @@ class NotificationServiceTest {
             assertThat(captor.getValue().getText()).contains("Delete task");
         }
 
-        @Test
         @DisplayName("long task text is truncated at 80 characters with ellipsis")
+        @Test
         void longTextIsTruncatedAt80Chars() throws TelegramApiException {
             String longText = "A".repeat(100);
 
@@ -163,6 +171,38 @@ class NotificationServiceTest {
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());
             assertThat(captor.getValue().getText()).contains("A".repeat(80) + "…");
+        }
+    }
+
+    // ── sendDeleteAllConfirmation ──────────────────────────────────────────────
+
+    @Nested
+    class SendDeleteAllConfirmation {
+
+        @DisplayName("EN language: confirmation buttons contain 'Yes, delete all' and 'Cancel'")
+        @Test
+        void enLanguageButtonLabels() throws TelegramApiException {
+            service.sendDeleteAllConfirmation(CHAT_ID, "Delete all 3 tasks?", Language.EN);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
+            String yesLabel = markup.getKeyboard().get(0).get(0).getText();
+            String cancelLabel = markup.getKeyboard().get(0).get(1).getText();
+            assertThat(yesLabel).contains("Yes, delete all");
+            assertThat(cancelLabel).contains("Cancel");
+        }
+
+        @DisplayName("RU language: confirmation buttons are in Russian")
+        @Test
+        void ruLanguageButtonLabels() throws TelegramApiException {
+            service.sendDeleteAllConfirmation(CHAT_ID, "Удалить все 3 задачи?", Language.RU);
+
+            ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+            verify(sender).execute(captor.capture());
+            InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
+            String yesLabel = markup.getKeyboard().get(0).get(0).getText();
+            assertThat(yesLabel).contains("Да, удалить");
         }
     }
 }

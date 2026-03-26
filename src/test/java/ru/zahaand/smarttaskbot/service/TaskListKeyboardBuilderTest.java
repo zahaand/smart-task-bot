@@ -53,11 +53,10 @@ class TaskListKeyboardBuilderTest {
     }
 
     @Nested
-    @DisplayName("Active task rows")
     class ActiveTaskRows {
 
-        @Test
         @DisplayName("text row is a single NO_OP button containing the task id and text")
+        @Test
         void textRowIsNoop() {
             TaskDto task = activeTask(3L);
             List<List<InlineKeyboardButton>> rows = rows(List.of(task), TaskStatus.ACTIVE);
@@ -68,8 +67,8 @@ class TaskListKeyboardBuilderTest {
             assertThat(textRow.get(0).getText()).contains("#3").contains("Task 3");
         }
 
-        @Test
         @DisplayName("action row has exactly 3 buttons: Remind, Complete, Delete")
+        @Test
         void actionRowHasThreeButtons() {
             TaskDto task = activeTask(3L);
             List<List<InlineKeyboardButton>> rows = rows(List.of(task), TaskStatus.ACTIVE);
@@ -78,8 +77,8 @@ class TaskListKeyboardBuilderTest {
             assertThat(actionRow).hasSize(3);
         }
 
-        @Test
         @DisplayName("Remind button has TASK_REMIND:<id> callback")
+        @Test
         void remindButtonCallback() {
             TaskDto task = activeTask(5L);
             List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
@@ -87,8 +86,8 @@ class TaskListKeyboardBuilderTest {
                     .isEqualTo(BotConstants.CB_TASK_REMIND + "5");
         }
 
-        @Test
         @DisplayName("Complete button has TASK_DONE:<id> callback")
+        @Test
         void completeButtonCallback() {
             TaskDto task = activeTask(5L);
             List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
@@ -96,8 +95,8 @@ class TaskListKeyboardBuilderTest {
                     .isEqualTo(BotConstants.CB_TASK_DONE + "5");
         }
 
-        @Test
         @DisplayName("Delete button has TASK_DELETE:<id> callback")
+        @Test
         void deleteButtonCallback() {
             TaskDto task = activeTask(5L);
             List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.ACTIVE).get(1);
@@ -107,11 +106,10 @@ class TaskListKeyboardBuilderTest {
     }
 
     @Nested
-    @DisplayName("Completed task rows")
     class CompletedTaskRows {
 
-        @Test
         @DisplayName("action row for completed task has exactly 1 button: Delete")
+        @Test
         void completedActionRowHasOneButton() {
             TaskDto task = completedTask(9L);
             List<List<InlineKeyboardButton>> rows = rows(List.of(task), TaskStatus.COMPLETED);
@@ -120,8 +118,8 @@ class TaskListKeyboardBuilderTest {
             assertThat(actionRow).hasSize(1);
         }
 
-        @Test
         @DisplayName("Delete button for completed task has TASK_DELETE:<id> callback")
+        @Test
         void completedDeleteButtonCallback() {
             TaskDto task = completedTask(9L);
             List<InlineKeyboardButton> actionRow = rows(List.of(task), TaskStatus.COMPLETED).get(1);
@@ -131,19 +129,18 @@ class TaskListKeyboardBuilderTest {
     }
 
     @Nested
-    @DisplayName("Tab row")
     class TabRow {
 
-        @Test
         @DisplayName("tab row is always present as the last row")
+        @Test
         void tabRowAlwaysPresent() {
             List<List<InlineKeyboardButton>> noTaskRows = rows(List.of(), TaskStatus.ACTIVE);
             List<InlineKeyboardButton> tabRow = noTaskRows.get(noTaskRows.size() - 1);
             assertThat(tabRow).hasSize(2);
         }
 
-        @Test
         @DisplayName("ACTIVE tab shows \"Active ✓\" and \"Completed\"")
+        @Test
         void activeTabLabels() {
             List<List<InlineKeyboardButton>> r = rows(List.of(), TaskStatus.ACTIVE);
             List<InlineKeyboardButton> tabRow = r.get(r.size() - 1);
@@ -151,8 +148,8 @@ class TaskListKeyboardBuilderTest {
             assertThat(tabRow.get(1).getText()).isEqualTo("Completed");
         }
 
-        @Test
         @DisplayName("COMPLETED tab shows \"Active\" and \"Completed ✓\"")
+        @Test
         void completedTabLabels() {
             List<List<InlineKeyboardButton>> r = rows(List.of(), TaskStatus.COMPLETED);
             List<InlineKeyboardButton> tabRow = r.get(r.size() - 1);
@@ -160,8 +157,8 @@ class TaskListKeyboardBuilderTest {
             assertThat(tabRow.get(1).getText()).isEqualTo("Completed ✓");
         }
 
-        @Test
         @DisplayName("tab callbacks are TASKS_TAB:ACTIVE and TASKS_TAB:COMPLETED")
+        @Test
         void tabCallbacks() {
             List<List<InlineKeyboardButton>> r = rows(List.of(), TaskStatus.ACTIVE);
             List<InlineKeyboardButton> tabRow = r.get(r.size() - 1);
@@ -171,24 +168,23 @@ class TaskListKeyboardBuilderTest {
     }
 
     @Nested
-    @DisplayName("Row count")
     class RowCount {
 
-        @Test
         @DisplayName("0 tasks → 1 row (tab only)")
+        @Test
         void zeroTasks() {
             assertThat(rows(List.of(), TaskStatus.ACTIVE)).hasSize(1);
         }
 
-        @Test
         @DisplayName("3 active tasks → 7 rows (2 per task + 1 tab)")
+        @Test
         void threeTasks() {
             List<TaskDto> tasks = List.of(activeTask(1), activeTask(2), activeTask(3));
             assertThat(rows(tasks, TaskStatus.ACTIVE)).hasSize(7);
         }
 
-        @Test
         @DisplayName("task text row carries reminder time when set")
+        @Test
         void textRowIncludesReminderWhenSet() {
             TaskDto task = new TaskDto(1L, "Buy milk", "25.03.2026 09:00");
             List<InlineKeyboardButton> textRow = rows(List.of(task), TaskStatus.ACTIVE).get(0);
