@@ -123,7 +123,7 @@ class CalendarCallbackHandlerTest {
             handler.handle(update);
 
             YearMonth expected = next.plusMonths(1);
-            verify(notificationService).editCalendar(CHAT_ID, MSG_ID, expected.getYear(), expected.getMonthValue());
+            verify(notificationService).editCalendar(CHAT_ID, MSG_ID, expected.getYear(), expected.getMonthValue(), null);
             verify(notificationService).answerCallbackQuery(CB_ID);
         }
 
@@ -140,7 +140,7 @@ class CalendarCallbackHandlerTest {
 
             handler.handle(update);
 
-            verify(notificationService).editCalendar(CHAT_ID, MSG_ID, current.getYear(), current.getMonthValue());
+            verify(notificationService).editCalendar(CHAT_ID, MSG_ID, current.getYear(), current.getMonthValue(), null);
             verify(notificationService).answerCallbackQuery(CB_ID);
         }
 
@@ -158,7 +158,7 @@ class CalendarCallbackHandlerTest {
             handler.handle(update);
 
             verify(notificationService).answerCallbackQuery(CB_ID);
-            verify(notificationService, never()).editCalendar(any(), any(), anyInt(), anyInt());
+            verify(notificationService, never()).editCalendar(any(), any(), anyInt(), anyInt(), any());
         }
     }
 
