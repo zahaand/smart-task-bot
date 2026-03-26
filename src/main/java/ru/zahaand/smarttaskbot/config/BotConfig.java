@@ -12,6 +12,9 @@ import ru.zahaand.smarttaskbot.handler.SmartTaskBot;
 /**
  * Configuration class for initializing the Telegram Bot API.
  * Loads bot credentials from properties and registers the {@link SmartTaskBot} bean.
+ * <p>
+ * Конфигурационный класс для инициализации Telegram Bot API.
+ * Загружает учётные данные бота из properties и регистрирует бин {@link SmartTaskBot}.
  */
 @Configuration
 @Getter

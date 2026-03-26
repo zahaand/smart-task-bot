@@ -5,7 +5,7 @@ package ru.zahaand.smarttaskbot.model;
  * Each constant carries both its English and Russian variants as constructor arguments.
  * Use {@link #get(Language)} to resolve the string at runtime.
  * Format strings follow {@link String#formatted} / {@code %s} / {@code %d} conventions.
- *
+ * <p>
  * Типизированные ключи всех пользовательских сообщений бота.
  * Каждая константа хранит английский и русский варианты.
  * Используйте {@link #get(Language)} для получения строки во время выполнения.
@@ -350,7 +350,7 @@ public enum MessageKey {
 
     /**
      * Returns the string for the given language, falling back to EN when language is null.
-     *
+     * <p>
      * Возвращает строку для указанного языка, при null — возвращает английский вариант.
      */
     public String get(Language language) {

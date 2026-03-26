@@ -9,6 +9,13 @@ import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.UserService;
 
+/**
+ * Handles the {@code /help} command.
+ * Sends a localised help message listing all available bot commands.
+ * <p>
+ * Обрабатывает команду {@code /help}.
+ * Отправляет локализованное сообщение со списком всех доступных команд бота.
+ */
 @Component
 @RequiredArgsConstructor
 public class HelpCommandHandler {

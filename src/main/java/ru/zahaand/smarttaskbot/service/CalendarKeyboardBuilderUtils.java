@@ -19,6 +19,11 @@ import java.util.Locale;
  * Past dates are rendered as non-interactive "·" cells; today and future dates
  * carry a {@code CAL_DATE:YYYY-MM-DD} callback. Navigation arrows step one month
  * at a time; "←" is disabled (NO_OP) when already showing the current month.
+ * <p>
+ * Строит инлайн-клавиатуру с месячным календарём.
+ * Прошедшие даты отображаются как неактивные ячейки «·»; сегодня и будущие даты
+ * содержат колбэк {@code CAL_DATE:YYYY-MM-DD}. Стрелки навигации переключают месяц;
+ * «←» отключена (NO_OP) при отображении текущего месяца.
  */
 @UtilityClass
 public class CalendarKeyboardBuilderUtils {

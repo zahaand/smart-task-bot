@@ -19,6 +19,9 @@ import java.util.List;
 /**
  * Handles TASKS_TAB:ACTIVE and TASKS_TAB:COMPLETED callbacks.
  * Edits the existing task-list message in place to show the selected tab.
+ * <p>
+ * Обрабатывает колбэки TASKS_TAB:ACTIVE и TASKS_TAB:COMPLETED.
+ * Редактирует существующее сообщение со списком задач для отображения выбранной вкладки.
  */
 @Component
 @RequiredArgsConstructor

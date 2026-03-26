@@ -16,6 +16,10 @@ import java.util.Optional;
  * Main bot class that handles communication with Telegram via Long Polling.
  * Inherits from {@link TelegramLongPollingBot} to receive updates and
  * delegates them to the {@link UpdateDispatcher}.
+ * <p>
+ * Главный класс бота для связи с Telegram через Long Polling.
+ * Наследует {@link TelegramLongPollingBot} для получения обновлений
+ * и делегирует их в {@link UpdateDispatcher}.
  */
 @Slf4j
 @Component

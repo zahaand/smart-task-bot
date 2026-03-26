@@ -2,7 +2,7 @@
 
 ---
 
-## Smart Task Bot
+## Smart Task Bot &nbsp; `v1.0.0`
 
 A personal Telegram task manager bot built with Java 21 and Spring Boot.
 Users register in two steps (language → timezone), then manage tasks entirely through
@@ -15,6 +15,17 @@ This project was built using the **Spec-Driven Development (SDD)** workflow powe
 Each feature sprint starts with a machine-readable spec, passes through automated plan and
 task generation, and ends with Claude Code executing every task against the generated checklist.
 The result is a fully traceable audit trail from user story to merged commit.
+
+### Features
+
+- Two-step registration: language (EN / RU) → timezone
+- Task creation via `/newtask` or the **New Task** persistent-menu button
+- Task list with inline buttons — tap a task to view details
+- Task detail view with **Remind**, **Complete**, and **Delete** action buttons
+- Inline calendar for picking a reminder date, then free-text time input
+- Reminder delivery within 60 seconds of the scheduled time (one automatic retry on failure)
+- Settings menu: **Change Language**, **Change Timezone**, **Delete Account**
+- Bilingual interface (English / Russian) powered by `MessageService`
 
 ### Commands
 
@@ -102,7 +113,7 @@ INFO  TelegramBotsApi - Bot connected
 
 ---
 
-## Smart Task Bot (на русском)
+## Smart Task Bot (на русском) &nbsp; `v1.0.0`
 
 Персональный Telegram-бот для управления задачами на Java 21 и Spring Boot.
 Пользователь регистрируется в два шага (язык → часовой пояс), после чего управляет
@@ -117,6 +128,17 @@ INFO  TelegramBotsApi - Bot connected
 генерацию плана и списка задач, а завершается выполнением всех задач Claude Code по
 сгенерированному чеклисту. Результат — полная трассировка от пользовательской истории
 до смёрженного коммита.
+
+### Возможности
+
+- Двухшаговая регистрация: язык (EN / RU) → часовой пояс
+- Создание задач через `/newtask` или кнопку **Новая задача** в меню
+- Список задач с инлайн-кнопками — нажмите на задачу для просмотра деталей
+- Детальный просмотр задачи с кнопками **Напоминание**, **Выполнить**, **Удалить**
+- Инлайн-календарь для выбора даты напоминания, затем ввод времени текстом
+- Доставка напоминаний в течение 60 секунд от запланированного времени (одна автоматическая повторная попытка при сбое)
+- Меню настроек: **Сменить язык**, **Сменить часовой пояс**, **Удалить аккаунт**
+- Двуязычный интерфейс (English / Русский) через `MessageService`
 
 ### Команды
 

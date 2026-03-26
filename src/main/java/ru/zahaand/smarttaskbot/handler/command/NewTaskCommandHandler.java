@@ -13,6 +13,12 @@ import ru.zahaand.smarttaskbot.service.UserService;
 
 /**
  * Handles the {@code /newtask} command.
+ * Extracts the task text from the message, delegates creation to {@link TaskService},
+ * and replies with a confirmation including action buttons.
+ * <p>
+ * Обрабатывает команду {@code /newtask}.
+ * Извлекает текст задачи из сообщения, делегирует создание в {@link TaskService}
+ * и отвечает подтверждением с кнопками действий.
  */
 @Component
 @RequiredArgsConstructor

@@ -15,7 +15,7 @@ import ru.zahaand.smarttaskbot.repository.UserStateRepository;
  * Service for managing user data and registration.
  * All domain logic for user lifecycle lives here; repositories are not accessed directly
  * from handlers.
- *
+ * <p>
  * Сервис управления данными пользователей и регистрацией.
  * Вся доменная логика жизненного цикла пользователей находится здесь.
  */
@@ -35,7 +35,7 @@ public class UserService {
      * Called exclusively from StartCommandHandler when a brand-new user sends /start.
      * UserStateService.initRegistration() MUST NOT be called separately — this method
      * is the sole owner of UserState creation during /start (CHK011 resolution).
-     *
+     * <p>
      * Атомарно создаёт строку User (language=null, timezone=null) и UserState
      * (AWAITING_LANGUAGE) в одной транзакции. Вызывается только из StartCommandHandler.
      */
@@ -61,7 +61,7 @@ public class UserService {
 
     /**
      * Sets the user's language. Called from LanguageCallbackHandler after language selection.
-     *
+     * <p>
      * Устанавливает язык пользователя. Вызывается из LanguageCallbackHandler.
      */
     @Transactional
@@ -75,7 +75,7 @@ public class UserService {
 
     /**
      * Sets the user's timezone. Called from TimezoneCallbackHandler after timezone selection.
-     *
+     * <p>
      * Устанавливает часовой пояс пользователя. Вызывается из TimezoneCallbackHandler.
      */
     @Transactional
@@ -92,7 +92,7 @@ public class UserService {
     /**
      * Returns true only when both language and timezone are set.
      * A user row existing without these fields is considered mid-registration.
-     *
+     * <p>
      * Возвращает true только когда установлены и язык, и часовой пояс.
      */
     public boolean isRegistered(Long telegramUserId) {
@@ -103,7 +103,7 @@ public class UserService {
 
     /**
      * Returns true when a User row exists but language is still null (step 1 of registration).
-     *
+     * <p>
      * Возвращает true, если строка User существует, но язык ещё не выбран.
      */
     public boolean isLanguagePending(Long telegramUserId) {
@@ -114,7 +114,7 @@ public class UserService {
 
     /**
      * Returns true when language is set but timezone is still null (step 2 of registration).
-     *
+     * <p>
      * Возвращает true, если язык выбран, но часовой пояс ещё не задан.
      */
     public boolean isTimezonePending(Long telegramUserId) {
@@ -128,7 +128,7 @@ public class UserService {
     /**
      * Returns the User for the given Telegram user ID, or throws if not found.
      * Used by handlers that need the full User object (e.g. for language resolution).
-     *
+     * <p>
      * Возвращает User по telegramUserId или бросает исключение если не найден.
      */
     public User findById(Long telegramUserId) {
@@ -155,7 +155,7 @@ public class UserService {
 
     /**
      * Returns true when a User row exists for the given Telegram user ID.
-     *
+     * <p>
      * Возвращает true, если строка User существует для указанного пользователя.
      */
     public boolean userExists(Long telegramUserId) {

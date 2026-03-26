@@ -6,6 +6,15 @@ import lombok.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a user task.
+ * Each task belongs to a {@link User}, has a status (ACTIVE/COMPLETED),
+ * an optional reminder time stored as UTC {@link Instant}, and a creation timestamp.
+ * <p>
+ * JPA-сущность, представляющая задачу пользователя.
+ * Каждая задача принадлежит {@link User}, имеет статус (ACTIVE/COMPLETED),
+ * необязательное время напоминания в UTC {@link Instant} и временную метку создания.
+ */
 @Entity
 @Table(name = "tasks")
 @Getter

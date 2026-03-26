@@ -27,6 +27,11 @@ import java.time.YearMonth;
  * <p>
  * Both actions verify that the user is in SELECTING_REMINDER_DATE state.
  * A stale/missing state causes a "session expired" message and a reset to IDLE.
+ * <p>
+ * Обрабатывает колбэки CAL_NAV и CAL_DATE инлайн-календаря.
+ * CAL_NAV:±1 — навигация на месяц вперёд/назад; CAL_DATE:YYYY-MM-DD — выбор даты.
+ * Оба действия проверяют состояние SELECTING_REMINDER_DATE; при устаревшем состоянии
+ * отправляется сообщение «сессия истекла» и выполняется сброс в IDLE.
  */
 @Slf4j
 @Component

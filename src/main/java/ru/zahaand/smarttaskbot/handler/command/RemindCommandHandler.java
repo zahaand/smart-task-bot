@@ -18,6 +18,12 @@ import java.time.format.DateTimeParseException;
 
 /**
  * Handles the {@code /remind} command.
+ * Parses the task ID and datetime, delegates to {@link TaskService#setReminder},
+ * and replies with a confirmation or error.
+ * <p>
+ * Обрабатывает команду {@code /remind}.
+ * Парсит ID задачи и дату/время, делегирует в {@link TaskService#setReminder}
+ * и отвечает подтверждением или ошибкой.
  */
 @Component
 @RequiredArgsConstructor

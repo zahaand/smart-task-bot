@@ -15,6 +15,10 @@ import java.util.List;
 
 /**
  * Handles the {@code /tasks} command.
+ * Loads the user's active tasks and sends a task list with inline buttons.
+ * <p>
+ * Обрабатывает команду {@code /tasks}.
+ * Загружает активные задачи пользователя и отправляет список с инлайн-кнопками.
  */
 @Component
 @RequiredArgsConstructor

@@ -12,6 +12,10 @@ import ru.zahaand.smarttaskbot.service.*;
 
 /**
  * Handles free-text input while the user is in CREATING_TASK state.
+ * Delegates task creation to {@link TaskService} and resets state to IDLE.
+ * <p>
+ * Обрабатывает текстовый ввод в состоянии CREATING_TASK.
+ * Делегирует создание задачи в {@link TaskService} и сбрасывает состояние в IDLE.
  */
 @Component
 @RequiredArgsConstructor

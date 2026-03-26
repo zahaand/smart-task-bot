@@ -9,6 +9,13 @@ import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.UserService;
 
+/**
+ * Fallback handler for unrecognised text input from registered users.
+ * Sends a localised "please use buttons" message.
+ * <p>
+ * Обработчик нераспознанного текстового ввода от зарегистрированных пользователей.
+ * Отправляет локализованное сообщение «используйте кнопки».
+ */
 @Component
 @RequiredArgsConstructor
 public class UnknownInputHandler {

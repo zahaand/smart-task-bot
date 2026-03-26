@@ -18,6 +18,10 @@ import java.util.Optional;
 
 /**
  * Handles free-text time input while the user is in ENTERING_REMINDER_TIME state.
+ * Parses the time via {@link TimeParserUtils}, sets the reminder, and resets state to IDLE.
+ * <p>
+ * Обрабатывает текстовый ввод времени в состоянии ENTERING_REMINDER_TIME.
+ * Парсит время через {@link TimeParserUtils}, устанавливает напоминание и сбрасывает состояние в IDLE.
  */
 @Slf4j
 @Component

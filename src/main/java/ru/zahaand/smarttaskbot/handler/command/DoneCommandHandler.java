@@ -18,6 +18,10 @@ import ru.zahaand.smarttaskbot.service.UserService;
  * Handles the {@code /done} command.
  * Parses the task ID, delegates completion to {@link TaskService#completeTask},
  * and replies with a confirmation or error.
+ * <p>
+ * Обрабатывает команду {@code /done}.
+ * Парсит ID задачи, делегирует завершение в {@link TaskService#completeTask}
+ * и отвечает подтверждением или ошибкой.
  */
 @Component
 @RequiredArgsConstructor

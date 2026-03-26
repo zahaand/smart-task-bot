@@ -20,6 +20,10 @@ import ru.zahaand.smarttaskbot.service.*;
  * CONFIRM_CANCEL          — cancels the deletion and resets state to IDLE.
  * <p>
  * Both actions verify that the user is in CONFIRMING_DELETE state.
+ * <p>
+ * Обрабатывает колбэки CONFIRM_DELETE и CONFIRM_CANCEL из диалога подтверждения удаления.
+ * CONFIRM_DELETE:<taskId> — удаляет задачу и уведомляет пользователя.
+ * CONFIRM_CANCEL — отменяет удаление и сбрасывает состояние в IDLE.
  */
 @Slf4j
 @Component

@@ -17,6 +17,9 @@ import java.util.List;
  * Handles TASK_DONE, TASK_REMIND, and TASK_DELETE inline button callbacks.
  * Built incrementally across phases: TASK_DONE here (Phase 4),
  * TASK_REMIND in Phase 5 (T026), TASK_DELETE in Phase 6 (T032).
+ * <p>
+ * Обрабатывает колбэки инлайн-кнопок TASK_DONE, TASK_REMIND и TASK_DELETE.
+ * Реализован поэтапно: TASK_DONE (фаза 4), TASK_REMIND (фаза 5), TASK_DELETE (фаза 6).
  */
 @Slf4j
 @Component

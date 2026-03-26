@@ -10,6 +10,9 @@ import java.util.Set;
  * Shared constants for bot interaction: timezone lists and callback prefixes.
  * Single source of truth — both keyboard construction and callback validation
  * reference this class to stay in sync.
+ * <p>
+ * Общие константы для взаимодействия с ботом: списки часовых поясов и префиксы колбэков.
+ * Единый источник истины — и построение клавиатур, и валидация колбэков ссылаются на этот класс.
  */
 @UtilityClass
 public class BotConstantsUtils {

@@ -14,6 +14,10 @@ import java.util.regex.Pattern;
  * Parses free-text time input into {@link LocalTime}.
  * Supports 24-hour notation and Russian AM/PM suffixes ("утра" = AM, "вечера" = PM).
  * Never throws — all parse failures return {@link Optional#empty()}.
+ * <p>
+ * Парсит текстовый ввод времени в {@link LocalTime}.
+ * Поддерживает 24-часовой формат и русские суффиксы AM/PM («утра», «вечера»).
+ * Никогда не выбрасывает исключений — ошибки парсинга возвращают {@link Optional#empty()}.
  */
 @UtilityClass
 public class TimeParserUtils {

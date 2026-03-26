@@ -12,8 +12,11 @@ import ru.zahaand.smarttaskbot.service.UserService;
 import ru.zahaand.smarttaskbot.service.UserStateService;
 
 /**
- * Handles the "📝 New Task" persistent menu button tap.
+ * Handles the "New Task" persistent menu button tap.
  * Transitions the user to CREATING_TASK state and prompts for task text.
+ * <p>
+ * Обрабатывает нажатие кнопки «Новая задача» в постоянном меню.
+ * Переводит пользователя в состояние CREATING_TASK и запрашивает текст задачи.
  */
 @Component
 @RequiredArgsConstructor
