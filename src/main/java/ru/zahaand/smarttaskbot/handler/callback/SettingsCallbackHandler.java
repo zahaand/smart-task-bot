@@ -123,6 +123,11 @@ public class SettingsCallbackHandler {
     }
 
     private void handleDeleteConfirm(Long chatId, Long userId) {
+        // Guard against double-tap: if user is already deleted, respond neutrally.
+        if (!userService.userExists(userId)) {
+            log.warn("SETTINGS_DELETE_CONFIRM: user already deleted userId={}", userId);
+            return;
+        }
         final Language language = resolveLanguage(userId);
         // deleteUser() triggers CASCADE deletion of user_states — do NOT call setState() after.
         userService.deleteUser(userId);

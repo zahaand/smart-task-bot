@@ -163,6 +163,7 @@ class SettingsCallbackHandlerTest {
         @DisplayName("deletes user and sends farewell with start button without setting state")
         @Test
         void deletesUserWithoutSettingState() {
+            when(userService.userExists(USER_ID)).thenReturn(true);
             when(userService.findById(USER_ID))
                     .thenReturn(registeredUser);
             final Update update = buildUpdate(BotConstantsUtils.CB_SETTINGS_DEL_CFM);
@@ -173,6 +174,18 @@ class SettingsCallbackHandlerTest {
             verify(notificationService).sendAccountDeleted(CHAT_ID, Language.EN);
             // setState must NOT be called after deleteUser (CASCADE removes user_states row)
             verify(userStateService, never()).setState(eq(USER_ID), any());
+        }
+
+        @DisplayName("double-tap: does nothing when user is already deleted")
+        @Test
+        void doubleTapDoesNothingWhenUserAlreadyDeleted() {
+            when(userService.userExists(USER_ID)).thenReturn(false);
+            final Update update = buildUpdate(BotConstantsUtils.CB_SETTINGS_DEL_CFM);
+
+            handler.handle(update);
+
+            verify(userService, never()).deleteUser(any());
+            verify(notificationService, never()).sendAccountDeleted(any(), any());
         }
     }
 

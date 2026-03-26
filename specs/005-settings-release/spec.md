@@ -193,8 +193,9 @@ with the new version, and the README accurately describes all current features.
   visible to all registered users.
 - **FR-002**: Tapping Settings MUST display four inline option buttons in the user's
   current language: Change Language, Change Timezone, Reset State, Delete Account.
-- **FR-003**: Change Language MUST reuse the existing language-selection flow and update
-  the `language` field on the User entity without affecting tasks or reminders.
+- **FR-003**: Change Language MUST reuse the language-selection service-layer logic
+  (via a dedicated `SettingsCallbackHandler` method) and update the `language` field
+  on the User entity without affecting tasks or reminders.
 - **FR-004**: Change Timezone MUST reuse the existing timezone-selection flow and update
   the `timezone` field on the User entity without affecting tasks or reminders.
 - **FR-005**: Reset State MUST set the user's conversation state to IDLE and send a
@@ -225,9 +226,9 @@ with the new version, and the README accurately describes all current features.
 - **FR-013**: All `@Deprecated` classes, methods, and fields MUST be removed.
 - **FR-014**: All unused classes, methods, and fields MUST be removed
   (Constitution Development Standard #3).
-- **FR-015**: All DTO classes MUST carry the `Dto` suffix; `CreateTaskRequest` MUST
-  be renamed to `CreateTaskRequestDto` and all callers updated
-  (Constitution Development Standard #7).
+- **FR-015**: All DTO classes MUST carry the `Dto` suffix. `CreateTaskRequest` was
+  identified as dead code and removed under FR-014 / Development Standard #3;
+  no rename required (Constitution Development Standard #7).
 - **FR-016**: All static-only utility classes without Spring injection MUST be annotated
   with `@UtilityClass` and renamed to carry the `Utils` suffix
   (Constitution Development Standard #8). Confirmed eligible: `CalendarKeyboardBuilder` →
@@ -262,12 +263,13 @@ with the new version, and the README accurately describes all current features.
 
 ### Measurable Outcomes
 
-- **SC-001**: A registered user can access all four Settings options within two taps
-  from any bot state, with no navigation dead-ends.
+- **SC-001**: A registered user can access all three Settings options within two taps
+  from any bot state (mid-flow states are auto-cancelled on the first tap),
+  with no navigation dead-ends.
 - **SC-002**: Language and timezone changes take effect on the very next bot message,
   with zero tasks or reminders lost.
 - **SC-003**: Account deletion removes all user data within one confirmation tap, with
-  zero orphaned records remaining in the database.
+  zero orphaned records remaining in the `users`, `tasks`, and `user_states` tables.
 - **SC-004**: A newly created task shows its three action buttons in the creation
   confirmation message 100% of the time, in the user's selected language.
 - **SC-005**: After the code quality cleanup, the codebase contains zero violations
