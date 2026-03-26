@@ -1,6 +1,18 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.3.0 → 1.3.1
+Modified principles:
+  - VIII. Code Style — removed Mockito when().thenReturn() formatting rule.
+    The rule was overly prescriptive and conflicted with idiomatic single-line
+    Mockito stubs that are more readable for simple cases. Removed from
+    NON-NEGOTIABLE rules; formatting deferred to developer judgement.
+Removed sections: None
+Templates requiring updates:
+  - .specify/templates/ ✅ (no changes required)
+Follow-up TODOs: None
+
+==================
 Version change: 1.2.0 → 1.3.0
 Modified principles:
   - X. Application Language — replaced "English-only" with multilingual support
@@ -159,12 +171,6 @@ Additional rules:
 - Private method names MUST start with a verb: `extractTaskId()`, `formatReminder()`.
 - `@DisplayName` annotation on test methods MUST be the first annotation, placed directly
   above the method signature.
-- In Mockito `when().thenReturn()` chains, `.thenReturn()` MUST start on a new line,
-  indented:
-  ```java
-  when(service.method(arg))
-      .thenReturn(value);
-  ```
 - `@Nested` test classes MUST NOT have a `@DisplayName` annotation.
 
 Rationale: Consistent, explicit code style reduces cognitive load during review and
@@ -250,4 +256,4 @@ Tracking section of the relevant `plan.md` with explicit justification.
 
 **Runtime guidance**: See `.specify/memory/` for feature-specific specs, plans, and tasks.
 
-**Version**: 1.3.0 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-20
+**Version**: 1.3.1 | **Ratified**: 2026-03-18 | **Last Amended**: 2026-03-26
