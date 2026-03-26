@@ -69,8 +69,8 @@ class ReminderServiceTest {
     @Nested
     class ProcessDueReminders {
 
-        @Test
         @DisplayName("only passes reminders with reminderTime not after now to initial processing")
+        @Test
         void callsFindDueRemindersWithNow() {
             when(taskRepository.findDueReminders(any())).thenReturn(List.of());
             when(taskRepository.findDueRetries(any())).thenReturn(List.of());
@@ -80,8 +80,8 @@ class ReminderServiceTest {
             verify(taskRepository).findDueReminders(any(Instant.class));
         }
 
-        @Test
         @DisplayName("only passes retries with reminderRetryAt not after now to retry processing")
+        @Test
         void callsFindDueRetriesWithNow() {
             when(taskRepository.findDueReminders(any())).thenReturn(List.of());
             when(taskRepository.findDueRetries(any())).thenReturn(List.of());
@@ -91,8 +91,8 @@ class ReminderServiceTest {
             verify(taskRepository).findDueRetries(any(Instant.class));
         }
 
-        @Test
         @DisplayName("processes no tasks when both findDueReminders and findDueRetries return empty")
+        @Test
         void doesNothingWhenNoTasksDue() {
             when(taskRepository.findDueReminders(any())).thenReturn(List.of());
             when(taskRepository.findDueRetries(any())).thenReturn(List.of());
@@ -102,8 +102,8 @@ class ReminderServiceTest {
             verify(notificationService, never()).sendMessage(anyLong(), anyString());
         }
 
-        @Test
         @DisplayName("sets reminderProcessed true when initial send succeeds")
+        @Test
         void setsReminderProcessedOnInitialSuccess() {
             Task task = buildTask(1L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of(task));
@@ -114,8 +114,8 @@ class ReminderServiceTest {
             assertThat(task.isReminderProcessed()).isTrue();
         }
 
-        @Test
         @DisplayName("sets reminderRetryAt to now+60s when initial send fails")
+        @Test
         void setsRetryAtWhenInitialSendFails() {
             Task task = buildTask(1L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of(task));
@@ -131,8 +131,8 @@ class ReminderServiceTest {
                     .isBeforeOrEqualTo(after.plusSeconds(60));
         }
 
-        @Test
         @DisplayName("does not set reminderProcessed true when initial send fails")
+        @Test
         void doesNotSetReminderProcessedWhenInitialSendFails() {
             Task task = buildTask(1L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of(task));
@@ -144,8 +144,8 @@ class ReminderServiceTest {
             assertThat(task.isReminderProcessed()).isFalse();
         }
 
-        @Test
         @DisplayName("sets reminderProcessed true when retry send succeeds")
+        @Test
         void setsReminderProcessedOnRetrySuccess() {
             Task task = buildTask(1L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of());
@@ -156,8 +156,8 @@ class ReminderServiceTest {
             assertThat(task.isReminderProcessed()).isTrue();
         }
 
-        @Test
         @DisplayName("sets reminderProcessed true and discards reminder when retry send fails")
+        @Test
         void discardsReminderWhenRetryFails() {
             Task task = buildTask(1L);
             when(taskRepository.findDueReminders(any())).thenReturn(List.of());
@@ -169,8 +169,8 @@ class ReminderServiceTest {
             assertThat(task.isReminderProcessed()).isTrue();
         }
 
-        @Test
         @DisplayName("continues processing remaining initial reminders after one send failure")
+        @Test
         void continuesAfterInitialSendFailure() {
             Task failingTask = buildTask(1L);
             Task succeedingTask = buildTask(2L);
@@ -184,8 +184,8 @@ class ReminderServiceTest {
             assertThat(succeedingTask.isReminderProcessed()).isTrue();
         }
 
-        @Test
         @DisplayName("continues processing remaining retries after one retry send failure")
+        @Test
         void continuesAfterRetrySendFailure() {
             Task failingTask = buildTask(1L);
             Task succeedingTask = buildTask(2L);
@@ -199,8 +199,8 @@ class ReminderServiceTest {
             assertThat(succeedingTask.isReminderProcessed()).isTrue();
         }
 
-        @Test
         @DisplayName("calls saveAll after initial pass with all tasks regardless of send outcome")
+        @Test
         void callsSaveAllAfterInitialPass() {
             Task task1 = buildTask(1L);
             Task task2 = buildTask(2L);
@@ -218,8 +218,8 @@ class ReminderServiceTest {
                     .anySatisfy(list -> assertThat(list).containsExactlyInAnyOrder(task1, task2));
         }
 
-        @Test
         @DisplayName("calls saveAll after retry pass with all tasks regardless of send outcome")
+        @Test
         void callsSaveAllAfterRetryPass() {
             Task task1 = buildTask(1L);
             Task task2 = buildTask(2L);

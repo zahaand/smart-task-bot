@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -112,7 +112,7 @@ class CalendarCallbackHandlerTest {
         @DisplayName("CAL_NAV:+1 from a future month navigates forward and calls editCalendar")
         @Test
         void navigatesForward() {
-            ConversationContext ctx = ConversationContext.builder()
+            ConversationContextDto ctx = ConversationContextDto.builder()
                     .taskId(7L)
                     .viewingYear(next.getYear())
                     .viewingMonth(next.getMonthValue())
@@ -130,7 +130,7 @@ class CalendarCallbackHandlerTest {
         @DisplayName("CAL_NAV:-1 from a future month navigates back one month")
         @Test
         void navigatesBack() {
-            ConversationContext ctx = ConversationContext.builder()
+            ConversationContextDto ctx = ConversationContextDto.builder()
                     .taskId(7L)
                     .viewingYear(next.getYear())
                     .viewingMonth(next.getMonthValue())
@@ -147,7 +147,7 @@ class CalendarCallbackHandlerTest {
         @DisplayName("CAL_NAV:-1 from the current month answers silently (server-side guard)")
         @Test
         void doesNotNavigateBeforeCurrentMonth() {
-            ConversationContext ctx = ConversationContext.builder()
+            ConversationContextDto ctx = ConversationContextDto.builder()
                     .taskId(7L)
                     .viewingYear(current.getYear())
                     .viewingMonth(current.getMonthValue())
@@ -175,13 +175,13 @@ class CalendarCallbackHandlerTest {
         @DisplayName("transitions to ENTERING_REMINDER_TIME with date stored in context")
         @Test
         void transitionsState() {
-            ConversationContext ctx = ConversationContext.builder().taskId(3L).build();
+            ConversationContextDto ctx = ConversationContextDto.builder().taskId(3L).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
             when(cq.getData()).thenReturn(BotConstantsUtils.CB_CAL_DATE + "2026-06-15");
 
             handler.handle(update);
 
-            ArgumentCaptor<ConversationContext> ctxCaptor = ArgumentCaptor.forClass(ConversationContext.class);
+            ArgumentCaptor<ConversationContextDto> ctxCaptor = ArgumentCaptor.forClass(ConversationContextDto.class);
             verify(userStateService).setStateWithContext(
                     eq(USER_ID), eq(ConversationState.ENTERING_REMINDER_TIME), ctxCaptor.capture());
             assertThat(ctxCaptor.getValue().getDate()).isEqualTo("2026-06-15");
@@ -191,7 +191,7 @@ class CalendarCallbackHandlerTest {
         @DisplayName("sends time-entry prompt message")
         @Test
         void sendsTimePrompt() {
-            ConversationContext ctx = ConversationContext.builder().taskId(3L).build();
+            ConversationContextDto ctx = ConversationContextDto.builder().taskId(3L).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
             when(cq.getData()).thenReturn(BotConstantsUtils.CB_CAL_DATE + "2026-06-15");
 

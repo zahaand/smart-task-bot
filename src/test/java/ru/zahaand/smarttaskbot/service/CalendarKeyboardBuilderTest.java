@@ -41,8 +41,8 @@ class CalendarKeyboardBuilderTest {
     @DisplayName("Header row")
     class HeaderRow {
 
-        @Test
         @DisplayName("first row is a single non-interactive button with NO_OP callback")
+        @Test
         void headerIsNoop() {
             InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             List<InlineKeyboardButton> header = markup.getKeyboard().get(0);
@@ -57,8 +57,8 @@ class CalendarKeyboardBuilderTest {
     @DisplayName("Day-of-week row")
     class DayOfWeekRow {
 
-        @Test
         @DisplayName("second row has 7 non-interactive day labels")
+        @Test
         void dayOfWeekRowHasSevenNoopButtons() {
             InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             List<InlineKeyboardButton> row = markup.getKeyboard().get(1);
@@ -72,8 +72,8 @@ class CalendarKeyboardBuilderTest {
     @DisplayName("Date cells — past month")
     class PastDateCells {
 
-        @Test
         @DisplayName("all day cells in a past month use NO_OP callback (shown as ·)")
+        @Test
         void allPastDayCellsAreNoop() {
             InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             List<InlineKeyboardButton> cells = dayCells(markup);
@@ -98,8 +98,8 @@ class CalendarKeyboardBuilderTest {
     @DisplayName("Date cells — future month")
     class FutureDateCells {
 
-        @Test
         @DisplayName("day cells in a future month use CAL_DATE:YYYY-MM-DD callbacks")
+        @Test
         void futureDayCellsHaveCalDateCallbacks() {
             LocalDate today = LocalDate.now();
             YearMonth nextYear = YearMonth.of(today.getYear() + 1, 1);
@@ -113,8 +113,8 @@ class CalendarKeyboardBuilderTest {
             assertThat(calDateCount).isEqualTo(31);
         }
 
-        @Test
         @DisplayName("CAL_DATE callback value is a valid ISO date in the correct month")
+        @Test
         void calDateCallbackIsValidIsoDate() {
             LocalDate today = LocalDate.now();
             YearMonth nextYear = YearMonth.of(today.getYear() + 1, 1);
@@ -137,8 +137,8 @@ class CalendarKeyboardBuilderTest {
     @DisplayName("Navigation row")
     class NavRow {
 
-        @Test
         @DisplayName("← is NO_OP when showing the current month (can't go further back)")
+        @Test
         void prevIsNoopForCurrentMonth() {
             LocalDate today = LocalDate.now();
             InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(today.getYear(), today.getMonthValue());
@@ -148,8 +148,8 @@ class CalendarKeyboardBuilderTest {
             assertThat(prev.getCallbackData()).isEqualTo(BotConstantsUtils.CB_NO_OP);
         }
 
-        @Test
         @DisplayName("← carries CAL_NAV:-1 for a future month")
+        @Test
         void prevHasNavCallbackForFutureMonth() {
             LocalDate today = LocalDate.now();
             YearMonth nextMonth = YearMonth.from(today).plusMonths(1);
@@ -160,8 +160,8 @@ class CalendarKeyboardBuilderTest {
             assertThat(prev.getCallbackData()).isEqualTo(BotConstantsUtils.CB_CAL_NAV + "-1");
         }
 
-        @Test
         @DisplayName("→ always carries CAL_NAV:+1")
+        @Test
         void nextAlwaysHasNavCallback() {
             InlineKeyboardMarkup pastMarkup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             InlineKeyboardMarkup currentMarkup = CalendarKeyboardBuilderUtils.buildCalendar(
@@ -173,8 +173,8 @@ class CalendarKeyboardBuilderTest {
                     .isEqualTo(BotConstantsUtils.CB_CAL_NAV + "+1");
         }
 
-        @Test
         @DisplayName("nav row has exactly 2 buttons (← and →)")
+        @Test
         void navRowHasTwoButtons() {
             InlineKeyboardMarkup markup = CalendarKeyboardBuilderUtils.buildCalendar(PAST_YEAR, PAST_MONTH);
             assertThat(navRow(markup)).hasSize(2);

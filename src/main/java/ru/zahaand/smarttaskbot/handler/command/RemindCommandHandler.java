@@ -1,10 +1,12 @@
 package ru.zahaand.smarttaskbot.handler.command;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.BotException;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.MessageService;
@@ -13,7 +15,6 @@ import ru.zahaand.smarttaskbot.service.TaskService;
 import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.time.format.DateTimeParseException;
-import java.util.NoSuchElementException;
 
 /**
  * Handles the {@code /remind} command.
@@ -37,7 +38,7 @@ public class RemindCommandHandler {
         final String argsText = extractArgs(messageText);
         final String[] parts = argsText.split("\\s+");
 
-        if (argsText.isBlank() || parts.length < 3) {
+        if (StringUtils.isBlank(argsText) || parts.length < 3) {
             notificationService.sendMessage(chatId, messageService.get(MessageKey.REMIND_USAGE_HINT, user));
             return;
         }
@@ -52,13 +53,15 @@ public class RemindCommandHandler {
         try {
             final TaskDto dto = taskService.setReminder(telegramUserId, taskId, dateTimeInput);
             final String timezone = userService.getTimezone(telegramUserId);
-            notificationService.sendMessage(chatId,
-                    "Reminder set ✓\n#" + dto.getId() + " " + dto.getText()
-                            + " — " + dto.getReminderTime() + " (" + timezone + ")");
+            final String reminderDisplay = dto.getReminderTime() + " (" + timezone + ")";
+            final String msg = messageService.get(MessageKey.REMINDER_SET, user)
+                    .formatted(dto.getId(), dto.getText(), reminderDisplay);
+            notificationService.sendMessage(chatId, msg);
         } catch (DateTimeParseException e) {
             notificationService.sendMessage(chatId, messageService.get(MessageKey.REMIND_FORMAT_ERROR, user));
-        } catch (NoSuchElementException | IllegalArgumentException e) {
-            notificationService.sendMessage(chatId, e.getMessage());
+        } catch (BotException e) {
+            final String msg = messageService.get(e.getMessageKey(), user);
+            notificationService.sendMessage(chatId, e.getArgs().length > 0 ? msg.formatted(e.getArgs()) : msg);
         }
     }
 

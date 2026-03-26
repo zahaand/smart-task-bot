@@ -7,6 +7,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.zahaand.smarttaskbot.config.BotConfig;
+import ru.zahaand.smarttaskbot.model.Language;
+import ru.zahaand.smarttaskbot.model.MessageKey;
 
 import java.util.Optional;
 
@@ -41,7 +43,8 @@ public class SmartTaskBot extends TelegramLongPollingBot {
             log.error("Unhandled exception processing update: {}", e.getMessage(), e);
             extractChatId(update).ifPresent(chatId -> {
                 try {
-                    execute(new SendMessage(chatId.toString(), "Something went wrong. Please try again."));
+                    execute(new SendMessage(chatId.toString(),
+                            MessageKey.SOMETHING_WENT_WRONG.get(Language.EN)));
                 } catch (TelegramApiException ex) {
                     log.error("Failed to send error reply to chatId={}: {}", chatId, ex.getMessage(), ex);
                 }

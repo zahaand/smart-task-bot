@@ -71,8 +71,8 @@ class TaskCreationTextHandlerTest {
     @DisplayName("Blank / whitespace input")
     class BlankInput {
 
-        @Test
         @DisplayName("sends error and does NOT create task or change state")
+        @Test
         void blankTextSendsError() {
             when(message.getText()).thenReturn("   ");
 
@@ -88,8 +88,8 @@ class TaskCreationTextHandlerTest {
     @DisplayName("Valid input")
     class ValidInput {
 
-        @Test
         @DisplayName("creates task, sends confirmation with action buttons, and transitions to IDLE")
+        @Test
         void createsTaskAndConfirms() {
             when(message.getText()).thenReturn("Buy milk");
             when(taskService.createTask(USER_ID, "Buy milk"))
@@ -103,8 +103,8 @@ class TaskCreationTextHandlerTest {
             verify(userStateService).setState(USER_ID, ConversationState.IDLE);
         }
 
-        @Test
         @DisplayName("trims leading/trailing whitespace from the message text")
+        @Test
         void trimsText() {
             when(message.getText()).thenReturn("  Buy milk  ");
             when(taskService.createTask(USER_ID, "Buy milk"))

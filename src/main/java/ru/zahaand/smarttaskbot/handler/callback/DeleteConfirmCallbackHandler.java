@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -54,7 +54,7 @@ public class DeleteConfirmCallbackHandler {
     }
 
     private void handleConfirmDelete(String callbackQueryId, Long userId, Long chatId, String data) {
-        final ConversationContext ctx = userStateService.getContext(userId).orElse(null);
+        final ConversationContextDto ctx = userStateService.getContext(userId).orElse(null);
 
         if (ctx == null || ctx.getTaskId() == null) {
             log.warn("DeleteConfirmCallbackHandler: missing taskId in context for userId={}", userId);

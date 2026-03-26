@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ConversationContext {
+public class ConversationContextDto {
 
     /**
      * Present in: SELECTING_REMINDER_DATE, ENTERING_REMINDER_TIME, CONFIRMING_DELETE

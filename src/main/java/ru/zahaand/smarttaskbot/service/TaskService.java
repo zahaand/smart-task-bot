@@ -6,9 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
-import ru.zahaand.smarttaskbot.model.Task;
-import ru.zahaand.smarttaskbot.model.TaskStatus;
-import ru.zahaand.smarttaskbot.model.User;
+import ru.zahaand.smarttaskbot.model.*;
 import ru.zahaand.smarttaskbot.repository.TaskRepository;
 import ru.zahaand.smarttaskbot.repository.UserRepository;
 
@@ -48,12 +46,12 @@ public class TaskService {
 
         if (StringUtils.isBlank(text)) {
             log.warn("Blank task text from userId={}", telegramUserId);
-            throw new IllegalArgumentException("Please provide task text.\nUsage: /newtask <your task>");
+            throw new BotException(MessageKey.TASK_TEXT_EMPTY);
         }
 
         if (StringUtils.length(text) > 500) {
             log.warn("Task text too long ({} chars) from userId={}", text.length(), telegramUserId);
-            throw new IllegalArgumentException("Task text is too long (max 500 characters).");
+            throw new BotException(MessageKey.TASK_TEXT_TOO_LONG);
         }
 
         User user = userRepository.findById(telegramUserId)
@@ -122,12 +120,12 @@ public class TaskService {
         Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
                 .orElseThrow(() -> {
                     log.error("Task #{} not found for userId={}", taskId, telegramUserId);
-                    return new NoSuchElementException("Task #%d not found.".formatted(taskId));
+                    return new BotException(MessageKey.TASK_NOT_FOUND, taskId);
                 });
 
         if (task.getStatus() == TaskStatus.COMPLETED) {
             log.warn("Reminder on completed task #{} by userId={}", taskId, telegramUserId);
-            throw new IllegalArgumentException("Cannot set a reminder on a completed task.");
+            throw new BotException(MessageKey.CANNOT_REMIND_COMPLETED);
         }
 
         ZoneId userZone = ZoneId.of(userService.getTimezone(telegramUserId));
@@ -161,12 +159,12 @@ public class TaskService {
         final Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
                 .orElseThrow(() -> {
                     log.error("Task #{} not found for userId={}", taskId, telegramUserId);
-                    return new NoSuchElementException("Task #%d not found.".formatted(taskId));
+                    return new BotException(MessageKey.TASK_NOT_FOUND, taskId);
                 });
 
         if (task.getStatus() == TaskStatus.COMPLETED) {
             log.warn("Reminder on completed task #{} by userId={}", taskId, telegramUserId);
-            throw new IllegalArgumentException("Cannot set a reminder on a completed task.");
+            throw new BotException(MessageKey.CANNOT_REMIND_COMPLETED);
         }
 
         final ZoneId userZone = ZoneId.of(userService.getTimezone(telegramUserId));
@@ -194,7 +192,7 @@ public class TaskService {
         Task task = taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
                 .orElseThrow(() -> {
                     log.error("Task #{} not found for userId={}", taskId, telegramUserId);
-                    return new NoSuchElementException("Task #%d not found.".formatted(taskId));
+                    return new BotException(MessageKey.TASK_NOT_FOUND, taskId);
                 });
 
         task.setStatus(TaskStatus.COMPLETED);
@@ -215,7 +213,7 @@ public class TaskService {
     public String getTaskText(Long telegramUserId, Long taskId) {
         return taskRepository.findByIdAndUserTelegramUserId(taskId, telegramUserId)
                 .map(Task::getText)
-                .orElseThrow(() -> new NoSuchElementException("Task #%d not found.".formatted(taskId)));
+                .orElseThrow(() -> new BotException(MessageKey.TASK_NOT_FOUND, taskId));
     }
 
     /**

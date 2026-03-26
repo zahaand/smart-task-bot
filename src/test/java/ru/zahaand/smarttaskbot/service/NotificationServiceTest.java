@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
@@ -267,7 +268,7 @@ class NotificationServiceTest {
             ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
             verify(sender).execute(captor.capture());
             InlineKeyboardMarkup markup = (InlineKeyboardMarkup) captor.getValue().getReplyMarkup();
-            var buttons = markup.getKeyboard().get(0);
+            List<InlineKeyboardButton> buttons = markup.getKeyboard().get(0);
             assertThat(buttons.get(0).getCallbackData()).startsWith("TASK_REMIND:").endsWith("7");
             assertThat(buttons.get(1).getCallbackData()).startsWith("TASK_DONE:").endsWith("7");
             assertThat(buttons.get(2).getCallbackData()).startsWith("TASK_DELETE:").endsWith("7");

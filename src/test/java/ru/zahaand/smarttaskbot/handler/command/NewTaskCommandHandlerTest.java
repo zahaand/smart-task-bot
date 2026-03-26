@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.BotException;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.User;
@@ -64,14 +65,21 @@ class NewTaskCommandHandlerTest {
         User user = new User();
         user.setLanguage(Language.EN);
         lenient().when(userService.findById(USER_ID)).thenReturn(user);
-        lenient().when(messageService.get(any(MessageKey.class), any(User.class))).thenReturn("Task created ✓");
+        lenient().when(messageService.get(any(MessageKey.class), any(User.class))).thenAnswer(inv -> {
+            MessageKey key = inv.getArgument(0);
+            return switch (key) {
+                case TASK_TEXT_EMPTY -> "Task text cannot be empty.";
+                case TASK_TEXT_TOO_LONG -> "Task text is too long (max 500 characters).";
+                default -> key.name();
+            };
+        });
     }
 
     @Nested
     class Handle {
 
-        @Test
         @DisplayName("calls taskService and sends success message for valid input")
+        @Test
         void sendsSuccessMessageForValidInput() {
             when(message.getText()).thenReturn("/newtask Buy milk");
             when(taskService.createTask(USER_ID, "Buy milk"))
@@ -84,28 +92,28 @@ class NewTaskCommandHandlerTest {
 
         @ParameterizedTest
         @MethodSource("ru.zahaand.smarttaskbot.handler.command.NewTaskCommandHandlerTest#blankInputMessages")
-        @DisplayName("forwards error message to user when taskService throws for blank input")
+        @DisplayName("forwards error message to user when taskService throws BotException for blank input")
         void forwardsErrorForBlankInput(String messageText) {
             when(message.getText()).thenReturn(messageText);
             when(taskService.createTask(eq(USER_ID), any()))
-                    .thenThrow(new IllegalArgumentException("Please provide task text."));
+                    .thenThrow(new BotException(MessageKey.TASK_TEXT_EMPTY));
 
             handler.handle(update);
 
-            verify(notificationService).sendMessage(eq(CHAT_ID), contains("Please provide task text."));
+            verify(notificationService).sendMessage(eq(CHAT_ID), contains("cannot be empty"));
         }
 
+        @DisplayName("forwards error message to user when taskService throws BotException for text over 500 chars")
         @Test
-        @DisplayName("forwards error message to user when taskService throws IllegalArgumentException for text over 500 chars")
         void forwardsErrorForTooLongText() {
             String longText = "x".repeat(501);
             when(message.getText()).thenReturn("/newtask " + longText);
             when(taskService.createTask(eq(USER_ID), eq(longText)))
-                    .thenThrow(new IllegalArgumentException("Task text is too long"));
+                    .thenThrow(new BotException(MessageKey.TASK_TEXT_TOO_LONG));
 
             handler.handle(update);
 
-            verify(notificationService).sendMessage(eq(CHAT_ID), contains("Task text is too long"));
+            verify(notificationService).sendMessage(eq(CHAT_ID), contains("too long"));
         }
     }
 

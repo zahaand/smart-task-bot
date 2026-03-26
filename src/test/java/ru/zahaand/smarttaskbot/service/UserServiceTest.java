@@ -53,8 +53,8 @@ class UserServiceTest {
     @Nested
     class IsRegistered {
 
-        @Test
         @DisplayName("returns true when user has both language and timezone set")
+        @Test
         void returnsTrueWhenFullyRegistered() {
             when(userRepository.findById(USER_ID))
                     .thenReturn(Optional.of(buildUser()));
@@ -62,8 +62,8 @@ class UserServiceTest {
             assertThat(userService.isRegistered(USER_ID)).isTrue();
         }
 
-        @Test
         @DisplayName("returns false when user has no language (mid-registration)")
+        @Test
         void returnsFalseWhenLanguageNull() {
             when(userRepository.findById(USER_ID))
                     .thenReturn(Optional.of(buildPartialUser()));
@@ -71,8 +71,8 @@ class UserServiceTest {
             assertThat(userService.isRegistered(USER_ID)).isFalse();
         }
 
-        @Test
         @DisplayName("returns false for an unknown user")
+        @Test
         void returnsFalseWhenUserNotFound() {
             when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
@@ -83,8 +83,8 @@ class UserServiceTest {
     @Nested
     class CreatePartialUser {
 
-        @Test
         @DisplayName("saves User and UserState(AWAITING_LANGUAGE) for new user")
+        @Test
         void savesUserAndUserState() {
             when(userRepository.existsById(USER_ID)).thenReturn(false);
 
@@ -94,8 +94,8 @@ class UserServiceTest {
             verify(userStateRepository).save(any(UserState.class));
         }
 
-        @Test
         @DisplayName("skips creation when user already exists")
+        @Test
         void skipsWhenAlreadyExists() {
             when(userRepository.existsById(USER_ID)).thenReturn(true);
 
@@ -109,16 +109,16 @@ class UserServiceTest {
     @Nested
     class GetTimezone {
 
-        @Test
         @DisplayName("returns timezone string for a registered user")
+        @Test
         void returnsTimezone() {
             when(userRepository.findById(USER_ID)).thenReturn(Optional.of(buildUser()));
 
             assertThat(userService.getTimezone(USER_ID)).isEqualTo("Europe/Moscow");
         }
 
-        @Test
         @DisplayName("throws IllegalStateException when user not found")
+        @Test
         void throwsWhenUserNotFound() {
             when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
@@ -130,16 +130,16 @@ class UserServiceTest {
     @Nested
     class DeleteUser {
 
-        @Test
         @DisplayName("calls deleteById with the given userId")
+        @Test
         void callsDeleteById() {
             userService.deleteUser(USER_ID);
 
             verify(userRepository).deleteById(USER_ID);
         }
 
-        @Test
         @DisplayName("does not throw when user does not exist")
+        @Test
         void doesNotThrowWhenAbsent() {
             doNothing().when(userRepository).deleteById(USER_ID);
 

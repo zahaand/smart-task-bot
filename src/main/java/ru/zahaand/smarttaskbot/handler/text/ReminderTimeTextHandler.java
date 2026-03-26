@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -45,7 +45,7 @@ public class ReminderTimeTextHandler {
             return;
         }
 
-        final ConversationContext ctx = userStateService.getContext(userId).orElse(null);
+        final ConversationContextDto ctx = userStateService.getContext(userId).orElse(null);
         if (ctx == null || ctx.getTaskId() == null || ctx.getDate() == null) {
             log.warn("ReminderTimeTextHandler: missing context for userId={}", userId);
             notificationService.sendMessage(chatId, messageService.get(MessageKey.SESSION_EXPIRED, user));

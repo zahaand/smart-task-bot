@@ -13,16 +13,12 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
-import ru.zahaand.smarttaskbot.model.ConversationState;
-import ru.zahaand.smarttaskbot.model.Language;
-import ru.zahaand.smarttaskbot.model.MessageKey;
-import ru.zahaand.smarttaskbot.model.TaskStatus;
+import ru.zahaand.smarttaskbot.model.*;
 import ru.zahaand.smarttaskbot.service.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -101,7 +97,7 @@ class TaskActionCallbackHandlerTest {
 
             handler.handle(update);
 
-            ArgumentCaptor<ConversationContext> ctxCaptor = ArgumentCaptor.forClass(ConversationContext.class);
+            ArgumentCaptor<ConversationContextDto> ctxCaptor = ArgumentCaptor.forClass(ConversationContextDto.class);
             verify(userStateService).setStateWithContext(eq(USER_ID), eq(ConversationState.SELECTING_REMINDER_DATE), ctxCaptor.capture());
             assertThat(ctxCaptor.getValue().getTaskId()).isEqualTo(TASK_ID);
             assertThat(ctxCaptor.getValue().getViewingYear()).isNotNull();
@@ -123,7 +119,7 @@ class TaskActionCallbackHandlerTest {
 
             handler.handle(update);
 
-            ArgumentCaptor<ConversationContext> ctxCaptor = ArgumentCaptor.forClass(ConversationContext.class);
+            ArgumentCaptor<ConversationContextDto> ctxCaptor = ArgumentCaptor.forClass(ConversationContextDto.class);
             verify(userStateService).setStateWithContext(
                     eq(USER_ID), eq(ConversationState.CONFIRMING_DELETE), ctxCaptor.capture());
             assertThat(ctxCaptor.getValue().getTaskId()).isEqualTo(TASK_ID);
@@ -137,7 +133,7 @@ class TaskActionCallbackHandlerTest {
         void sendsErrorWhenTaskGone() {
             when(cq.getData()).thenReturn(BotConstantsUtils.CB_TASK_DELETE + TASK_ID);
             when(taskService.getTaskText(USER_ID, TASK_ID))
-                    .thenThrow(new NoSuchElementException("Task #7 not found."));
+                    .thenThrow(new BotException(MessageKey.TASK_NOT_FOUND, TASK_ID));
 
             handler.handle(update);
 

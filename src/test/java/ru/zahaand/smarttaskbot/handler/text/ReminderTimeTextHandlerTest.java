@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -77,11 +77,11 @@ class ReminderTimeTextHandlerTest {
     @DisplayName("Valid time input")
     class ValidTime {
 
-        @Test
         @DisplayName("creates reminder, sends confirmation, and transitions to IDLE")
+        @Test
         void createsReminderAndConfirms() {
             when(message.getText()).thenReturn("14:30");
-            ConversationContext ctx = ConversationContext.builder()
+            ConversationContextDto ctx = ConversationContextDto.builder()
                     .taskId(TASK_ID).date(DATE_STR).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
             when(taskService.setReminderFromCalendar(eq(USER_ID), eq(TASK_ID), any(), eq(LocalTime.of(14, 30))))
@@ -99,8 +99,8 @@ class ReminderTimeTextHandlerTest {
     @DisplayName("12-o'clock ambiguous input")
     class TwelveOClock {
 
-        @Test
         @DisplayName("sends 24-hour format hint and stays in ENTERING_REMINDER_TIME")
+        @Test
         void sends12OClockHint() {
             when(message.getText()).thenReturn("12 вечера");
 
@@ -116,8 +116,8 @@ class ReminderTimeTextHandlerTest {
     @DisplayName("Generic parse failure")
     class GenericFailure {
 
-        @Test
         @DisplayName("sends generic format hint and stays in ENTERING_REMINDER_TIME")
+        @Test
         void sendsGenericHint() {
             when(message.getText()).thenReturn("abc");
 
@@ -133,8 +133,8 @@ class ReminderTimeTextHandlerTest {
     @DisplayName("Missing context")
     class MissingContext {
 
-        @Test
         @DisplayName("sends expiry message and resets to IDLE when context is empty")
+        @Test
         void handlesExpiredSession() {
             when(message.getText()).thenReturn("14:30");
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.empty());

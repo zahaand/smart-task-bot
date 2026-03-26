@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.BotException;
 import ru.zahaand.smarttaskbot.model.Task;
 import ru.zahaand.smarttaskbot.model.TaskStatus;
 import ru.zahaand.smarttaskbot.model.User;
@@ -20,7 +21,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -71,8 +71,8 @@ class TaskServiceTest {
     @Nested
     class CreateTask {
 
-        @Test
         @DisplayName("creates task and returns DTO for valid input")
+        @Test
         void createsTaskAndReturnsDto() {
             when(userRepository.findById(USER_ID)).thenReturn(Optional.of(buildUser()));
             Task saved = buildTask(TaskStatus.ACTIVE);
@@ -87,22 +87,22 @@ class TaskServiceTest {
 
         @ParameterizedTest
         @MethodSource("ru.zahaand.smarttaskbot.service.TaskServiceTest#blankTexts")
-        @DisplayName("throws IllegalArgumentException for blank or null text")
+        @DisplayName("throws BotException for blank or null text")
         void throwsForBlankOrNullText(String text) {
             assertThatThrownBy(() -> taskService.createTask(USER_ID, text))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(BotException.class);
         }
 
+        @DisplayName("throws BotException for text exceeding 500 characters")
         @Test
-        @DisplayName("throws IllegalArgumentException for text exceeding 500 characters")
         void throwsForTextOver500Chars() {
             String longText = "x".repeat(501);
             assertThatThrownBy(() -> taskService.createTask(USER_ID, longText))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(BotException.class);
         }
 
-        @Test
         @DisplayName("throws IllegalStateException when user is not found")
+        @Test
         void throwsWhenUserNotFound() {
             when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
@@ -114,8 +114,8 @@ class TaskServiceTest {
     @Nested
     class GetActiveTasks {
 
-        @Test
         @DisplayName("returns empty list when no active tasks exist for user")
+        @Test
         void returnsEmptyListWhenNoActiveTasks() {
             when(userService.getTimezone(USER_ID)).thenReturn("Europe/Moscow");
             when(taskRepository.findByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.ACTIVE))
@@ -126,8 +126,8 @@ class TaskServiceTest {
             assertThat(result).isEmpty();
         }
 
-        @Test
         @DisplayName("returns DTOs with formatted reminder times for active tasks")
+        @Test
         void returnsDtosWithFormattedReminderTimes() {
             when(userService.getTimezone(USER_ID)).thenReturn("Europe/Moscow");
             Task task = buildTask(TaskStatus.ACTIVE);
@@ -145,8 +145,8 @@ class TaskServiceTest {
     @Nested
     class SetReminder {
 
-        @Test
         @DisplayName("sets reminder and returns DTO with formatted time for valid input")
+        @Test
         void setsReminderAndReturnsDto() {
             Task task = buildTask(TaskStatus.ACTIVE);
             when(taskRepository.findByIdAndUserTelegramUserId(TASK_ID, USER_ID))
@@ -160,29 +160,29 @@ class TaskServiceTest {
             verify(taskRepository).save(task);
         }
 
+        @DisplayName("throws BotException when task not found for user")
         @Test
-        @DisplayName("throws NoSuchElementException when task not found for user")
         void throwsWhenTaskNotFound() {
             when(taskRepository.findByIdAndUserTelegramUserId(TASK_ID, USER_ID))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> taskService.setReminder(USER_ID, TASK_ID, "25.03.2026 09:00"))
-                    .isInstanceOf(NoSuchElementException.class);
+                    .isInstanceOf(BotException.class);
         }
 
+        @DisplayName("throws BotException when task status is COMPLETED")
         @Test
-        @DisplayName("throws IllegalArgumentException when task status is COMPLETED")
         void throwsWhenTaskIsCompleted() {
             Task task = buildTask(TaskStatus.COMPLETED);
             when(taskRepository.findByIdAndUserTelegramUserId(TASK_ID, USER_ID))
                     .thenReturn(Optional.of(task));
 
             assertThatThrownBy(() -> taskService.setReminder(USER_ID, TASK_ID, "25.03.2026 09:00"))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(BotException.class);
         }
 
-        @Test
         @DisplayName("throws DateTimeParseException for invalid datetime string")
+        @Test
         void throwsForInvalidDatetimeString() {
             Task task = buildTask(TaskStatus.ACTIVE);
             when(taskRepository.findByIdAndUserTelegramUserId(TASK_ID, USER_ID))
@@ -197,8 +197,8 @@ class TaskServiceTest {
     @Nested
     class CompleteTask {
 
-        @Test
         @DisplayName("marks task COMPLETED and returns DTO for valid task")
+        @Test
         void marksTaskCompletedAndReturnsDto() {
             Task task = buildTask(TaskStatus.ACTIVE);
             when(taskRepository.findByIdAndUserTelegramUserId(TASK_ID, USER_ID))
@@ -211,22 +211,22 @@ class TaskServiceTest {
             assertThat(result.getId()).isEqualTo(TASK_ID);
         }
 
+        @DisplayName("throws BotException when task not found for user")
         @Test
-        @DisplayName("throws NoSuchElementException when task not found for user")
         void throwsWhenTaskNotFound() {
             when(taskRepository.findByIdAndUserTelegramUserId(TASK_ID, USER_ID))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> taskService.completeTask(USER_ID, TASK_ID))
-                    .isInstanceOf(NoSuchElementException.class);
+                    .isInstanceOf(BotException.class);
         }
     }
 
     @Nested
     class CountCompleted {
 
-        @Test
         @DisplayName("returns completed task count for user")
+        @Test
         void returnsCount() {
             when(taskRepository.countByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.COMPLETED)).thenReturn(3L);
 
@@ -239,8 +239,8 @@ class TaskServiceTest {
     @Nested
     class DeleteAllCompleted {
 
-        @Test
         @DisplayName("returns deleted count when completed tasks exist")
+        @Test
         void returnsCountWhenTasksDeleted() {
             when(taskRepository.deleteAllByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.COMPLETED)).thenReturn(3);
 
@@ -250,8 +250,8 @@ class TaskServiceTest {
             verify(taskRepository).deleteAllByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.COMPLETED);
         }
 
-        @Test
         @DisplayName("returns 0 when no completed tasks exist")
+        @Test
         void returnsZeroWhenNoCompletedTasks() {
             when(taskRepository.deleteAllByUserTelegramUserIdAndStatus(USER_ID, TaskStatus.COMPLETED)).thenReturn(0);
 

@@ -45,7 +45,8 @@ public class TaskListCommandHandler {
                     .append(" ")
                     .append(task.getText());
             if (task.getReminderTime() != null) {
-                builder.append("  ⏰ ").append(task.getReminderTime());
+                builder.append(messageService.get(MessageKey.REMINDER_ICON, user))
+                        .append(task.getReminderTime());
             }
         }
 

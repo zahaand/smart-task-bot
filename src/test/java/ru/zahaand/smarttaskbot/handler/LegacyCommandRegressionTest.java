@@ -131,8 +131,8 @@ class LegacyCommandRegressionTest {
                     .thenReturn(ConversationState.IDLE);
         }
 
-        @Test
         @DisplayName("/help delegates to HelpCommandHandler")
+        @Test
         void helpCommand() {
             // /help routes directly — no guard involved
             Update update = commandUpdate("/help");
@@ -140,8 +140,8 @@ class LegacyCommandRegressionTest {
             verify(helpCommandHandler).handle(update);
         }
 
-        @Test
         @DisplayName("/newtask delegates to NewTaskCommandHandler")
+        @Test
         void newtaskCommand() {
             guardAllowsAccess();
             Update update = commandUpdate("/newtask Buy milk");
@@ -149,8 +149,8 @@ class LegacyCommandRegressionTest {
             verify(newTaskCommandHandler).handle(update);
         }
 
-        @Test
         @DisplayName("/tasks delegates to TaskListCommandHandler")
+        @Test
         void tasksCommand() {
             guardAllowsAccess();
             Update update = commandUpdate("/tasks");
@@ -158,8 +158,8 @@ class LegacyCommandRegressionTest {
             verify(taskListCommandHandler).handle(update);
         }
 
-        @Test
         @DisplayName("/remind delegates to RemindCommandHandler")
+        @Test
         void remindCommand() {
             guardAllowsAccess();
             Update update = commandUpdate("/remind 1 25.05.2026 14:00");
@@ -167,8 +167,8 @@ class LegacyCommandRegressionTest {
             verify(remindCommandHandler).handle(update);
         }
 
-        @Test
         @DisplayName("/done delegates to DoneCommandHandler")
+        @Test
         void doneCommand() {
             guardAllowsAccess();
             Update update = commandUpdate("/done 1");
@@ -188,8 +188,8 @@ class LegacyCommandRegressionTest {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CREATING_TASK);
         }
 
-        @Test
         @DisplayName("/newtask in CREATING_TASK bypasses state and reaches NewTaskCommandHandler")
+        @Test
         void newtaskBypassesState() {
             guardAllowsAccess();
             Update update = commandUpdate("/newtask Another task");
@@ -198,8 +198,8 @@ class LegacyCommandRegressionTest {
             verify(taskCreationTextHandler, never()).handle(any());
         }
 
-        @Test
         @DisplayName("/tasks in CREATING_TASK bypasses state and reaches TaskListCommandHandler")
+        @Test
         void tasksCommandBypassesState() {
             guardAllowsAccess();
             Update update = commandUpdate("/tasks");
@@ -208,8 +208,8 @@ class LegacyCommandRegressionTest {
             verify(taskCreationTextHandler, never()).handle(any());
         }
 
-        @Test
         @DisplayName("/help in CREATING_TASK bypasses state and reaches HelpCommandHandler")
+        @Test
         void helpBypassesState() {
             // /help routes directly — no guard involved
             Update update = commandUpdate("/help");
@@ -224,8 +224,8 @@ class LegacyCommandRegressionTest {
     @DisplayName("/start always delegates without registration check")
     class StartCommand {
 
-        @Test
         @DisplayName("/start in IDLE reaches StartCommandHandler without going through RegistrationGuard")
+        @Test
         void startCommandInIdle() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
             Update update = commandUpdate("/start");

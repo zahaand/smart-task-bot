@@ -11,14 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.BotException;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
 import ru.zahaand.smarttaskbot.service.UserService;
-
-import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -64,6 +63,7 @@ class DoneCommandHandlerTest {
             return switch (key) {
                 case DONE_USAGE_HINT -> "Please provide a task ID.\nUsage: /done <task_id>";
                 case TASK_COMPLETED -> "Task completed ✓";
+                case TASK_NOT_FOUND -> "Task #%d not found.";
                 default -> key.name();
             };
         });
@@ -72,8 +72,8 @@ class DoneCommandHandlerTest {
     @Nested
     class Handle {
 
-        @Test
         @DisplayName("sends usage hint when no task ID is provided (blank args)")
+        @Test
         void sendsUsageHintWhenNoArgs() {
             when(message.getText()).thenReturn("/done");
 
@@ -83,8 +83,8 @@ class DoneCommandHandlerTest {
             verifyNoInteractions(taskService);
         }
 
-        @Test
         @DisplayName("sends usage hint when task ID is non-numeric")
+        @Test
         void sendsUsageHintWhenTaskIdNonNumeric() {
             when(message.getText()).thenReturn("/done abc");
 
@@ -94,8 +94,8 @@ class DoneCommandHandlerTest {
             verifyNoInteractions(taskService);
         }
 
-        @Test
         @DisplayName("marks task complete and sends success message for valid task ID")
+        @Test
         void sendsSuccessMessageForValidTaskId() {
             when(message.getText()).thenReturn("/done 7");
             when(taskService.completeTask(USER_ID, 7L))
@@ -106,12 +106,12 @@ class DoneCommandHandlerTest {
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("Task completed"));
         }
 
+        @DisplayName("sends error message when task not found (BotException from taskService)")
         @Test
-        @DisplayName("sends error message when task not found (NoSuchElementException from taskService)")
         void sendsErrorWhenTaskNotFound() {
             when(message.getText()).thenReturn("/done 99");
             when(taskService.completeTask(USER_ID, 99L))
-                    .thenThrow(new NoSuchElementException("Task #99 not found."));
+                    .thenThrow(new BotException(MessageKey.TASK_NOT_FOUND, 99L));
 
             handler.handle(update);
 

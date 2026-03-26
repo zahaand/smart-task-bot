@@ -30,7 +30,7 @@ public class UserState {
     private ConversationState state = ConversationState.IDLE;
 
     /**
-     * JSON-serialized {@link ru.zahaand.smarttaskbot.dto.ConversationContext}.
+     * JSON-serialized {@link ru.zahaand.smarttaskbot.dto.ConversationContextDto}.
      * NULL when state is IDLE.
      */
     @Column(name = "context", columnDefinition = "TEXT")

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -64,7 +64,7 @@ public class CalendarCallbackHandler {
     private void handleNav(String callbackQueryId, Long userId, Long chatId,
                            Integer messageId, String data) {
         final int delta = Integer.parseInt(data.substring(BotConstantsUtils.CB_CAL_NAV.length()));
-        final ConversationContext ctx = userStateService.getContext(userId).orElse(null);
+        final ConversationContextDto ctx = userStateService.getContext(userId).orElse(null);
 
         if (ctx == null || ctx.getViewingYear() == null || ctx.getViewingMonth() == null) {
             log.warn("CalendarCallbackHandler: missing context for userId={}", userId);
@@ -79,7 +79,7 @@ public class CalendarCallbackHandler {
             return;
         }
 
-        final ConversationContext updated = ConversationContext.builder()
+        final ConversationContextDto updated = ConversationContextDto.builder()
                 .taskId(ctx.getTaskId())
                 .viewingYear(target.getYear())
                 .viewingMonth(target.getMonthValue())
@@ -93,7 +93,7 @@ public class CalendarCallbackHandler {
 
     private void handleDate(String callbackQueryId, Long userId, Long chatId, String data) {
         final String dateStr = data.substring(BotConstantsUtils.CB_CAL_DATE.length());
-        final ConversationContext ctx = userStateService.getContext(userId).orElse(null);
+        final ConversationContextDto ctx = userStateService.getContext(userId).orElse(null);
 
         if (ctx == null || ctx.getTaskId() == null) {
             log.warn("CalendarCallbackHandler: missing taskId in context for userId={}", userId);
@@ -101,7 +101,7 @@ public class CalendarCallbackHandler {
             return;
         }
 
-        final ConversationContext next = ConversationContext.builder()
+        final ConversationContextDto next = ConversationContextDto.builder()
                 .taskId(ctx.getTaskId())
                 .date(dateStr)
                 .build();

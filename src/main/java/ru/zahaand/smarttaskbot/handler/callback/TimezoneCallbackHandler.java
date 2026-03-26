@@ -2,6 +2,7 @@ package ru.zahaand.smarttaskbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -45,7 +46,7 @@ public class TimezoneCallbackHandler {
         final Long telegramUserId = callbackQuery.getFrom().getId();
         final String data = callbackQuery.getData();
 
-        if (data == null || !data.startsWith(BotConstantsUtils.CB_TZ)) {
+        if (StringUtils.isBlank(data) || !data.startsWith(BotConstantsUtils.CB_TZ)) {
             sendError(chatId, telegramUserId);
             return;
         }

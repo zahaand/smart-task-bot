@@ -304,6 +304,33 @@ public enum MessageKey {
     REMINDER_NOTIFICATION(
             "⏰ Reminder: %s",
             "⏰ Напоминание: %s"
+    ),
+
+    // ── Localized error messages (formerly hardcoded in services) ────────────
+
+    REMINDER_SET(
+            "Reminder set ✓\n#%d: %s — %s",
+            "Напоминание установлено ✓\n#%d: %s — %s"
+    ),
+    REMINDER_ICON(
+            "  ⏰ ",
+            "  ⏰ "
+    ),
+    TASK_COMPLETED_MARKER(
+            " ✓",
+            " ✓"
+    ),
+    TASK_NOT_FOUND(
+            "Task #%d not found.",
+            "Задача #%d не найдена."
+    ),
+    TASK_TEXT_TOO_LONG(
+            "Task text is too long (max 500 characters).",
+            "Текст задачи слишком длинный (максимум 500 символов)."
+    ),
+    CANNOT_REMIND_COMPLETED(
+            "Cannot set a reminder on a completed task.",
+            "Нельзя установить напоминание на выполненную задачу."
     );
 
     private final String en;

@@ -1,6 +1,7 @@
 package ru.zahaand.smarttaskbot.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -25,6 +26,7 @@ import java.util.List;
  * последней строкой всегда идёт переключатель вкладок.
  * Все подписи кнопок разрешаются через {@link MessageService} на языке пользователя.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TaskListKeyboardBuilder {
@@ -90,8 +92,9 @@ public class TaskListKeyboardBuilder {
     private List<InlineKeyboardButton> buildTabRow(TaskStatus activeTab, Language language) {
         final String activeBase = messageService.get(MessageKey.TAB_ACTIVE, language);
         final String completedBase = messageService.get(MessageKey.TAB_COMPLETED, language);
-        final String activeLabel = activeBase + (activeTab == TaskStatus.ACTIVE ? " ✓" : "");
-        final String completedLabel = completedBase + (activeTab == TaskStatus.COMPLETED ? " ✓" : "");
+        final String marker = messageService.get(MessageKey.TASK_COMPLETED_MARKER, language);
+        final String activeLabel = activeBase + (activeTab == TaskStatus.ACTIVE ? marker : "");
+        final String completedLabel = completedBase + (activeTab == TaskStatus.COMPLETED ? marker : "");
 
         return List.of(
                 button(activeLabel, BotConstantsUtils.CB_TASKS_TAB + "ACTIVE"),

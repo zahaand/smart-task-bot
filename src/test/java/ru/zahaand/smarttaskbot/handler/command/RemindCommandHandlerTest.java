@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.BotException;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.MessageService;
@@ -19,7 +20,6 @@ import ru.zahaand.smarttaskbot.service.TaskService;
 import ru.zahaand.smarttaskbot.service.UserService;
 
 import java.time.format.DateTimeParseException;
-import java.util.NoSuchElementException;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -65,6 +65,9 @@ class RemindCommandHandlerTest {
             return switch (key) {
                 case REMIND_USAGE_HINT -> "Usage: /remind <id> DD.MM.YYYY HH:mm";
                 case REMIND_FORMAT_ERROR -> "Invalid date format.\nUsage: /remind <id> DD.MM.YYYY HH:mm";
+                case REMINDER_SET -> "Reminder set ✓\n#%d: %s — %s";
+                case TASK_NOT_FOUND -> "Task #%d not found.";
+                case CANNOT_REMIND_COMPLETED -> "Cannot set a reminder on a completed task.";
                 default -> key.name();
             };
         });
@@ -73,8 +76,8 @@ class RemindCommandHandlerTest {
     @Nested
     class Handle {
 
-        @Test
         @DisplayName("sends usage hint when no arguments are provided")
+        @Test
         void sendsUsageHintWhenNoArgs() {
             when(message.getText()).thenReturn("/remind");
 
@@ -84,8 +87,8 @@ class RemindCommandHandlerTest {
             verifyNoInteractions(taskService);
         }
 
-        @Test
         @DisplayName("sends usage hint when fewer than 3 argument parts are given")
+        @Test
         void sendsUsageHintWhenFewerThan3Parts() {
             when(message.getText()).thenReturn("/remind 7 25.03.2026");
 
@@ -95,8 +98,8 @@ class RemindCommandHandlerTest {
             verifyNoInteractions(taskService);
         }
 
-        @Test
         @DisplayName("sends usage hint when task ID part is non-numeric")
+        @Test
         void sendsUsageHintWhenTaskIdNonNumeric() {
             when(message.getText()).thenReturn("/remind abc 25.03.2026 09:00");
 
@@ -106,8 +109,8 @@ class RemindCommandHandlerTest {
             verifyNoInteractions(taskService);
         }
 
-        @Test
         @DisplayName("sets reminder and sends success message for valid input")
+        @Test
         void sendsSuccessMessageForValidInput() {
             when(message.getText()).thenReturn("/remind 7 25.03.2026 09:00");
             when(taskService.setReminder(USER_ID, 7L, "25.03.2026 09:00"))
@@ -119,8 +122,8 @@ class RemindCommandHandlerTest {
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("Reminder set"));
         }
 
-        @Test
         @DisplayName("sends format error message when datetime cannot be parsed (DateTimeParseException)")
+        @Test
         void sendsFormatErrorWhenDatetimeCannotBeParsed() {
             when(message.getText()).thenReturn("/remind 7 25-03-2026 09:00");
             when(taskService.setReminder(eq(USER_ID), eq(7L), anyString()))
@@ -131,24 +134,24 @@ class RemindCommandHandlerTest {
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("Invalid date format"));
         }
 
+        @DisplayName("sends error message when task not found (BotException from taskService)")
         @Test
-        @DisplayName("sends error message when task not found (NoSuchElementException from taskService)")
         void sendsErrorWhenTaskNotFound() {
             when(message.getText()).thenReturn("/remind 99 25.03.2026 09:00");
             when(taskService.setReminder(USER_ID, 99L, "25.03.2026 09:00"))
-                    .thenThrow(new NoSuchElementException("Task #99 not found."));
+                    .thenThrow(new BotException(MessageKey.TASK_NOT_FOUND, 99L));
 
             handler.handle(update);
 
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("not found"));
         }
 
+        @DisplayName("sends error message when task is already completed (BotException)")
         @Test
-        @DisplayName("sends error message when task is already completed (IllegalArgumentException)")
         void sendsErrorWhenTaskAlreadyCompleted() {
             when(message.getText()).thenReturn("/remind 7 25.03.2026 09:00");
             when(taskService.setReminder(USER_ID, 7L, "25.03.2026 09:00"))
-                    .thenThrow(new IllegalArgumentException("Cannot set a reminder on a completed task."));
+                    .thenThrow(new BotException(MessageKey.CANNOT_REMIND_COMPLETED));
 
             handler.handle(update);
 

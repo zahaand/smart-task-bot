@@ -2,6 +2,7 @@ package ru.zahaand.smarttaskbot.handler.callback;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -43,7 +44,7 @@ public class SettingsCallbackHandler {
 
         notificationService.answerCallbackQuery(cq.getId());
 
-        if (data == null) {
+        if (StringUtils.isBlank(data)) {
             log.warn("SettingsCallbackHandler: null callback data for userId={}", userId);
             return;
         }

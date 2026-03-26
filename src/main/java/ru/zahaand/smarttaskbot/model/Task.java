@@ -45,7 +45,9 @@ public class Task {
 
     @PrePersist
     void prePersist() {
-        if (status == null) status = TaskStatus.ACTIVE;
+        if (status == null) {
+            status = TaskStatus.ACTIVE;
+        }
         reminderProcessed = false;
         createdAt = LocalDateTime.now();
     }

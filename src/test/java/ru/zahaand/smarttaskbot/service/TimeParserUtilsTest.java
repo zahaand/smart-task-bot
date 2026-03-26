@@ -66,8 +66,8 @@ class TimeParserUtilsTest {
             assertThat(TimeParserUtils.parse(c.input())).isEqualTo(c.expected());
         }
 
-        @Test
         @DisplayName("trims leading/trailing whitespace before matching")
+        @Test
         void trimsWhitespace() {
             assertThat(TimeParserUtils.parse("  14:30  ")).isEqualTo(Optional.of(LocalTime.of(14, 30)));
         }
@@ -105,14 +105,14 @@ class TimeParserUtilsTest {
             assertThat(TimeParserUtils.parse(input)).isEmpty();
         }
 
-        @Test
         @DisplayName("null → empty, no exception")
+        @Test
         void returnsEmptyForNull() {
             assertThat(TimeParserUtils.parse(null)).isEmpty();
         }
 
-        @Test
         @DisplayName("blank string → empty, no exception")
+        @Test
         void returnsEmptyForBlank() {
             assertThat(TimeParserUtils.parse("   ")).isEmpty();
         }
@@ -122,38 +122,38 @@ class TimeParserUtilsTest {
     @DisplayName("isTwelveOClockAmbiguous()")
     class TwelveOClock {
 
-        @Test
         @DisplayName("true for \"12 утра\"")
+        @Test
         void trueFor12Utra() {
             assertThat(TimeParserUtils.isTwelveOClockAmbiguous("12 утра")).isTrue();
         }
 
-        @Test
         @DisplayName("true for \"12 вечера\"")
+        @Test
         void trueFor12Vechera() {
             assertThat(TimeParserUtils.isTwelveOClockAmbiguous("12 вечера")).isTrue();
         }
 
-        @Test
         @DisplayName("case-insensitive: \"12 УТРА\" → true")
+        @Test
         void caseInsensitive() {
             assertThat(TimeParserUtils.isTwelveOClockAmbiguous("12 УТРА")).isTrue();
         }
 
-        @Test
         @DisplayName("false for non-ambiguous input \"9 утра\"")
+        @Test
         void falseForNonAmbiguous() {
             assertThat(TimeParserUtils.isTwelveOClockAmbiguous("9 утра")).isFalse();
         }
 
-        @Test
         @DisplayName("false for null")
+        @Test
         void falseForNull() {
             assertThat(TimeParserUtils.isTwelveOClockAmbiguous(null)).isFalse();
         }
 
-        @Test
         @DisplayName("false for blank")
+        @Test
         void falseForBlank() {
             assertThat(TimeParserUtils.isTwelveOClockAmbiguous("  ")).isFalse();
         }

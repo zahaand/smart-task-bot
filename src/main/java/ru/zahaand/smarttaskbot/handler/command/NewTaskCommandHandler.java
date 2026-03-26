@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.BotException;
 import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
@@ -33,8 +34,9 @@ public class NewTaskCommandHandler {
         try {
             final TaskDto task = taskService.createTask(telegramUserId, taskText);
             notificationService.sendTaskCreatedWithActions(chatId, task.getId(), task.getText(), user.getLanguage());
-        } catch (IllegalArgumentException e) {
-            notificationService.sendMessage(chatId, e.getMessage());
+        } catch (BotException e) {
+            final String msg = messageService.get(e.getMessageKey(), user);
+            notificationService.sendMessage(chatId, e.getArgs().length > 0 ? msg.formatted(e.getArgs()) : msg);
         }
     }
 

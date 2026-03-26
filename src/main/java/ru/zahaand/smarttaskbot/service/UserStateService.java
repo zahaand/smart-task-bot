@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.UserState;
@@ -55,13 +55,13 @@ public class UserStateService {
      * <p>
      * Десериализует и возвращает контекст диалога; при отсутствии или повреждении — сбрасывает в IDLE.
      */
-    public Optional<ConversationContext> getContext(Long userId) {
+    public Optional<ConversationContextDto> getContext(Long userId) {
         return userStateRepository.findById(userId)
                 .map(UserState::getContext)
                 .filter(StringUtils::isNotBlank)
                 .flatMap(json -> {
                     try {
-                        return Optional.of(objectMapper.readValue(json, ConversationContext.class));
+                        return Optional.of(objectMapper.readValue(json, ConversationContextDto.class));
                     } catch (JsonProcessingException e) {
                         log.error("Malformed conversation context for userId={}, resetting to IDLE. json={}",
                                 userId, json, e);
@@ -88,11 +88,11 @@ public class UserStateService {
     }
 
     /**
-     * Transitions the user to {@code state} and stores a serialized {@link ConversationContext}.
+     * Transitions the user to {@code state} and stores a serialized {@link ConversationContextDto}.
      * <p>
-     * Переводит в {@code state} и сохраняет сериализованный {@link ConversationContext}.
+     * Переводит в {@code state} и сохраняет сериализованный {@link ConversationContextDto}.
      */
-    public void setStateWithContext(Long userId, ConversationState state, ConversationContext context) {
+    public void setStateWithContext(Long userId, ConversationState state, ConversationContextDto context) {
         UserState userState = findOrCreate(userId);
         userState.setState(state);
         userState.setContext(serializeContext(context));
@@ -106,7 +106,7 @@ public class UserStateService {
      * <p>
      * Заменяет сохранённый JSON-контекст, не изменяя текущее состояние.
      */
-    public void updateContext(Long userId, ConversationContext context) {
+    public void updateContext(Long userId, ConversationContextDto context) {
         UserState userState = findOrCreate(userId);
         userState.setContext(serializeContext(context));
         userState.setUpdatedAt(Instant.now());
@@ -155,14 +155,12 @@ public class UserStateService {
                 .orElse(new UserState(userId));
     }
 
-    private String serializeContext(ConversationContext context) {
+    private String serializeContext(ConversationContextDto context) {
         try {
             return objectMapper.writeValueAsString(context);
         } catch (JsonProcessingException e) {
-            log.error("Failed to serialize ConversationContext for userId — using null context", e);
+            log.error("Failed to serialize ConversationContextDto for userId — using null context", e);
             return null;
         }
     }
-
-
 }

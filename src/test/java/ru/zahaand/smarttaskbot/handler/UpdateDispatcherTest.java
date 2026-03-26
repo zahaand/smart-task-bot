@@ -128,32 +128,32 @@ class UpdateDispatcherTest {
     class CallbackRouting {
         // No resetIfStale stub needed — callback dispatch path doesn't call it
 
-        @Test
         @DisplayName("CAL_DATE: callback routes to CalendarCallbackHandler")
+        @Test
         void calDateRoutesToCalendarHandler() {
             Update update = callbackUpdate(BotConstantsUtils.CB_CAL_DATE + "2026-06-01");
             dispatcher.dispatch(update);
             verify(calendarCallbackHandler).handle(update);
         }
 
-        @Test
         @DisplayName("CAL_NAV: callback routes to CalendarCallbackHandler")
+        @Test
         void calNavRoutesToCalendarHandler() {
             Update update = callbackUpdate(BotConstantsUtils.CB_CAL_NAV + "+1");
             dispatcher.dispatch(update);
             verify(calendarCallbackHandler).handle(update);
         }
 
-        @Test
         @DisplayName("TASKS_TAB: callback routes to TaskListTabCallbackHandler")
+        @Test
         void tasksTabRoutesToTabHandler() {
             Update update = callbackUpdate(BotConstantsUtils.CB_TASKS_TAB + "ACTIVE");
             dispatcher.dispatch(update);
             verify(taskListTabCallbackHandler).handle(update);
         }
 
-        @Test
         @DisplayName("NO_OP callback is answered silently — no other handler called")
+        @Test
         void noOpAnsweredSilently() {
             Update update = callbackUpdate(BotConstantsUtils.CB_NO_OP);
             dispatcher.dispatch(update);
@@ -163,16 +163,16 @@ class UpdateDispatcherTest {
                     timezoneCallbackHandler);
         }
 
-        @Test
         @DisplayName("CONFIRM_DELETE: callback routes to DeleteConfirmCallbackHandler")
+        @Test
         void confirmDeleteRoutesToDeleteConfirmHandler() {
             Update update = callbackUpdate(BotConstantsUtils.CB_CONFIRM_DELETE + "7");
             dispatcher.dispatch(update);
             verify(deleteConfirmCallbackHandler).handle(update);
         }
 
-        @Test
         @DisplayName("CONFIRM_CANCEL callback routes to DeleteConfirmCallbackHandler")
+        @Test
         void confirmCancelRoutesToDeleteConfirmHandler() {
             Update update = callbackUpdate(BotConstantsUtils.CB_CONFIRM_CANCEL);
             dispatcher.dispatch(update);
@@ -192,8 +192,8 @@ class UpdateDispatcherTest {
             doNothing().when(userStateService).resetIfStale(USER_ID);
         }
 
-        @Test
         @DisplayName("BTN_NEW_TASK in IDLE state routes to NewTaskButtonHandler")
+        @Test
         void newTaskButtonInIdleRoutesToHandler() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
             Update update = messageUpdate(MessageKey.BTN_NEW_TASK.get(ru.zahaand.smarttaskbot.model.Language.EN));
@@ -203,8 +203,8 @@ class UpdateDispatcherTest {
             verify(newTaskButtonHandler).handle(update);
         }
 
-        @Test
         @DisplayName("BTN_MY_TASKS in CREATING_TASK → cancelWithNotification then TaskListButtonHandler")
+        @Test
         void myTasksButtonInCreatingTaskCancelsThenRoutes() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CREATING_TASK);
             Update update = messageUpdate(MessageKey.BTN_MY_TASKS.get(ru.zahaand.smarttaskbot.model.Language.EN));
@@ -215,8 +215,8 @@ class UpdateDispatcherTest {
             verify(taskListButtonHandler).handle(update);
         }
 
-        @Test
         @DisplayName("/cancel in CREATING_TASK calls cancelWithNotification and returns — no command handler")
+        @Test
         void cancelCommandInCreatingTaskCancelsAndReturns() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CREATING_TASK);
             Update update = messageUpdate("/cancel");
@@ -228,8 +228,8 @@ class UpdateDispatcherTest {
                     remindCommandHandler, doneCommandHandler);
         }
 
-        @Test
         @DisplayName("/newtask in CREATING_TASK bypasses state handler and routes to newTaskCommandHandler")
+        @Test
         void newtaskCommandInCreatingTaskBypassesStateAndRoutes() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CREATING_TASK);
             doAnswer(inv -> {
@@ -245,8 +245,8 @@ class UpdateDispatcherTest {
             verify(taskCreationTextHandler, never()).handle(any());
         }
 
-        @Test
         @DisplayName("free text in CONFIRMING_DELETE → sends \"Please use the buttons above.\"")
+        @Test
         void freeTextInConfirmingDeleteSendsButtonsMessage() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CONFIRMING_DELETE);
             when(messageService.get(any(MessageKey.class), (ru.zahaand.smarttaskbot.model.Language) any()))
@@ -260,8 +260,8 @@ class UpdateDispatcherTest {
             verify(reminderTimeTextHandler, never()).handle(any());
         }
 
-        @Test
         @DisplayName("free text in CREATING_TASK routes to TaskCreationTextHandler")
+        @Test
         void freeTextInCreatingTaskRoutesToCreationHandler() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CREATING_TASK);
             Update update = messageUpdate("Buy milk");
@@ -271,8 +271,8 @@ class UpdateDispatcherTest {
             verify(taskCreationTextHandler).handle(update);
         }
 
-        @Test
         @DisplayName("free text in ENTERING_REMINDER_TIME routes to ReminderTimeTextHandler")
+        @Test
         void freeTextInEnteringReminderTimeRoutesToReminderHandler() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.ENTERING_REMINDER_TIME);
             Update update = messageUpdate("14:30");
@@ -282,8 +282,8 @@ class UpdateDispatcherTest {
             verify(reminderTimeTextHandler).handle(update);
         }
 
-        @Test
         @DisplayName("BTN_START in IDLE state routes to StartCommandHandler")
+        @Test
         void startButtonInIdleRoutesToStartCommandHandler() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
             Update update = messageUpdate(MessageKey.BTN_START.get(ru.zahaand.smarttaskbot.model.Language.EN));

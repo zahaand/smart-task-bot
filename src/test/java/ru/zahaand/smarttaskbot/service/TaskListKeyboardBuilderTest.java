@@ -36,6 +36,7 @@ class TaskListKeyboardBuilderTest {
         lenient().when(messageService.get(MessageKey.BTN_DELETE_ALL, Language.EN)).thenReturn("🗑 Delete All");
         lenient().when(messageService.get(MessageKey.TAB_ACTIVE, Language.EN)).thenReturn("Active");
         lenient().when(messageService.get(MessageKey.TAB_COMPLETED, Language.EN)).thenReturn("Completed");
+        lenient().when(messageService.get(MessageKey.TASK_COMPLETED_MARKER, Language.EN)).thenReturn(" ✓");
         builder = new TaskListKeyboardBuilder(messageService);
     }
 

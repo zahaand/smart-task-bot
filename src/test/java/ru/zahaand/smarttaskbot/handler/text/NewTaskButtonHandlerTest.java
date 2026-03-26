@@ -57,8 +57,8 @@ class NewTaskButtonHandlerTest {
         when(messageService.get(any(MessageKey.class), any(User.class))).thenReturn("Enter task description:");
     }
 
-    @Test
     @DisplayName("sets state to CREATING_TASK and sends task-text prompt")
+    @Test
     void setsStateAndSendsPrompt() {
         handler.handle(update);
 

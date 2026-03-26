@@ -111,7 +111,7 @@ public class UpdateDispatcher {
         String data = update.getCallbackQuery().getData();
         String callbackQueryId = update.getCallbackQuery().getId();
 
-        if (data == null) {
+        if (StringUtils.isBlank(data)) {
             notificationService.answerCallbackQuery(callbackQueryId);
             return;
         }
@@ -321,11 +321,15 @@ public class UpdateDispatcher {
     }
 
     private String extractCommand(String text) {
-        if (text == null) return "";
-        String[] parts = text.split("\\s+", 2);
+        if (text == null) {
+            return "";
+        }
+        final String[] parts = text.split("\\s+", 2);
         String command = parts[0].toLowerCase();
-        int atIndex = command.indexOf('@');
-        if (atIndex != -1) command = command.substring(0, atIndex);
+        final int atIndex = command.indexOf('@');
+        if (atIndex != -1) {
+            command = command.substring(0, atIndex);
+        }
         return command;
     }
 }

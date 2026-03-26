@@ -10,7 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -56,16 +56,16 @@ class UserStateServiceTest {
     @DisplayName("getState()")
     class GetState {
 
-        @Test
         @DisplayName("returns IDLE when no row exists for user")
+        @Test
         void returnsIdleWhenNoRow() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
             assertThat(service.getState(USER_ID)).isEqualTo(ConversationState.IDLE);
         }
 
-        @Test
         @DisplayName("returns stored state when row exists")
+        @Test
         void returnsStoredState() {
             UserState stored = new UserState(USER_ID);
             stored.setState(ConversationState.CREATING_TASK);
@@ -81,8 +81,8 @@ class UserStateServiceTest {
     @DisplayName("setState()")
     class SetState {
 
-        @Test
         @DisplayName("upserts state and clears context")
+        @Test
         void upsertsStateAndClearsContext() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -95,8 +95,8 @@ class UserStateServiceTest {
             assertThat(captor.getValue().getContext()).isNull();
         }
 
-        @Test
         @DisplayName("overwrites existing row")
+        @Test
         void overwritesExistingRow() {
             UserState existing = new UserState(USER_ID);
             existing.setState(ConversationState.CREATING_TASK);
@@ -119,13 +119,13 @@ class UserStateServiceTest {
     @DisplayName("setStateWithContext()")
     class SetStateWithContext {
 
+        @DisplayName("serializes ConversationContextDto to JSON and saves")
         @Test
-        @DisplayName("serializes ConversationContext to JSON and saves")
         void serializesContext() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-            ConversationContext ctx = ConversationContext.builder().taskId(7L).build();
+            ConversationContextDto ctx = ConversationContextDto.builder().taskId(7L).build();
             service.setStateWithContext(USER_ID, ConversationState.CONFIRMING_DELETE, ctx);
 
             ArgumentCaptor<UserState> captor = ArgumentCaptor.forClass(UserState.class);
@@ -141,13 +141,13 @@ class UserStateServiceTest {
     @DisplayName("updateContext()")
     class UpdateContext {
 
-        @Test
         @DisplayName("serializes context JSON and saves")
+        @Test
         void serializesContextAndSaves() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-            ConversationContext ctx = ConversationContext.builder().taskId(3L).date("2026-06-01").build();
+            ConversationContextDto ctx = ConversationContextDto.builder().taskId(3L).date("2026-06-01").build();
             service.updateContext(USER_ID, ctx);
 
             ArgumentCaptor<UserState> captor = ArgumentCaptor.forClass(UserState.class);
@@ -156,14 +156,14 @@ class UserStateServiceTest {
             assertThat(captor.getValue().getContext()).contains("\"date\":\"2026-06-01\"");
         }
 
-        @Test
         @DisplayName("refreshes updatedAt timestamp")
+        @Test
         void refreshesUpdatedAt() {
             Instant before = Instant.now().minusSeconds(1);
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-            service.updateContext(USER_ID, ConversationContext.builder().build());
+            service.updateContext(USER_ID, ConversationContextDto.builder().build());
 
             ArgumentCaptor<UserState> captor = ArgumentCaptor.forClass(UserState.class);
             verify(userStateRepository).save(captor.capture());
@@ -177,16 +177,16 @@ class UserStateServiceTest {
     @DisplayName("getContext()")
     class GetContext {
 
-        @Test
         @DisplayName("returns empty when no row exists")
+        @Test
         void returnsEmptyWhenNoRow() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
             assertThat(service.getContext(USER_ID)).isEmpty();
         }
 
-        @Test
         @DisplayName("returns empty and resets state to IDLE when context JSON is malformed")
+        @Test
         void resetsToIdleOnMalformedJson() {
             UserState stored = new UserState(USER_ID);
             stored.setState(ConversationState.CONFIRMING_DELETE);
@@ -194,20 +194,20 @@ class UserStateServiceTest {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.of(stored));
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-            Optional<ConversationContext> result = service.getContext(USER_ID);
+            Optional<ConversationContextDto> result = service.getContext(USER_ID);
 
             assertThat(result).isEmpty();
             verify(userStateRepository, atLeastOnce()).save(any());
         }
 
+        @DisplayName("deserializes stored JSON into ConversationContextDto")
         @Test
-        @DisplayName("deserializes stored JSON into ConversationContext")
         void deserializesContext() {
             UserState stored = new UserState(USER_ID);
             stored.setContext("{\"taskId\":5,\"date\":\"2026-05-20\"}");
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.of(stored));
 
-            Optional<ConversationContext> result = service.getContext(USER_ID);
+            Optional<ConversationContextDto> result = service.getContext(USER_ID);
 
             assertThat(result).isPresent();
             assertThat(result.get().getTaskId()).isEqualTo(5L);
@@ -221,8 +221,8 @@ class UserStateServiceTest {
     @DisplayName("resetIfStale()")
     class ResetIfStale {
 
-        @Test
         @DisplayName("resets to IDLE when updatedAt is more than 24h ago")
+        @Test
         void resetsStaleState() {
             UserState stored = new UserState(USER_ID);
             stored.setState(ConversationState.CREATING_TASK);
@@ -237,8 +237,8 @@ class UserStateServiceTest {
             assertThat(captor.getValue().getState()).isEqualTo(ConversationState.IDLE);
         }
 
-        @Test
         @DisplayName("does NOT reset when updatedAt is less than 24h ago")
+        @Test
         void doesNotResetFreshState() {
             UserState stored = new UserState(USER_ID);
             stored.setState(ConversationState.CREATING_TASK);
@@ -250,8 +250,8 @@ class UserStateServiceTest {
             verify(userStateRepository, never()).save(any());
         }
 
-        @Test
         @DisplayName("does NOT reset when state is already IDLE")
+        @Test
         void doesNotResetIdleState() {
             UserState stored = new UserState(USER_ID);
             stored.setState(ConversationState.IDLE);
@@ -270,8 +270,8 @@ class UserStateServiceTest {
     @DisplayName("cancelWithNotification()")
     class CancelWithNotification {
 
-        @Test
         @DisplayName("CREATING_TASK → sends \"Operation cancelled.\"")
+        @Test
         void creatingTask() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -282,8 +282,8 @@ class UserStateServiceTest {
             verify(notificationService).sendMessage(eq(CHAT_ID), eq("Operation cancelled."));
         }
 
-        @Test
         @DisplayName("ENTERING_REMINDER_TIME → sends \"Operation cancelled.\"")
+        @Test
         void enteringReminderTime() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -294,8 +294,8 @@ class UserStateServiceTest {
             verify(notificationService).sendMessage(eq(CHAT_ID), eq("Operation cancelled."));
         }
 
-        @Test
         @DisplayName("CONFIRMING_DELETE → sends \"Operation cancelled.\"")
+        @Test
         void confirmingDelete() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -306,8 +306,8 @@ class UserStateServiceTest {
             verify(notificationService).sendMessage(eq(CHAT_ID), eq("Operation cancelled."));
         }
 
-        @Test
         @DisplayName("SELECTING_REMINDER_DATE → sends \"Operation cancelled.\"")
+        @Test
         void selectingReminderDate() {
             when(userStateRepository.findById(USER_ID)).thenReturn(Optional.empty());
             when(userStateRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));

@@ -111,7 +111,9 @@ public class TimeParserUtils {
         if (m.matches()) {
             final int n = Integer.parseInt(m.group(1));
             final int minute = Integer.parseInt(m.group(2));
-            if (n < 1 || n > 11) return Optional.empty();
+            if (n < 1 || n > 11) {
+                return Optional.empty();
+            }
             return validTime(n, minute);
         }
 
@@ -119,21 +121,27 @@ public class TimeParserUtils {
         if (m.matches()) {
             final int n = Integer.parseInt(m.group(1));
             final int minute = Integer.parseInt(m.group(2));
-            if (n < 1 || n > 11) return Optional.empty();
+            if (n < 1 || n > 11) {
+                return Optional.empty();
+            }
             return validTime(n + 12, minute);
         }
 
         m = P_N_UTRA.matcher(input);
         if (m.matches()) {
             final int n = Integer.parseInt(m.group(1));
-            if (n == 12 || n < 1 || n > 11) return Optional.empty();
+            if (n == 12 || n < 1 || n > 11) {
+                return Optional.empty();
+            }
             return validTime(n, 0);
         }
 
         m = P_N_VECHERA.matcher(input);
         if (m.matches()) {
             final int n = Integer.parseInt(m.group(1));
-            if (n == 12 || n < 1 || n > 11) return Optional.empty();
+            if (n == 12 || n < 1 || n > 11) {
+                return Optional.empty();
+            }
             return validTime(n + 12, 0);
         }
 

@@ -1,18 +1,18 @@
 package ru.zahaand.smarttaskbot.handler.command;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
+import ru.zahaand.smarttaskbot.model.BotException;
 import ru.zahaand.smarttaskbot.model.MessageKey;
 import ru.zahaand.smarttaskbot.model.User;
 import ru.zahaand.smarttaskbot.service.MessageService;
 import ru.zahaand.smarttaskbot.service.NotificationService;
 import ru.zahaand.smarttaskbot.service.TaskService;
 import ru.zahaand.smarttaskbot.service.UserService;
-
-import java.util.NoSuchElementException;
 
 /**
  * Handles the {@code /done} command.
@@ -37,7 +37,7 @@ public class DoneCommandHandler {
 
         final String argsText = extractArgs(messageText);
 
-        if (argsText.isBlank()) {
+        if (StringUtils.isBlank(argsText)) {
             notificationService.sendMessage(chatId, messageService.get(MessageKey.DONE_USAGE_HINT, user));
             return;
         }
@@ -52,8 +52,9 @@ public class DoneCommandHandler {
             notificationService.sendMessage(chatId,
                     messageService.get(MessageKey.TASK_COMPLETED, user)
                             + "\n#" + task.getId() + " " + task.getText());
-        } catch (NoSuchElementException e) {
-            notificationService.sendMessage(chatId, e.getMessage());
+        } catch (BotException e) {
+            final String msg = messageService.get(e.getMessageKey(), user);
+            notificationService.sendMessage(chatId, e.getArgs().length > 0 ? msg.formatted(e.getArgs()) : msg);
         }
     }
 

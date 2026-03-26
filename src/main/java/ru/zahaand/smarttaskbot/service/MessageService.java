@@ -1,5 +1,6 @@
 package ru.zahaand.smarttaskbot.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -14,6 +15,7 @@ import ru.zahaand.smarttaskbot.model.User;
  * Весь текст в обработчиках и сервисах должен получаться через этот бин.
  * Null-язык автоматически заменяется на EN (защита для состояния mid-registration).
  */
+@Slf4j
 @Service
 public class MessageService {
 

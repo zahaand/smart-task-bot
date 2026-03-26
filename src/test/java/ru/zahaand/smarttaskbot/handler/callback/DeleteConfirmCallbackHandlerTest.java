@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.model.ConversationState;
 import ru.zahaand.smarttaskbot.model.Language;
 import ru.zahaand.smarttaskbot.model.MessageKey;
@@ -81,8 +81,8 @@ class DeleteConfirmCallbackHandlerTest {
     @DisplayName("Stale state guard")
     class StaleStateGuard {
 
-        @Test
         @DisplayName("answers and resets to IDLE when state ≠ CONFIRMING_DELETE")
+        @Test
         void resetsWhenNotInConfirmingState() {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.IDLE);
             when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_DELETE + TASK_ID);
@@ -107,10 +107,10 @@ class DeleteConfirmCallbackHandlerTest {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CONFIRMING_DELETE);
         }
 
-        @Test
         @DisplayName("deletes task and sends \"✅ Task deleted.\" when row count is 1")
+        @Test
         void deletesTaskAndConfirms() {
-            ConversationContext ctx = ConversationContext.builder().taskId(TASK_ID).build();
+            ConversationContextDto ctx = ConversationContextDto.builder().taskId(TASK_ID).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
             when(taskService.deleteTask(USER_ID, TASK_ID)).thenReturn(1);
             when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_DELETE + TASK_ID);
@@ -123,10 +123,10 @@ class DeleteConfirmCallbackHandlerTest {
             verify(notificationService).sendMessage(eq(CHAT_ID), contains("Task deleted"));
         }
 
-        @Test
         @DisplayName("sends \"Task has already been deleted.\" when 0 rows affected")
+        @Test
         void sendsAlreadyDeletedWhenZeroRows() {
-            ConversationContext ctx = ConversationContext.builder().taskId(TASK_ID).build();
+            ConversationContextDto ctx = ConversationContextDto.builder().taskId(TASK_ID).build();
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.of(ctx));
             when(taskService.deleteTask(USER_ID, TASK_ID)).thenReturn(0);
             when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_DELETE + TASK_ID);
@@ -137,8 +137,8 @@ class DeleteConfirmCallbackHandlerTest {
             verify(userStateService).setState(USER_ID, ConversationState.IDLE);
         }
 
-        @Test
         @DisplayName("resets to IDLE and sends expiry message when context is missing")
+        @Test
         void handlesNullContext() {
             when(userStateService.getContext(USER_ID)).thenReturn(Optional.empty());
             when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_DELETE + TASK_ID);
@@ -161,8 +161,8 @@ class DeleteConfirmCallbackHandlerTest {
             when(userStateService.getState(USER_ID)).thenReturn(ConversationState.CONFIRMING_DELETE);
         }
 
-        @Test
         @DisplayName("sends \"Deletion cancelled.\", resets to IDLE, no deletion")
+        @Test
         void cancelsDeletionAndResets() {
             when(cq.getData()).thenReturn(BotConstantsUtils.CB_CONFIRM_CANCEL);
 

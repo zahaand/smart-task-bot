@@ -6,16 +6,13 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.zahaand.smarttaskbot.config.BotConstantsUtils;
-import ru.zahaand.smarttaskbot.dto.ConversationContext;
+import ru.zahaand.smarttaskbot.dto.ConversationContextDto;
 import ru.zahaand.smarttaskbot.dto.TaskDto;
 import ru.zahaand.smarttaskbot.model.*;
 import ru.zahaand.smarttaskbot.service.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
-
-
 /**
  * Handles TASK_DONE, TASK_REMIND, and TASK_DELETE inline button callbacks.
  * Built incrementally across phases: TASK_DONE here (Phase 4),
@@ -63,7 +60,7 @@ public class TaskActionCallbackHandler {
         notificationService.answerCallbackQuery(callbackQueryId);
 
         final LocalDate today = LocalDate.now();
-        final ConversationContext ctx = ConversationContext.builder()
+        final ConversationContextDto ctx = ConversationContextDto.builder()
                 .taskId(taskId)
                 .viewingYear(today.getYear())
                 .viewingMonth(today.getMonthValue())
@@ -79,14 +76,14 @@ public class TaskActionCallbackHandler {
         final String taskText;
         try {
             taskText = taskService.getTaskText(userId, taskId);
-        } catch (NoSuchElementException e) {
+        } catch (BotException e) {
             log.warn("TASK_DELETE: task #{} not found for userId={}", taskId, userId);
             notificationService.sendMessage(chatId,
                     messageService.get(MessageKey.SOMETHING_WENT_WRONG, resolveLanguage(userId)));
             return;
         }
 
-        final ConversationContext ctx = ConversationContext.builder().taskId(taskId).build();
+        final ConversationContextDto ctx = ConversationContextDto.builder().taskId(taskId).build();
         userStateService.setStateWithContext(userId, ConversationState.CONFIRMING_DELETE, ctx);
         notificationService.sendDeleteConfirmation(chatId, taskId, taskText, resolveLanguage(userId));
     }
