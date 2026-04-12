@@ -8,6 +8,10 @@ A personal Telegram task manager bot built with Java 21 and Spring Boot.
 Users register in two steps (language → timezone), then manage tasks entirely through
 inline keyboards and reply buttons — no slash commands needed for day-to-day use.
 
+**Demo:** [Smart Task Bot](https://t.me/smart_task_admin_bot)
+
+<img width="832" height="923" alt="Снимок экрана — 2026-04-12 в 22 26 21" src="https://github.com/user-attachments/assets/859c8941-10dd-473b-847b-01d9f8168928" />
+
 ### Methodology
 
 This project was built using the **Spec-Driven Development (SDD)** workflow powered by
@@ -52,6 +56,8 @@ The bot accepts reminder times in three equivalent formats:
 Russian AM/PM suffixes are also supported: `9 утра`, `3 вечера`, `9:30 утра`.
 
 Reminders are delivered within 60 seconds of the scheduled time. One retry is attempted on delivery failure.
+
+<img width="832" height="923" alt="Снимок экрана — 2026-04-12 в 22 27 12" src="https://github.com/user-attachments/assets/68409d3d-a9aa-416c-a024-301d1b917783" />
 
 ### Local Setup
 
@@ -119,6 +125,8 @@ INFO  TelegramBotsApi - Bot connected
 Пользователь регистрируется в два шага (язык → часовой пояс), после чего управляет
 задачами через инлайн-клавиатуры и кнопки меню — команды для повседневного использования
 не нужны.
+
+**Демо:** [Smart Task Bot](https://t.me/smart_task_admin_bot)
 
 ### Методология разработки
 
