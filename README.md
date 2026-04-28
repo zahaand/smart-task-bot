@@ -10,7 +10,7 @@ inline keyboards and reply buttons — no slash commands needed for day-to-day u
 
 **Demo:** [Smart Task Bot](https://t.me/smart_task_admin_bot)
 
-<img width="832" height="923" alt="Снимок экрана — 2026-04-12 в 22 26 21" src="https://github.com/user-attachments/assets/859c8941-10dd-473b-847b-01d9f8168928" />
+<img width="832" height="923" alt="577095738-859c8941-10dd-473b-847b-01d9f8168928" src="https://github.com/user-attachments/assets/a3557a4a-4dea-41de-b2c5-1007194b1496" />
 
 ### Methodology
 
@@ -57,7 +57,7 @@ Russian AM/PM suffixes are also supported: `9 утра`, `3 вечера`, `9:30
 
 Reminders are delivered within 60 seconds of the scheduled time. One retry is attempted on delivery failure.
 
-<img width="832" height="923" alt="Снимок экрана — 2026-04-12 в 22 27 12" src="https://github.com/user-attachments/assets/68409d3d-a9aa-416c-a024-301d1b917783" />
+<img width="832" height="923" alt="577095782-68409d3d-a9aa-416c-a024-301d1b917783" src="https://github.com/user-attachments/assets/a3bb5a09-5233-4740-ad03-1ba5bf7b48bc" />
 
 ### Local Setup
 
